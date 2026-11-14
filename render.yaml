@@ -2,7 +2,7 @@ services:
   - type: web
     name: learnmate-jee-platform
     runtime: node
-    plan: standard
+    plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm run start
     healthCheckPath: /api/health
