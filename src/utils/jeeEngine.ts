@@ -1956,5 +1956,171 @@ export interface DiagramVectorOverlayItem {
   color: string;
 }
 
+const CANONICAL_SUBJECT_ORDER: readonly ('Physics' | 'Chemistry' | 'Mathematics')[] = [
+  'Physics',
+  'Chemistry',
+  'Mathematics',
+];
+
+/**
+ * Distributes custom CBT test questions evenly (round-robin) across all selected subjects,
+ * falling back to another selected subject only if a subject's pool is exhausted.
+ * Preserves canonical IDs (appending `__copy_N` only when wrapping exhausted tiny pools)
+ * so server-verified grading continues to match authoritative answer keys.
+ */
+export function buildBalancedCustomTestQuestions(params: {
+  pool: CBTQuestion[];
+  selectedSubjects: ('Physics' | 'Chemistry' | 'Mathematics')[];
+  questionCount: number;
+  groupBySubject?: boolean;
+}): CBTQuestion[] {
+  const { pool, selectedSubjects, questionCount, groupBySubject = true } = params;
+  const targetCount = Math.max(1, Math.floor(questionCount));
+  if (!pool.length) return [];
+
+  const orderedSubjects = CANONICAL_SUBJECT_ORDER.filter((subj) =>
+    selectedSubjects.includes(subj)
+  );
+  const candidateSubjects =
+    orderedSubjects.length > 0
+      ? orderedSubjects
+      : CANONICAL_SUBJECT_ORDER.filter((subj) => pool.some((q) => q.subject === subj));
+
+  const buckets = new Map<'Physics' | 'Chemistry' | 'Mathematics', CBTQuestion[]>();
+  for (const subj of candidateSubjects) {
+    const items = pool.filter((q) => q.subject === subj);
+    if (items.length > 0) {
+      buckets.set(subj, items);
+    }
+  }
+
+  const activeSubjects = candidateSubjects.filter((s) => (buckets.get(s)?.length || 0) > 0);
+  if (activeSubjects.length === 0) {
+    const fallback = pool.slice(0, targetCount);
+    return fallback.map((q, idx) => ({ ...q, number: idx + 1 }));
+  }
+
+  const cursors = new Map<'Physics' | 'Chemistry' | 'Mathematics', number>();
+  activeSubjects.forEach((s) => cursors.set(s, 0));
+
+  const picked: CBTQuestion[] = [];
+  // Pass 1: Strict round-robin taking 1 unique item per active subject in turn until targetCount
+  // or all unique subject pools are exhausted.
+  while (picked.length < targetCount) {
+    let progressed = false;
+    for (const subj of activeSubjects) {
+      if (picked.length >= targetCount) break;
+      const bucket = buckets.get(subj)!;
+      const cursor = cursors.get(subj) || 0;
+      if (cursor < bucket.length) {
+        picked.push(bucket[cursor]);
+        cursors.set(subj, cursor + 1);
+        progressed = true;
+      }
+    }
+    if (!progressed) break;
+  }
+
+  // Pass 2: If total unique items across all selected subjects < targetCount (e.g., narrow filter),
+  // continue round-robin wrapping across active subjects so every subject still keeps balanced share.
+  if (picked.length < targetCount) {
+    while (picked.length < targetCount) {
+      for (const subj of activeSubjects) {
+        if (picked.length >= targetCount) break;
+        const bucket = buckets.get(subj)!;
+        const cursor = cursors.get(subj) || 0;
+        picked.push(bucket[cursor % bucket.length]);
+        cursors.set(subj, cursor + 1);
+      }
+    }
+  }
+
+  const ordered = groupBySubject
+    ? [...picked].sort(
+        (a, b) =>
+          CANONICAL_SUBJECT_ORDER.indexOf(a.subject) -
+          CANONICAL_SUBJECT_ORDER.indexOf(b.subject)
+      )
+    : picked;
+
+  const usedIds = new Set<string>();
+  return ordered.map((tpl, idx) => {
+    const uniqueId = usedIds.has(tpl.id) ? `${tpl.id}__copy_${idx + 1}` : tpl.id;
+    usedIds.add(uniqueId);
+    return {
+      ...tpl,
+      id: uniqueId,
+      number: idx + 1,
+    };
+  });
+}
+
+/**
+ * Sanitizes Section B numerical input from both physical keyboards and the on-screen keypad.
+ * Allows optional leading `-`, digits `0-9`, and at most one `.` up to 10 characters.
+ */
+export function sanitizeNumericalInputValue(raw: string): string {
+  const input = String(raw || '');
+  let out = '';
+  let hasDot = false;
+  for (let i = 0; i < input.length; i += 1) {
+    const ch = input[i];
+    if (ch >= '0' && ch <= '9') {
+      out += ch;
+    } else if (ch === '-' && out.length === 0) {
+      out += '-';
+    } else if (ch === '.' && !hasDot) {
+      hasDot = true;
+      out += '.';
+    }
+    if (out.length >= 10) break;
+  }
+  return out;
+}
+
+export function resolveCbtSessionInit<
+  T extends {
+    examMode: ExamTrack;
+    secondsRemaining: number;
+    currentQNumber: number;
+  },
+>(params: {
+  initialExamMode: ExamTrack;
+  customQuestions?: CBTQuestion[];
+  customDurationMinutes?: number;
+  resumeFromDraft?: boolean;
+  existingDraft: T | null;
+}): {
+  isCustomTest: boolean;
+  shouldResumeDraft: boolean;
+  examMode: ExamTrack;
+  initialQNumber: number;
+  initialSecondsRemaining: number;
+} {
+  const isCustomTest = Boolean(params.customQuestions && params.customQuestions.length > 0);
+  const canResume = Boolean(
+    !isCustomTest &&
+      params.resumeFromDraft &&
+      params.existingDraft &&
+      params.existingDraft.examMode === params.initialExamMode &&
+      params.existingDraft.secondsRemaining > 0
+  );
+  const examMode: ExamTrack = canResume ? params.existingDraft!.examMode : params.initialExamMode;
+  const firstQuestionNumber = params.customQuestions?.[0]?.number || 1;
+  const defaultDurationSeconds =
+    (params.customDurationMinutes || (examMode === 'NEET UG' ? 200 : 180)) * 60;
+
+  return {
+    isCustomTest,
+    shouldResumeDraft: canResume,
+    examMode,
+    initialQNumber: canResume ? params.existingDraft!.currentQNumber : firstQuestionNumber,
+    initialSecondsRemaining: canResume
+      ? params.existingDraft!.secondsRemaining
+      : defaultDurationSeconds,
+  };
+}
+
+
 
 

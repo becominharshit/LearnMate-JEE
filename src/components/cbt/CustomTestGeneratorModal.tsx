@@ -10,7 +10,7 @@ import {
   Sparkles,
   Filter,
 } from 'lucide-react';
-import { CBTQuestion } from '../../utils/jeeEngine';
+import { CBTQuestion, buildBalancedCustomTestQuestions } from '../../utils/jeeEngine';
 import {
   JEE_SYLLABUS_DATA,
   CBT_MOCK_QUESTIONS,
@@ -131,22 +131,19 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
     }
 
     if (pool.length === 0) {
-      pool = CBT_MOCK_QUESTIONS.slice(0, questionCount);
+      pool = CBT_MOCK_QUESTIONS.filter((q) => selectedSubjects.includes(q.subject));
+      if (pool.length === 0) {
+        pool = CBT_MOCK_QUESTIONS.slice(0, questionCount);
+      }
     }
 
-    // Build exact requested questionCount while preserving canonical question IDs for server-verified grading
-    const usedIds = new Set<string>();
-    const finalQuestions: CBTQuestion[] = [];
-    for (let i = 0; i < questionCount; i++) {
-      const tpl = pool[i % pool.length];
-      const uniqueId = usedIds.has(tpl.id) ? `${tpl.id}__copy_${i + 1}` : tpl.id;
-      usedIds.add(uniqueId);
-      finalQuestions.push({
-        ...tpl,
-        id: uniqueId,
-        number: i + 1,
-      });
-    }
+    // Build exact requested questionCount distributed evenly (round-robin) across selected subjects
+    const finalQuestions = buildBalancedCustomTestQuestions({
+      pool,
+      selectedSubjects,
+      questionCount,
+      groupBySubject: true,
+    });
 
     onLaunchCustomCBT(
       finalQuestions,

@@ -32,6 +32,8 @@ import {
   ExamTrack,
   formatCountdownTimer,
   calculateNextSRSReview,
+  sanitizeNumericalInputValue,
+  resolveCbtSessionInit,
 } from '../utils/jeeEngine';
 import {
   saveCbtInProgressDraft,
@@ -1433,7 +1435,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
 // 2. PRACTICE DASHBOARD VIEW (Marks-Style Buckets + Custom Test Builder + Mistakes)
 // ============================================================================
 interface PracticeViewProps {
-  onStartCBTMock: (examMode?: ExamTrack) => void;
+  onStartCBTMock: (examMode?: ExamTrack, options?: { resume?: boolean }) => void;
   onOpenInstantPractice: (paperTitle: string, customQuestions?: CBTQuestion[]) => void;
   onOpenCustomTestModal?: () => void;
   mistakesNotebook?: MistakeNotebookEntry[];
@@ -1692,7 +1694,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => onStartCBTMock(savedDraft.examMode)}
+              onClick={() => onStartCBTMock(savedDraft.examMode, { resume: true })}
               className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold cursor-pointer shadow-2xs"
             >
               Resume Interrupted Mock →
@@ -2398,6 +2400,8 @@ interface CBTMockExamProps {
   customQuestions?: CBTQuestion[];
   customDurationMinutes?: number;
   customPaperTitle?: string;
+  sessionId?: string;
+  resumeFromDraft?: boolean;
   onSubmitMock: (
     summary: CBTMockSummary,
     focusEvents: number,
@@ -2414,14 +2418,24 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
   customQuestions,
   customDurationMinutes,
   customPaperTitle,
+  sessionId: _sessionId,
+  resumeFromDraft = false,
   onSubmitMock,
   onExitMock,
   onRecordMistake,
 }) => {
-  const existingDraft = loadCbtInProgressDraft();
-  const [examMode, setExamMode] = useState<ExamTrack>(
-    existingDraft?.examMode || initialExamMode
-  );
+  const isCustomTest = Boolean(customQuestions && customQuestions.length > 0);
+  const rawExistingDraft = !isCustomTest && resumeFromDraft ? loadCbtInProgressDraft() : null;
+  const sessionInit = resolveCbtSessionInit({
+    initialExamMode,
+    customQuestions,
+    customDurationMinutes,
+    resumeFromDraft,
+    existingDraft: rawExistingDraft,
+  });
+  const existingDraft = sessionInit.shouldResumeDraft ? rawExistingDraft : null;
+
+  const [examMode, setExamMode] = useState<ExamTrack>(sessionInit.examMode);
 
   const getQuestionsForMode = (mode: ExamTrack): CBTQuestion[] => {
     if (customQuestions && customQuestions.length > 0) return customQuestions;
@@ -2432,20 +2446,18 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
   };
 
   const questionsList = getQuestionsForMode(examMode);
+  const initialQuestion =
+    questionsList.find((q) => q.number === sessionInit.initialQNumber) || questionsList[0];
 
   const [activeSubject, setActiveSubject] = useState<'Physics' | 'Chemistry' | 'Mathematics'>(
-    questionsList[0]?.subject || 'Physics'
+    initialQuestion?.subject || questionsList[0]?.subject || 'Physics'
   );
-  const [activeSection, setActiveSection] = useState<'Section A' | 'Section B'>('Section A');
-  const [currentQNumber, setCurrentQNumber] = useState<number>(
-    existingDraft && existingDraft.examMode === examMode
-      ? existingDraft.currentQNumber
-      : questionsList[0]?.number || 1
+  const [activeSection, setActiveSection] = useState<'Section A' | 'Section B'>(
+    initialQuestion?.section || 'Section A'
   );
+  const [currentQNumber, setCurrentQNumber] = useState<number>(sessionInit.initialQNumber);
   const [secondsRemaining, setSecondsRemaining] = useState<number>(
-    existingDraft && existingDraft.examMode === examMode && existingDraft.secondsRemaining > 0
-      ? existingDraft.secondsRemaining
-      : (customDurationMinutes || (examMode === 'NEET UG' ? 200 : 180)) * 60
+    sessionInit.initialSecondsRemaining
   );
   const [focusEvents, setFocusEvents] = useState<number>(
     existingDraft?.focusSwitchCount || 0
@@ -2457,6 +2469,8 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
   const [lastAutoSavedTime, setLastAutoSavedTime] = useState<string>(
     existingDraft?.savedAt
       ? new Date(existingDraft.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : isCustomTest
+      ? 'Isolated session'
       : 'Just now'
   );
   const [examLanguage, setExamLanguage] = useState<'English' | 'Hindi'>('English');
@@ -2538,9 +2552,9 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
     return () => clearInterval(timer);
   }, [currentQuestion?.id, submittedSummary]);
 
-  // 15-Second Crash-Recovery Auto-Save Loop (plus manual save helper)
+  // 15-Second Crash-Recovery Auto-Save Loop for official mocks (isolated away from Custom Tests)
   useEffect(() => {
-    if (submittedSummary) return;
+    if (submittedSummary || isCustomTest) return;
     const performAutoSave = () => {
       const nowIso = new Date().toISOString();
       void saveCbtInProgressDraft({
@@ -2564,6 +2578,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
     const interval = setInterval(performAutoSave, 15000);
     return () => clearInterval(interval);
   }, [
+    isCustomTest,
     examMode,
     secondsRemaining,
     currentQNumber,
@@ -2692,12 +2707,23 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
     }));
   };
 
+  const handleNumericalDirectChange = (rawValue: string) => {
+    const sanitized = sanitizeNumericalInputValue(rawValue);
+    setResponses((prev) => ({
+      ...prev,
+      [currentQuestion.id]: {
+        ...currentResponse,
+        numericalValue: sanitized,
+      },
+    }));
+  };
+
   const handleNumericalKeyPress = (key: string) => {
     const curVal = currentResponse.numericalValue || '';
     let nextVal = curVal;
     if (key === 'CLEAR') nextVal = '';
     else if (key === 'BACKSPACE') nextVal = curVal.slice(0, -1);
-    else if (curVal.length < 10) nextVal = curVal + key;
+    else nextVal = sanitizeNumericalInputValue(curVal + key);
 
     setResponses((prev) => ({
       ...prev,
@@ -2737,23 +2763,25 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
       },
     };
     setResponses(nextResponses);
-    const nowIso = new Date().toISOString();
-    void saveCbtInProgressDraft({
-      examMode,
-      secondsRemaining,
-      currentQNumber,
-      responses: nextResponses,
-      focusSwitchCount: focusEvents,
-      focusEvents: proctorWarningLog,
-      savedAt: nowIso,
-    });
-    setLastAutoSavedTime(
-      new Date(nowIso).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })
-    );
+    if (!isCustomTest) {
+      const nowIso = new Date().toISOString();
+      void saveCbtInProgressDraft({
+        examMode,
+        secondsRemaining,
+        currentQNumber,
+        responses: nextResponses,
+        focusSwitchCount: focusEvents,
+        focusEvents: proctorWarningLog,
+        savedAt: nowIso,
+      });
+      setLastAutoSavedTime(
+        new Date(nowIso).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      );
+    }
     advanceToNextQuestion();
   };
 
@@ -2805,7 +2833,9 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
         return;
       }
 
-      void clearCbtInProgressDraft();
+      if (!isCustomTest) {
+        void clearCbtInProgressDraft();
+      }
       const summary = graded.data.summary as CBTMockSummary;
       setServerSolutions(graded.data.questionSolutions || {});
       setSubmittedSummary(summary);
@@ -2982,9 +3012,11 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
         <div className="lg:col-span-9 flex flex-col gap-4">
           {/* Subject & Section Bar */}
           <div className="bg-white rounded-xl border border-slate-200 p-3 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {(['Physics', 'Chemistry', 'Mathematics'] as const).map((subj) => {
                 const active = activeSubject === subj;
+                const subjCount = questionsList.filter((q) => q.subject === subj).length;
+                if (isCustomTest && subjCount === 0) return null;
                 const firstQ = questionsList.find((q) => q.subject === subj);
                 return (
                   <button
@@ -2992,7 +3024,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                     type="button"
                     onClick={() => {
                       setActiveSubject(subj);
-                      setActiveSection('Section A');
+                      setActiveSection(firstQ?.section || 'Section A');
                       if (firstQ) handleJumpToQuestion(firstQ.number);
                     }}
                     className={`px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer ${
@@ -3001,19 +3033,21 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    {subj} ({questionsList.filter((q) => q.subject === subj).length} Qs)
+                    {subj} ({subjCount} Qs)
                   </button>
                 );
               })}
             </div>
 
             {examMode === 'JEE Main' && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {(['Section A', 'Section B'] as const).map((sec) => {
-                  const active = activeSection === sec;
-                  const firstSecQ = questionsList.find(
+                  const secQs = questionsList.filter(
                     (q) => q.subject === activeSubject && (q.section || 'Section A') === sec
                   );
+                  if (isCustomTest && secQs.length === 0) return null;
+                  const active = activeSection === sec;
+                  const firstSecQ = secQs[0];
                   return (
                     <button
                       key={sec}
@@ -3028,7 +3062,11 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                     >
-                      {sec === 'Section A'
+                      {isCustomTest
+                        ? sec === 'Section A'
+                          ? `Section A (${secQs.length} MCQs • +4 / -1)`
+                          : `Section B (${secQs.length} Numericals • +4 / -1)`
+                        : sec === 'Section A'
                         ? 'Section A (20 MCQs • +4 / -1)'
                         : 'Section B (5 Compulsory Numericals • +4 / -1)'}
                     </button>
@@ -3209,10 +3247,12 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                     </div>
                     <input
                       type="text"
-                      readOnly
+                      inputMode="decimal"
+                      aria-label="Numerical value response"
                       value={currentResponse.numericalValue || ''}
+                      onChange={(e) => handleNumericalDirectChange(e.target.value)}
                       placeholder="Enter numerical value..."
-                      className="w-full px-3.5 py-2.5 rounded-xl border-2 border-indigo-300 bg-white font-mono text-base font-extrabold text-slate-900 mb-3"
+                      className="w-full px-3.5 py-2.5 rounded-xl border-2 border-indigo-300 focus:border-indigo-600 focus:outline-none bg-white font-mono text-base font-extrabold text-slate-900 mb-3"
                     />
                     <div className="grid grid-cols-3 gap-2">
                       {['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '-'].map(

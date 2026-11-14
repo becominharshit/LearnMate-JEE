@@ -393,3 +393,120 @@ test('Multi-exam evaluation supports BITSAT (+3/-1) and NEET UG (+4/-1) plus 12-
   assert.equal(autoChunks[0].seconds, 0);
 });
 
+test('buildBalancedCustomTestQuestions allocates evenly across Physics, Chemistry, and Mathematics with fallback only when exhausted', async () => {
+  const { buildBalancedCustomTestQuestions } = await import('./jeeEngine.ts');
+
+  const even30 = buildBalancedCustomTestQuestions({
+    pool: CBT_MOCK_QUESTIONS,
+    selectedSubjects: ['Physics', 'Chemistry', 'Mathematics'],
+    questionCount: 30,
+    groupBySubject: true,
+  });
+  assert.equal(even30.length, 30);
+  assert.equal(even30.filter((q) => q.subject === 'Physics').length, 10);
+  assert.equal(even30.filter((q) => q.subject === 'Chemistry').length, 10);
+  assert.equal(even30.filter((q) => q.subject === 'Mathematics').length, 10);
+  assert.deepEqual(
+    even30.map((q) => q.number),
+    Array.from({ length: 30 }, (_, i) => i + 1)
+  );
+
+  // Remainder distribution for non-divisible total (10 -> 4/3/3)
+  const remainder10 = buildBalancedCustomTestQuestions({
+    pool: CBT_MOCK_QUESTIONS,
+    selectedSubjects: ['Physics', 'Chemistry', 'Mathematics'],
+    questionCount: 10,
+    groupBySubject: true,
+  });
+  assert.equal(remainder10.filter((q) => q.subject === 'Physics').length, 4);
+  assert.equal(remainder10.filter((q) => q.subject === 'Chemistry').length, 3);
+  assert.equal(remainder10.filter((q) => q.subject === 'Mathematics').length, 3);
+
+  // Narrow pool where Chemistry only has 2 unique questions out of 12 requested across 3 subjects
+  const narrowPool: CBTQuestion[] = [
+    ...CBT_MOCK_QUESTIONS.filter((q) => q.subject === 'Physics').slice(0, 8),
+    ...CBT_MOCK_QUESTIONS.filter((q) => q.subject === 'Chemistry').slice(0, 2),
+    ...CBT_MOCK_QUESTIONS.filter((q) => q.subject === 'Mathematics').slice(0, 8),
+  ];
+  const balanced12 = buildBalancedCustomTestQuestions({
+    pool: narrowPool,
+    selectedSubjects: ['Physics', 'Chemistry', 'Mathematics'],
+    questionCount: 12,
+    groupBySubject: true,
+  });
+  assert.equal(balanced12.length, 12);
+  assert.equal(balanced12.filter((q) => q.subject === 'Chemistry').length, 2);
+  assert.equal(balanced12.filter((q) => q.subject === 'Physics').length, 5);
+  assert.equal(balanced12.filter((q) => q.subject === 'Mathematics').length, 5);
+});
+
+test('CBT_MOCK_QUESTIONS has 15 distinct Section B numerical stems with zero duplicate drill prefixes', () => {
+  const sectionB = CBT_MOCK_QUESTIONS.filter((q) => q.section === 'Section B');
+  assert.equal(sectionB.length, 15);
+  const stems = sectionB.map((q) => q.stem.trim());
+  assert.equal(new Set(stems).size, 15);
+  for (const q of sectionB) {
+    assert.equal(/Compulsory Numerical Drill/i.test(q.stem), false);
+    assert.equal(q.numericalAnswer !== undefined, true);
+  }
+});
+
+test('sanitizeNumericalInputValue handles physical keyboard digits, decimals, leading minus, and invalid characters', async () => {
+  const { sanitizeNumericalInputValue } = await import('./jeeEngine.ts');
+
+  assert.equal(sanitizeNumericalInputValue('-42.5'), '-42.5');
+  assert.equal(sanitizeNumericalInputValue('72abc'), '72');
+  assert.equal(sanitizeNumericalInputValue('1.2.34'), '1.234');
+  assert.equal(sanitizeNumericalInputValue('1-2-3'), '123');
+  assert.equal(sanitizeNumericalInputValue('--0.75'), '-0.75');
+  assert.equal(sanitizeNumericalInputValue(''), '');
+});
+
+test('resolveCbtSessionInit prevents custom tests from inheriting interrupted mock timer or responses', async () => {
+  const { resolveCbtSessionInit, buildBalancedCustomTestQuestions } = await import('./jeeEngine.ts');
+
+  const customQs = buildBalancedCustomTestQuestions({
+    pool: CBT_MOCK_QUESTIONS,
+    selectedSubjects: ['Physics', 'Chemistry', 'Mathematics'],
+    questionCount: 30,
+  });
+
+  const existingDraft = {
+    examMode: 'JEE Main' as const,
+    secondsRemaining: 10789,
+    currentQNumber: 1,
+  };
+
+  // Custom test must start completely fresh at durationMinutes * 60
+  const customInit = resolveCbtSessionInit({
+    initialExamMode: 'JEE Main',
+    customQuestions: customQs,
+    customDurationMinutes: 60,
+    resumeFromDraft: true,
+    existingDraft,
+  });
+  assert.equal(customInit.isCustomTest, true);
+  assert.equal(customInit.shouldResumeDraft, false);
+  assert.equal(customInit.initialQNumber, 1);
+  assert.equal(customInit.initialSecondsRemaining, 3600);
+
+  // Fresh standard CBT launch ignores interrupted draft unless resumeFromDraft === true
+  const freshMockInit = resolveCbtSessionInit({
+    initialExamMode: 'JEE Main',
+    resumeFromDraft: false,
+    existingDraft,
+  });
+  assert.equal(freshMockInit.isCustomTest, false);
+  assert.equal(freshMockInit.shouldResumeDraft, false);
+  assert.equal(freshMockInit.initialSecondsRemaining, 10800);
+
+  // Explicit Resume Interrupted Mock restores draft state
+  const resumedInit = resolveCbtSessionInit({
+    initialExamMode: 'JEE Main',
+    resumeFromDraft: true,
+    existingDraft,
+  });
+  assert.equal(resumedInit.shouldResumeDraft, true);
+  assert.equal(resumedInit.initialQNumber, 1);
+  assert.equal(resumedInit.initialSecondsRemaining, 10789);
+});

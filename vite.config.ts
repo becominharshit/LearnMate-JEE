@@ -2,7 +2,44 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
+
+function katexFontPreloadPlugin(): Plugin {
+  return {
+    name: 'katex-font-preload',
+    transformIndexHtml(html, ctx) {
+      const preloadHrefs: string[] = [];
+      if (ctx?.bundle) {
+        for (const fileName of Object.keys(ctx.bundle)) {
+          if (
+            /KaTeX_Main-Regular.*\.woff2$/i.test(fileName) ||
+            /KaTeX_Math-Italic.*\.woff2$/i.test(fileName)
+          ) {
+            preloadHrefs.push(`/${fileName.replace(/^\/+/, '')}`);
+          }
+        }
+      } else {
+        preloadHrefs.push(
+          '/node_modules/katex/dist/fonts/KaTeX_Main-Regular.woff2',
+          '/node_modules/katex/dist/fonts/KaTeX_Math-Italic.woff2'
+        );
+      }
+
+      if (preloadHrefs.length === 0) return html;
+      return preloadHrefs.map((href) => ({
+        tag: 'link',
+        attrs: {
+          rel: 'preload',
+          href,
+          as: 'font',
+          type: 'font/woff2',
+          crossorigin: 'anonymous',
+        },
+        injectTo: 'head',
+      }));
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -35,6 +72,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
+      katexFontPreloadPlugin(),
     ],
     define: {
       'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(

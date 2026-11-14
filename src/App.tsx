@@ -76,6 +76,9 @@ export function App() {
   if (s.inCBTMockMode) {
     return (
       <JeeCbtExamModal
+        key={s.cbtSessionId}
+        sessionId={s.cbtSessionId}
+        resumeFromDraft={s.cbtResumeFromDraft}
         candidateName={s.studentProfile.displayName || 'Candidate'}
         initialExamMode={s.cbtExamMode}
         customQuestions={s.customCbtConfig?.questions}
@@ -163,9 +166,7 @@ export function App() {
         avatarColor={s.studentProfile.avatarColor || '#4F46E5'}
         userInitial={userInitial}
         onStartCBTMock={(mode) => {
-          s.setCustomCbtConfig(null);
-          s.setCbtExamMode(mode);
-          s.setInCBTMockMode(true);
+          s.startCBTMockSession(mode);
         }}
         toastMessage={s.toastMessage}
       >
@@ -276,10 +277,8 @@ export function App() {
 
         {s.activeTab === 'Practice' && (
           <PracticeWorkspaceView
-            onStartCBTMock={(mode = 'JEE Main') => {
-              s.setCustomCbtConfig(null);
-              s.setCbtExamMode(mode);
-              s.setInCBTMockMode(true);
+            onStartCBTMock={(mode = 'JEE Main', options) => {
+              s.startCBTMockSession(mode, options);
             }}
             onOpenCustomTestModal={() => s.setCustomTestModalOpen(true)}
             onOpenInstantPractice={(paperTitle, customQuestions) =>
@@ -341,9 +340,7 @@ export function App() {
         {s.activeTab === 'Progress' && (
           <ProgressAndRankView
             onStartCBTMock={(mode = 'JEE Main') => {
-              s.setCustomCbtConfig(null);
-              s.setCbtExamMode(mode);
-              s.setInCBTMockMode(true);
+              s.startCBTMockSession(mode);
             }}
             onPracticeWeakTopic={(topic) => {
               s.setInstantPracticeConfig({
@@ -396,16 +393,18 @@ export function App() {
         onLaunchCustomCBT={(questionsOrConfig, durationMinutes = 60, paperTitle = 'Custom Test') => {
           s.setCustomTestModalOpen(false);
           if (Array.isArray(questionsOrConfig)) {
-            s.setCustomCbtConfig({ questions: questionsOrConfig, durationMinutes, paperTitle });
+            s.launchCustomCBTSession({
+              questions: questionsOrConfig,
+              durationMinutes,
+              paperTitle,
+            });
           } else {
-            s.setCustomCbtConfig({
+            s.launchCustomCBTSession({
               questions: questionsOrConfig.questions,
               durationMinutes: questionsOrConfig.durationMinutes,
               paperTitle: questionsOrConfig.title,
             });
           }
-          s.setCbtExamMode('JEE Main');
-          s.setInCBTMockMode(true);
         }}
       />
 
@@ -479,7 +478,7 @@ export function App() {
         }}
         onLaunchFullCBT={() => {
           s.setInstantPracticeConfig(null);
-          s.setInCBTMockMode(true);
+          s.startCBTMockSession('JEE Main');
         }}
         onRecordMistake={(q, ans) => s.handleRecordMistake(q, ans, 'Adaptive Drill')}
       />

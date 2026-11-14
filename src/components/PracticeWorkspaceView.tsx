@@ -3,7 +3,7 @@ import { PracticeDashboardView, MistakeNotebookEntry } from './RevisePracticePro
 import { CBTQuestion, ExamTrack } from '../utils/jeeEngine';
 
 export interface PracticeWorkspaceViewProps {
-  onStartCBTMock: (mode?: ExamTrack) => void;
+  onStartCBTMock: (mode?: ExamTrack, options?: { resume?: boolean }) => void;
   onOpenCustomTestModal: () => void;
   onOpenInstantPractice: (paperTitle: string, customQuestions?: CBTQuestion[]) => void;
   mistakesNotebook: MistakeNotebookEntry[];

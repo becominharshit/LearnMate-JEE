@@ -96,6 +96,8 @@ export function useLearnMateAppState() {
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem | null>(null);
   const [inCBTMockMode, setInCBTMockMode] = useState<boolean>(false);
   const [cbtExamMode, setCbtExamMode] = useState<ExamTrack>('JEE Main');
+  const [cbtSessionId, setCbtSessionId] = useState<string>('cbt-init');
+  const [cbtResumeFromDraft, setCbtResumeFromDraft] = useState<boolean>(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
   const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'pro' | 'institute'>('free');
@@ -144,6 +146,26 @@ export function useLearnMateAppState() {
     durationMinutes: number;
     paperTitle: string;
   } | null>(null);
+
+  const startCBTMockSession = (mode: ExamTrack = 'JEE Main', options?: { resume?: boolean }) => {
+    setCustomCbtConfig(null);
+    setCbtExamMode(mode);
+    setCbtResumeFromDraft(Boolean(options?.resume));
+    setCbtSessionId(`cbt-${mode.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`);
+    setInCBTMockMode(true);
+  };
+
+  const launchCustomCBTSession = (config: {
+    questions: CBTQuestion[];
+    durationMinutes: number;
+    paperTitle: string;
+  }) => {
+    setCustomCbtConfig(config);
+    setCbtExamMode('JEE Main');
+    setCbtResumeFromDraft(false);
+    setCbtSessionId(`custom-cbt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`);
+    setInCBTMockMode(true);
+  };
   const [streakDays, setStreakDays] = useState<number>(0);
   const [xp, setXp] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
@@ -971,6 +993,10 @@ export function useLearnMateAppState() {
     setInCBTMockMode,
     cbtExamMode,
     setCbtExamMode,
+    cbtSessionId,
+    cbtResumeFromDraft,
+    startCBTMockSession,
+    launchCustomCBTSession,
     sidebarCollapsed,
     setSidebarCollapsed,
     subscriptionTier,

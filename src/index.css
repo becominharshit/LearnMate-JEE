@@ -3,14 +3,18 @@
 
 @layer base {
   :root {
-    --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'DM Sans', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
   body {
     font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  button, input, select, option, textarea {
+    font-family: inherit;
   }
 
   h1, h2, h3, h4, .font-display {
@@ -21,6 +25,29 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Prevent KaTeX FOIT blank flash (node_modules katex.min.css defaults to font-display: block) */
+@font-face {
+  font-family: 'KaTeX_Main';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('katex/dist/fonts/KaTeX_Main-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'KaTeX_Math';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('katex/dist/fonts/KaTeX_Math-Italic.woff2') format('woff2');
+}
+
+.katex,
+.katex-block-wrapper {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Handwriting Fonts for Handwritten Notes Studio */

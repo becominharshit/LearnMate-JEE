@@ -8,6 +8,8 @@ import {
 import { CBTMockExamView } from '../RevisePracticeProgressCBT';
 
 export interface JeeCbtExamModalProps {
+  sessionId?: string;
+  resumeFromDraft?: boolean;
   candidateName: string;
   initialExamMode?: ExamTrack;
   customQuestions?: CBTQuestion[];
@@ -24,6 +26,8 @@ export interface JeeCbtExamModalProps {
 }
 
 export const JeeCbtExamModal: React.FC<JeeCbtExamModalProps> = ({
+  sessionId,
+  resumeFromDraft = false,
   candidateName,
   initialExamMode = 'JEE Main',
   customQuestions,
@@ -35,6 +39,9 @@ export const JeeCbtExamModal: React.FC<JeeCbtExamModalProps> = ({
 }) => {
   return (
     <CBTMockExamView
+      key={sessionId || initialExamMode}
+      sessionId={sessionId}
+      resumeFromDraft={resumeFromDraft}
       candidateName={candidateName}
       initialExamMode={initialExamMode}
       customQuestions={customQuestions}

@@ -535,7 +535,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 w-full pb-24 lg:pb-20">{children}</main>
+        <main className="flex-1 min-w-0 w-full pb-28">{children}</main>
       </div>
 
       {/* MOBILE & TABLET (<1024px) PERMANENT 5-TAB BOTTOM NAVIGATION BAR (NO COLLAPSIBLE SIDEBAR) */}

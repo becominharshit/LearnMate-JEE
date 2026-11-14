@@ -468,7 +468,7 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
       aria-label="Add Material"
       className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-[640px] p-6 space-y-5">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-display font-bold text-xl text-slate-900 dark:text-white">
@@ -509,13 +509,13 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
 
         {/* Top Source Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-1 overflow-x-auto">
+        <div role="tablist" aria-label="Material upload sources" className="flex flex-wrap items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-2">
           {[
             { id: 'pdf', label: 'PDF Document', icon: FileText },
-            { id: 'photo', label: 'Handwritten Photo (OCR)', icon: ImageIcon },
-            { id: 'youtube', label: 'YouTube (Up to 12h)', icon: Youtube },
-            { id: 'text', label: 'Paste Notes / Outline', icon: TypeIcon },
-            { id: 'drive', label: 'Google Drive / Docs', icon: FolderOpen },
+            { id: 'photo', label: 'Photo OCR', icon: ImageIcon },
+            { id: 'youtube', label: 'YouTube (≤12h)', icon: Youtube },
+            { id: 'text', label: 'Paste Notes', icon: TypeIcon },
+            { id: 'drive', label: 'Google Drive', icon: FolderOpen },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -523,14 +523,16 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
               <button
                 key={tab.id}
                 type="button"
+                role="tab"
+                aria-selected={active}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3.5 py-2.5 rounded-t-xl text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-colors cursor-pointer ${
                   active
-                    ? 'bg-[#EEF2FF] text-[#4F46E5] border-[#4F46E5]'
-                    : 'text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-900'
+                    ? 'bg-[#EEF2FF] text-[#4F46E5] border-[#4F46E5]/40'
+                    : 'text-slate-600 dark:text-slate-400 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 <span>{tab.label}</span>
               </button>
             );
