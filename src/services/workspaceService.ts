@@ -17,6 +17,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { computeStableContentHash, splitSourceIntoPages } from './studyBundleBuilder';
+import { apiFetch, apiUrl } from '../config/apiConfig';
 
 export interface DriveFileItem {
   id: string;
@@ -502,7 +503,7 @@ export async function apiFetchWithAuth<T = any>(
   try {
     const headers = await getAuthenticatedRequestHeaders();
 
-    const res = await fetch(endpoint, {
+    const res = await apiFetch(endpoint, {
       method,
       headers,
       body: method === 'GET' || !body ? undefined : JSON.stringify(body),
@@ -1133,7 +1134,7 @@ export async function ingestYouTubeOnServer(params: {
 
 export async function fetchCommercialPlans() {
   try {
-    const res = await fetch('/api/commercial/plans');
+    const res = await apiFetch('/api/commercial/plans');
     const json = await res.json();
     return { ok: res.ok, data: json };
   } catch {
@@ -1264,7 +1265,7 @@ export async function purgeUserFirestoreData(uid: string): Promise<number> {
 export async function fetchLazyPyqPack(
   packId: 'jee-main-shifts' | 'jee-advanced-papers'
 ): Promise<any> {
-  const cacheKey = `learnmate_pyq_pack_v2_${packId}`;
+  const cacheKey = `learnmate_pyq_pack_v3_${packId}`;
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
@@ -1276,7 +1277,7 @@ export async function fetchLazyPyqPack(
 
   let data: any = null;
   try {
-    const apiRes = await fetch(`/api/pyq/packs/${packId}`);
+    const apiRes = await fetch(apiUrl(`/api/pyq/packs/${packId}`));
     if (apiRes.ok) {
       data = await apiRes.json();
     }

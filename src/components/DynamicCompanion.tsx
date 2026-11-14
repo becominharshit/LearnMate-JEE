@@ -107,7 +107,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
   return (
     <>
       {/* Floating Companion Trigger Pill */}
-      <div className="fixed bottom-20 right-4 lg:bottom-12 lg:right-5 z-40">
+      <div className="fixed bottom-16 right-3 md:bottom-14 md:right-4 z-40">
         {!isOpen ? (
           <button
             type="button"

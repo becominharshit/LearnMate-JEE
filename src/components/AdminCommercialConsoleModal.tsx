@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { X, ShieldCheck, Server, Sparkles, AlertTriangle, Receipt, Building2 } from 'lucide-react';
-import { fetchBillingInvoices } from '../services/workspaceService';
+import { X, ShieldCheck, Server, Sparkles, AlertTriangle, Receipt, Building2, CheckCircle2 } from 'lucide-react';
+import { apiFetchWithAuth, fetchBillingInvoices } from '../services/workspaceService';
 
 export interface AdminCommercialConsoleModalProps {
   isOpen: boolean;
@@ -28,6 +28,8 @@ export const AdminCommercialConsoleModal: React.FC<
   onClose,
 }) => {
   const [submittingPlan, setSubmittingPlan] = useState<'pro_aspirant' | 'institute_cohort' | null>(null);
+  const [waitlistJoined, setWaitlistJoined] = useState<Record<string, boolean>>({});
+  const [waitlistBanner, setWaitlistBanner] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<
     {
       invoiceId: string;
@@ -55,6 +57,19 @@ export const AdminCommercialConsoleModal: React.FC<
   const triggerCheckout = async (planId: 'pro_aspirant' | 'institute_cohort') => {
     setSubmittingPlan(planId);
     try {
+      if (!paymentsConfigured) {
+        const res = await apiFetchWithAuth('/api/commercial/waitlist', {
+          planId,
+          billingCycle,
+        });
+        setWaitlistJoined((prev) => ({ ...prev, [planId]: true }));
+        setWaitlistBanner(
+          res.ok
+            ? 'You are on the LearnMate Pro Early Access waitlist! We will notify you as soon as online plans launch.'
+            : 'Early Access interest recorded locally — sign in with Google or Email to reserve priority launch pricing.'
+        );
+        return;
+      }
       await onStartCheckout(planId);
     } finally {
       setSubmittingPlan(null);
@@ -73,7 +88,7 @@ export const AdminCommercialConsoleModal: React.FC<
           <div>
             <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase tracking-wider inline-flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Plans &amp; Entitlements · Verified Webhook Billing
+              {paymentsConfigured ? 'Plans & Instant Billing' : 'Plans & Early Access Preview'}
             </span>
             <h2 className="text-xl font-extrabold mt-1.5">
               LearnMate JEE Plans (Current: {subscriptionTier.toUpperCase()} · {subscriptionStatus})
@@ -93,11 +108,11 @@ export const AdminCommercialConsoleModal: React.FC<
           <div className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>
-              Gateway Status:{' '}
-              <strong className={paymentsConfigured ? 'text-emerald-600' : 'text-amber-600'}>
+              Plan Availability:{' '}
+              <strong className={paymentsConfigured ? 'text-emerald-600' : 'text-indigo-600 dark:text-indigo-400'}>
                 {paymentsConfigured
-                  ? 'Live Checkout Ready (HMAC Verified)'
-                  : 'Gateway Keys Not Provisioned (Checkout Returns 503 Honest Notice)'}
+                  ? 'Live Checkout Ready'
+                  : 'Early Access Preview • Pro Plans Launching Soon'}
               </strong>
             </span>
           </div>
@@ -127,11 +142,21 @@ export const AdminCommercialConsoleModal: React.FC<
           </div>
         </div>
 
-        {billingError && (
+        {waitlistBanner && (
+          <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <div>
+              <div className="font-extrabold">Early Access Waitlist Confirmed</div>
+              <p className="mt-0.5">{waitlistBanner}</p>
+            </div>
+          </div>
+        )}
+
+        {paymentsConfigured && billingError && (
           <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <div className="font-extrabold">Billing Gateway Notice</div>
+              <div className="font-extrabold">Billing Notice</div>
               <p className="mt-0.5">{billingError}</p>
             </div>
           </div>
@@ -180,6 +205,23 @@ export const AdminCommercialConsoleModal: React.FC<
               <div className="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-center font-extrabold">
                 ✓ Pro Aspirant Active
               </div>
+            ) : !paymentsConfigured ? (
+              <button
+                type="button"
+                disabled={submittingPlan !== null || waitlistJoined.pro_aspirant}
+                onClick={() => triggerCheckout('pro_aspirant')}
+                className={`w-full py-2.5 px-3 rounded-xl font-extrabold shadow-sm cursor-pointer disabled:opacity-75 ${
+                  waitlistJoined.pro_aspirant
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                }`}
+              >
+                {submittingPlan === 'pro_aspirant'
+                  ? 'Joining Waitlist...'
+                  : waitlistJoined.pro_aspirant
+                  ? '✓ Joined Early Access Waitlist'
+                  : 'Pro Plan Launching Soon — Join Early Access'}
+              </button>
             ) : (
               <button
                 type="button"
@@ -215,6 +257,23 @@ export const AdminCommercialConsoleModal: React.FC<
               <div className="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-center font-extrabold">
                 ✓ Institute Seat Active
               </div>
+            ) : !paymentsConfigured ? (
+              <button
+                type="button"
+                disabled={submittingPlan !== null || waitlistJoined.institute_cohort}
+                onClick={() => triggerCheckout('institute_cohort')}
+                className={`w-full py-2.5 px-3 rounded-xl font-extrabold cursor-pointer disabled:opacity-75 ${
+                  waitlistJoined.institute_cohort
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 text-white'
+                }`}
+              >
+                {submittingPlan === 'institute_cohort'
+                  ? 'Joining Waitlist...'
+                  : waitlistJoined.institute_cohort
+                  ? '✓ Institute Waitlist Joined'
+                  : 'Pro Plan Launching Soon — Join Early Access'}
+              </button>
             ) : (
               <button
                 type="button"
@@ -238,7 +297,7 @@ export const AdminCommercialConsoleModal: React.FC<
           </div>
           {invoices.length === 0 ? (
             <div className="text-slate-500">
-              No paid invoices on file. Upgrades require verified payment gateway webhook confirmation.
+              No paid invoices on file yet. Early Access members receive launch pricing notifications when Pro plans open.
             </div>
           ) : (
             <div className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -257,9 +316,9 @@ export const AdminCommercialConsoleModal: React.FC<
         <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between text-[11px] text-slate-500">
           <span className="inline-flex items-center gap-1.5 font-semibold">
             <Server className="w-3.5 h-3.5 text-indigo-600" />
-            Protected by RS256 Firebase Auth, HMAC-Verified Webhooks &amp; Server-Authoritative Entitlements
+            Protected by Firebase Auth &amp; Verified Account Entitlements
           </span>
-          <span className="font-extrabold text-indigo-600">No Client Self-Upgrade</span>
+          <span className="font-extrabold text-indigo-600">LearnMate JEE</span>
         </div>
       </div>
     </div>

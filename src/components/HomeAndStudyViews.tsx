@@ -671,187 +671,192 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
               )}
             </div>
 
-            {/* 2. Continue Study / Clean Zero-State Upload Card */}
+            {/* 2. Continue Study (when materials exist) OR Single Consolidated Upload Card */}
             {materials.length > 0 ? (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
-                <div>
-                  <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                    Continue with: {materials[0].title}
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {materials[0].subject} • {materials[0].chapter}
-                  </p>
+              <>
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+                  <div>
+                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
+                      Continue with: {materials[0].title}
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {materials[0].subject} • {materials[0].chapter}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => onOpenStudyWorkbench(materials[0])}
+                      className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Resume Study</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onOpenRevise}
+                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                    >
+                      Quick Revise &amp; Handwritten View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onOpenPractice}
+                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                    >
+                      Practice PYQs
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => onOpenStudyWorkbench(materials[0])}
-                    className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                  >
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>Resume Study</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onOpenRevise}
-                    className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
-                  >
-                    Quick Revise &amp; Handwritten View
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onOpenPractice}
-                    className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
-                  >
-                    Practice PYQs
-                  </button>
+
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
+                      My Materials ({materials.length})
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={onOpenMyMaterials}
+                      className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {materials.map((mat) => (
+                      <div
+                        key={mat.id}
+                        className="py-3 first:pt-0 flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
+                            {mat.sourceType === 'youtube' ? (
+                              <Video className="w-4 h-4" />
+                            ) : (
+                              <FileText className="w-4 h-4" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                              {mat.title}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {mat.subject} • {mat.chapter}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onOpenStudyWorkbench(mat)}
+                          className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                        >
+                          Open
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddMaterial('pdf')}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Upload PDF</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddMaterial('photo')}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Handwritten Photo (OCR)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddMaterial('youtube')}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-slate-400" />
+                      <span>YouTube (Up to 12h)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddMaterial('text')}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Paste Text</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAddMaterial('drive')}
+                      className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/50 text-xs font-semibold text-[#4F46E5] hover:bg-indigo-100 inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <FolderOpen className="w-3.5 h-3.5" />
+                      <span>Google Drive</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-3 shadow-2xs">
+              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="px-2.5 py-0.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold uppercase">
-                      Clean Zero-State Workspace
-                    </span>
-                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white mt-1.5">
+                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
                       Upload Your First JEE Study Material
                     </h2>
-                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Upload any PDF chapter, handwritten note photo, or up-to-12-hour YouTube
-                      lecture to unlock full detailed notes, handwritten font conversion, formula book, mind maps, and
-                      flashcards.
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Upload a chapter PDF, handwritten note photo, or up-to-12-hour YouTube lecture to unlock full notes, formula sheets, mind maps, and SM-2 flashcards.
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 pt-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('pdf')}
                     className="px-4 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>+ Upload PDF / Handwritten Notes</span>
+                    <span>Upload PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenAddMaterial('photo')}
+                    className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Handwritten Photo (OCR)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('youtube')}
-                    className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <Youtube className="w-3.5 h-3.5 text-rose-600" />
-                    <span>Extract 12h YouTube Lecture</span>
+                    <span>YouTube (12h)</span>
                   </button>
                   <button
                     type="button"
-                    onClick={onOpenPractice}
-                    className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                    onClick={() => onOpenAddMaterial('text')}
+                    className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    Solve Official PYQs &amp; 75-Q CBT
+                    <Plus className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Paste Text</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenAddMaterial('drive')}
+                    className="px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50/50 text-xs font-semibold text-[#4F46E5] hover:bg-indigo-100 inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <FolderOpen className="w-3.5 h-3.5" />
+                    <span>Google Drive</span>
                   </button>
                 </div>
               </div>
             )}
-
-            {/* 3. My Materials Card */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                  My Materials ({materials.length})
-                </h2>
-                {materials.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={onOpenMyMaterials}
-                    className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
-                  >
-                    View All
-                  </button>
-                )}
-              </div>
-
-              {materials.length === 0 ? (
-                <p className="text-xs text-slate-500 py-2">
-                  No preloaded materials. Use the buttons below to upload your own study files:
-                </p>
-              ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {materials.map((mat) => (
-                    <div
-                      key={mat.id}
-                      className="py-3 first:pt-0 flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
-                          {mat.sourceType === 'youtube' ? (
-                            <Video className="w-4 h-4" />
-                          ) : (
-                            <FileText className="w-4 h-4" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                            {mat.title}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {mat.subject} • {mat.chapter}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => onOpenStudyWorkbench(mat)}
-                        className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
-                      >
-                        Open
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="pt-2 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onOpenAddMaterial('pdf')}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Upload PDF</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenAddMaterial('photo')}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Handwritten Photo (OCR)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenAddMaterial('youtube')}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 text-slate-400" />
-                  <span>YouTube (Up to 12h)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenAddMaterial('text')}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Paste Text</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenAddMaterial('drive')}
-                  className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/50 text-xs font-semibold text-[#4F46E5] hover:bg-indigo-100 inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <FolderOpen className="w-3.5 h-3.5" />
-                  <span>Google Drive</span>
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Right 5-Column Stack */}
@@ -922,12 +927,22 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
               </div>
 
               <form onSubmit={handleAskDoubt}>
-                <input
-                  type="text"
+                <textarea
+                  rows={2}
                   value={doubtInput}
-                  onChange={(e) => setDoubtInput(e.target.value)}
-                  placeholder="Ask any JEE concept, derivation, or numerical..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+                  onChange={(e) => {
+                    setDoubtInput(e.target.value);
+                    e.currentTarget.style.height = 'auto';
+                    e.currentTarget.style.height = `${Math.min(160, e.currentTarget.scrollHeight)}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      void handleAskDoubt(e as unknown as React.FormEvent);
+                    }
+                  }}
+                  placeholder="Ask a JEE concept, derivation, or numerical..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#4F46E5] resize-none leading-relaxed"
                 />
                 <div className="flex items-center justify-between gap-2 mt-3">
                   <div className="flex items-center gap-2">

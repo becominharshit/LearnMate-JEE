@@ -6,6 +6,10 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 160 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "plan": { "type": "string", "enum": ["free", "pro", "institute"] },
         "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
         "targetExam": {
           "type": "string",

@@ -383,6 +383,38 @@ billingRouter.post(
   }
 );
 
+// Early Access Pro Waitlist (for environments where live payment keys are launching soon)
+billingRouter.post('/waitlist', checkoutRateLimit, async (req: AuthenticatedRequest, res: Response) => {
+  const uid = req.userUid && req.userUid !== 'anonymous' ? req.userUid : null;
+  const planId = String(req.body?.planId || 'pro_aspirant').slice(0, 40);
+  const email = String(req.body?.email || '').trim().slice(0, 160);
+  const entryId = uid || `waitlist_${crypto.createHash('sha256').update(email || req.ip || 'anon').digest('hex').slice(0, 16)}`;
+
+  try {
+    await adminSetDoc(
+      'commercial_waitlist',
+      entryId,
+      {
+        entryId,
+        uid: uid || null,
+        email: email || null,
+        planId,
+        joinedAtIso: new Date().toISOString(),
+      },
+      true
+    );
+  } catch {
+    // Non-blocking fallback when persistence is read-only
+  }
+
+  res.json({
+    status: 'WAITLIST_JOINED',
+    planId,
+    joinedAtIso: new Date().toISOString(),
+    message: 'You are on the LearnMate Pro Early Access waitlist!',
+  });
+});
+
 // Live Stripe / Razorpay Checkout Session Creator (returns 503 PAYMENTS_NOT_CONFIGURED when secrets absent)
 billingRouter.post(
   '/checkout',

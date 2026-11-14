@@ -48,7 +48,8 @@ service cloud.firestore {
         'createdAt', 'updatedAt'
       ]) &&
       data.keys().hasOnly([
-        'userId', 'displayName', 'targetExam', 'preferredLanguage',
+        'userId', 'uid', 'email', 'photoURL', 'plan',
+        'displayName', 'targetExam', 'preferredLanguage',
         'streakDays', 'xp', 'level', 'focusMinutes',
         'physicsMastery', 'chemistryMastery', 'mathsMastery',
         'migrationVersion', 'migrationChecksum', 'migratedV2At',
@@ -56,6 +57,10 @@ service cloud.firestore {
         'createdAt', 'updatedAt'
       ]) &&
       data.userId is string && data.userId == userId && data.userId == request.auth.uid &&
+      (!('uid' in data) || (data.uid is string && data.uid == userId && data.uid == request.auth.uid)) &&
+      (!('email' in data) || (data.email is string && data.email.size() <= 160)) &&
+      (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+      (!('plan' in data) || (data.plan is string && (data.plan == 'free' || data.plan == 'pro' || data.plan == 'institute'))) &&
       data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
       data.targetExam is string && data.targetExam.size() <= 40 &&
       (data.targetExam == 'JEE Main 2027' || data.targetExam == 'JEE Advanced 2027' || data.targetExam == 'NEET UG 2027' || data.targetExam == 'BITSAT 2027' || data.targetExam == 'JEE Main 2028') &&
@@ -297,6 +302,7 @@ service cloud.firestore {
       allow list: if false; // Zero user enumeration
       allow create: if isVerifiedOwner(userId) &&
         isValidUserProfile(incoming(), userId) &&
+        (!('plan' in incoming()) || incoming().plan == 'free') &&
         incoming().createdAt == request.time &&
         incoming().updatedAt == request.time;
       allow update: if isVerifiedOwner(userId) &&
@@ -304,7 +310,9 @@ service cloud.firestore {
         incoming().userId == existing().userId &&
         incoming().createdAt == existing().createdAt &&
         incoming().updatedAt == request.time &&
+        (!('plan' in incoming()) || (('plan' in existing()) ? incoming().plan == existing().plan : incoming().plan == 'free')) &&
         incoming().diff(existing()).affectedKeys().hasOnly([
+          'uid', 'email', 'photoURL', 'plan',
           'displayName', 'targetExam', 'preferredLanguage',
           'streakDays', 'xp', 'level', 'focusMinutes',
           'physicsMastery', 'chemistryMastery', 'mathsMastery',

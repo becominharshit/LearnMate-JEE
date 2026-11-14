@@ -15,10 +15,12 @@ import {
 } from './data/authoritativeAnswerKeys';
 
 export const ALLOWED_GEMINI_MODELS = {
-  fast: 'gemini-4-hydrogen',
-  lite: 'gemini-3.1-flash-lite',
-  thinking: 'gemini-4-argon',
-  reasoning: 'gemini-4-carbon',
+  fast: 'gemini-3.5-flash-lite',
+  lite: 'gemini-3.5-flash-lite',
+  thinking: 'gemini-3.8-flash',
+  reasoning: 'gemini-3.8-flash',
+  analyze: 'gemini-3.8-flash',
+  intermediate: 'gemini-3.6-flash',
   image: 'gemini-3-pro-image',
   imageEdit: 'gemini-nano-banana-2.1',
   video: 'gemini-omni-1.2-flash',
@@ -43,17 +45,34 @@ export function resolveConfiguredModel(
 }
 
 export function getModelRoutingConfig() {
+  const fast = resolveConfiguredModel(process.env.GEMINI_MODEL_FAST, ALLOWED_GEMINI_MODELS.fast);
+  const thinking = resolveConfiguredModel(process.env.GEMINI_MODEL_THINKING, ALLOWED_GEMINI_MODELS.thinking);
+  const analyze = resolveConfiguredModel(process.env.GEMINI_MODEL_ANALYZE, thinking);
+  const lite = resolveConfiguredModel(process.env.GEMINI_MODEL_LITE, fast);
+  const reasoning = resolveConfiguredModel(process.env.GEMINI_MODEL_REASONING, thinking);
   return {
-    fast: resolveConfiguredModel(process.env.GEMINI_MODEL_FAST, ALLOWED_GEMINI_MODELS.fast),
-    lite: resolveConfiguredModel(process.env.GEMINI_MODEL_LITE, ALLOWED_GEMINI_MODELS.lite),
-    thinking: resolveConfiguredModel(process.env.GEMINI_MODEL_THINKING, ALLOWED_GEMINI_MODELS.thinking),
-    reasoning: resolveConfiguredModel(process.env.GEMINI_MODEL_REASONING, ALLOWED_GEMINI_MODELS.reasoning),
+    fast,
+    lite,
+    thinking,
+    reasoning,
+    analyze,
     image: resolveConfiguredModel(process.env.GEMINI_MODEL_IMAGE, ALLOWED_GEMINI_MODELS.image),
     imageEdit: resolveConfiguredModel(process.env.GEMINI_MODEL_IMAGE_EDIT, ALLOWED_GEMINI_MODELS.imageEdit),
     transcribe: resolveConfiguredModel(process.env.GEMINI_MODEL_TRANSCRIBE, ALLOWED_GEMINI_MODELS.transcribe),
     tts: resolveConfiguredModel(process.env.GEMINI_MODEL_TTS, ALLOWED_GEMINI_MODELS.tts),
     live: resolveConfiguredModel(process.env.GEMINI_MODEL_LIVE, ALLOWED_GEMINI_MODELS.live),
   };
+}
+
+export function buildThinkingFallbackChain(primaryModel?: string): string[] {
+  const cfg = getModelRoutingConfig();
+  const raw = [
+    primaryModel || cfg.thinking,
+    ALLOWED_GEMINI_MODELS.intermediate,
+    cfg.fast,
+    ALLOWED_GEMINI_MODELS.fast,
+  ];
+  return Array.from(new Set(raw.filter(Boolean)));
 }
 
 export function getValidatedGenAIClient(): GoogleGenAI {
@@ -76,29 +95,71 @@ export function getValidatedGenAIClient(): GoogleGenAI {
   });
 }
 
+function isRetryableModelFallbackError(err: any): boolean {
+  const msg = String(err?.message || err || '');
+  const status = Number(err?.status || err?.statusCode || 0);
+  return (
+    status === 403 ||
+    status === 404 ||
+    status === 429 ||
+    /\b404\b|\b429\b|permission|quota|not found|unsupported|resource_exhausted|unavailable|paid/i.test(msg)
+  );
+}
+
 export async function generateWithModelFallback<T>(
-  primaryModel: string,
-  fallbackModel: string | null,
-  invoke: (model: string) => Promise<T>
-): Promise<{ result: T; modelUsed: string; fallbackUsed: boolean }> {
-  try {
-    const result = await invoke(primaryModel);
-    return { result, modelUsed: primaryModel, fallbackUsed: false };
-  } catch (err: any) {
-    const msg = String(err?.message || err || '');
-    const status = Number(err?.status || err?.statusCode || 0);
-    const shouldFallback =
-      Boolean(fallbackModel && fallbackModel !== primaryModel) &&
-      (status === 403 ||
-        status === 404 ||
-        status === 429 ||
-        /permission|quota|not found|unsupported|resource_exhausted|paid/i.test(msg));
-    if (!shouldFallback || !fallbackModel) {
-      throw err;
-    }
-    const fallbackResult = await invoke(fallbackModel);
-    return { result: fallbackResult, modelUsed: fallbackModel, fallbackUsed: true };
+  modelsOrPrimary: string | string[],
+  fallbackOrInvoke: string | null | ((model: string) => Promise<T>),
+  maybeInvoke?: (model: string) => Promise<T>
+): Promise<{ result: T; modelUsed: string; fallbackUsed: boolean; attemptedModels: string[] }> {
+  const candidateModels = Array.isArray(modelsOrPrimary)
+    ? Array.from(new Set(modelsOrPrimary.map((m) => String(m || '').trim()).filter(Boolean)))
+    : Array.from(
+        new Set(
+          [modelsOrPrimary, typeof fallbackOrInvoke === 'string' ? fallbackOrInvoke : null]
+            .map((m) => String(m || '').trim())
+            .filter(Boolean)
+        )
+      );
+
+  const invoke: ((model: string) => Promise<T>) | undefined =
+    typeof fallbackOrInvoke === 'function' ? fallbackOrInvoke : maybeInvoke;
+
+  if (!invoke || candidateModels.length === 0) {
+    throw new Error('generateWithModelFallback requires at least one model and an invoke callback.');
   }
+
+  const attemptedModels: string[] = [];
+  let lastError: any = null;
+
+  for (let i = 0; i < candidateModels.length; i += 1) {
+    const model = candidateModels[i];
+    attemptedModels.push(model);
+    try {
+      const result = await invoke(model);
+      return {
+        result,
+        modelUsed: model,
+        fallbackUsed: i > 0,
+        attemptedModels,
+      };
+    } catch (err: any) {
+      lastError = err;
+      const hasNext = i < candidateModels.length - 1;
+      if (!hasNext || !isRetryableModelFallbackError(err)) {
+        break;
+      }
+    }
+  }
+
+  const lastMessage = redactSensitiveText(String(lastError?.message || lastError || 'Model invocation failed'));
+  const diagnosticErr: any = new Error(
+    `All configured Gemini models failed (${attemptedModels.join(' -> ')}): ${lastMessage}`
+  );
+  diagnosticErr.status = lastError?.status;
+  diagnosticErr.statusCode = lastError?.statusCode || (lastError?.status === 429 ? 429 : 503);
+  diagnosticErr.errorCode = lastError?.errorCode || (lastError?.status === 429 ? 'UPSTREAM_RATE_LIMITED' : 'UPSTREAM_AI_UNAVAILABLE');
+  diagnosticErr.attemptedModels = attemptedModels;
+  throw diagnosticErr;
 }
 
 export function sendStructuredUpstreamError(

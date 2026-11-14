@@ -17,7 +17,8 @@ import {
   Grid,
   Headphones,
 } from 'lucide-react';
-import { googleSignIn, emailSignIn, emailSignUp } from '../firebase';
+import { signInWithGoogle, emailSignIn, emailSignUp, resetPassword } from '../firebase';
+import { apiFetch } from '../config/apiConfig';
 import {
   getDaysToJeeMain2027Session1,
   GLOBAL_PPP_PRICING,
@@ -44,7 +45,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
   const faqs = [
     {
       q: 'How does LearnMate turn my own JEE notes into practice and revision?',
-      a: 'Upload your coaching PDFs, handwritten note photos, YouTube lecture links, or Google Docs. Gemini 4 Argon and Carbon extract every formula, concept, and common JEE trap to build custom flashcards, mind maps, and NTA-style CBT mocks.',
+      a: 'Upload your coaching PDFs, handwritten note photos, YouTube lecture links, or Google Docs. Gemini 3.8 Flash and Gemini 3.5 Flash Lite extract every formula, concept, and common JEE trap to build custom flashcards, mind maps, and NTA-style CBT mocks.',
     },
     {
       q: 'Why can’t I generate images or videos without signing in?',
@@ -61,7 +62,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
     if (!quickQuestion.trim()) return;
     setQuickLoading(true);
     try {
-      const res = await fetch('/api/public/sample-question', {
+      const res = await apiFetch('/api/public/sample-question', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,7 +86,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
   return (
     <div className="min-h-screen bg-white text-[#0F172A] flex flex-col relative">
       {/* Top Bar matching Screenshot 13 & 14 */}
-      <header className="w-full max-w-[1280px] mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-[#4F46E5] flex items-center justify-center text-white shadow-sm">
             <BookOpen className="w-5 h-5" />
@@ -96,6 +97,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
           <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[#EEF2FF] text-[#4F46E5] tracking-wide">
             JEE
           </span>
+        </div>
+
+        <div className="flex md:hidden items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onOpenAuth('signin')}
+            className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-900 cursor-pointer"
+          >
+            Sign in
+          </button>
         </div>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -128,7 +139,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
 
       {/* Hero Section matching Screenshot 13 */}
       <main className="flex-1">
-        <section className="max-w-[1280px] mx-auto px-6 pt-12 pb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <section className="max-w-[1280px] mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16 sm:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-center">
           <div className="lg:col-span-7 space-y-6">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2FF] text-[#4F46E5] text-xs font-semibold border border-indigo-100">
@@ -276,7 +287,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
         </section>
 
         {/* How It Works & Try a Question Section */}
-        <section id="how-it-works" className="max-w-[1280px] mx-auto px-6 py-12 border-t border-slate-100">
+        <section id="how-it-works" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 border-t border-slate-100">
           <p className="text-[11px] font-bold tracking-widest uppercase text-[#4F46E5] mb-2">
             BUILT FOR JEE MAIN & ADVANCED
           </p>
@@ -312,14 +323,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
         </section>
 
         {/* Try a Question Interactive Bar */}
-        <section id="try-question" className="max-w-[1280px] mx-auto px-6 py-8">
+        <section id="try-question" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
           <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h2 className="font-display font-bold text-lg text-slate-900">
                 Try asking a quick JEE concept question
               </h2>
               <p className="text-xs text-slate-500">
-                Powered by low-latency Gemini 3.1 Flash Lite in {sampleLang}.
+                Powered by low-latency Gemini 3.5 Flash Lite in {sampleLang}.
               </p>
             </div>
             <form onSubmit={handleTryQuestion} className="w-full md:w-auto flex-1 max-w-xl flex gap-2">
@@ -347,7 +358,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
         </section>
 
         {/* FAQ Section matching Screenshot 14 */}
-        <section id="faq" className="max-w-[1280px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <section id="faq" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5">
             <h2 className="font-display font-bold text-2xl text-slate-900">
               Frequently asked questions
@@ -446,7 +457,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
       </div>
 
       {/* Footer matching Screenshot 14 with interactive Legal & Compliance Center triggers */}
-      <footer className="max-w-[1280px] w-full mx-auto px-6 py-10 text-xs text-slate-500 space-y-4">
+      <footer className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-10 text-xs text-slate-500 space-y-4">
         <div className="flex flex-wrap items-center gap-6 font-medium text-slate-700">
           <span className="font-display font-bold text-slate-900">LearnMate</span>
           <button
@@ -503,21 +514,34 @@ interface AuthScreenProps {
   initialMode: 'signin' | 'signup';
   onBackToLanding: () => void;
   onAuthComplete: () => void;
+  onTryDemo?: () => void;
   onOpenLegal?: (tab: LegalModalTabId) => void;
 }
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const AuthScreen: React.FC<AuthScreenProps> = ({
   initialMode,
   onBackToLanding,
   onAuthComplete,
+  onTryDemo,
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isUnder18, setIsUnder18] = useState(false);
   const [guardianEmail, setGuardianEmail] = useState('');
   const [guardianConsent, setGuardianConsent] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    guardian?: string;
+  }>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const daysToJee2027 = getDaysToJeeMain2027Session1();
@@ -526,14 +550,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     setErrorMsg(null);
     setLoading(true);
     try {
-      const outcome = await googleSignIn(false);
+      const outcome = await signInWithGoogle(false);
+      if (outcome.redirected) {
+        return;
+      }
       if (outcome.user) {
         onAuthComplete();
       } else if (outcome.cancelled) {
         setErrorMsg(
-          outcome.errorCode === 'auth/popup-blocked'
-            ? 'Your browser blocked the sign-in popup. Please allow popups for this site or sign in with your email below.'
-            : 'Google Sign-In window was closed before completing. Click "Continue with Google" to try again, or sign in with your email below.'
+          'Google Sign-In window was closed before completing. Click "Continue with Google" to try again, or sign in with your email below.'
         );
       } else if (outcome.errorMessage) {
         setErrorMsg(outcome.errorMessage);
@@ -545,25 +570,60 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     }
   };
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handlePasswordResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-    if (!email.trim() || password.length < 8) {
-      setErrorMsg('Please enter a valid email and a password of at least 8 characters.');
-      return;
-    }
-    if (mode === 'signup' && !name.trim()) {
-      setErrorMsg('Please enter your full name.');
-      return;
-    }
-    if (mode === 'signup' && isUnder18 && (!guardianEmail.trim() || !guardianConsent)) {
-      setErrorMsg('Under India DPDP Act 2023 / GDPR, minors under 18 require a parent/guardian email and consent.');
+    setResetSent(false);
+    const trimmed = resetEmail.trim();
+    if (!EMAIL_PATTERN.test(trimmed)) {
+      setErrorMsg('Please enter a valid email address to receive your reset link.');
       return;
     }
     setLoading(true);
     try {
+      await resetPassword(trimmed);
+      setResetSent(true);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Unable to send password reset email. Please verify your email and retry.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    const nextFieldErrors: typeof fieldErrors = {};
+    if (mode === 'signup' && !name.trim()) {
+      nextFieldErrors.name = 'Please enter your full name.';
+    }
+    if (!EMAIL_PATTERN.test(email.trim())) {
+      nextFieldErrors.email = 'Enter a valid email address.';
+    }
+    if (password.length < 6) {
+      nextFieldErrors.password = 'Password must be at least 6 characters.';
+    }
+    if (mode === 'signup' && isUnder18 && (!EMAIL_PATTERN.test(guardianEmail.trim()) || !guardianConsent)) {
+      nextFieldErrors.guardian =
+        'Under India DPDP Act 2023 / GDPR, minors under 18 require a valid parent/guardian email and consent.';
+    }
+
+    setFieldErrors(nextFieldErrors);
+    if (Object.keys(nextFieldErrors).length > 0) {
+      setErrorMsg(
+        nextFieldErrors.name ||
+          nextFieldErrors.email ||
+          nextFieldErrors.password ||
+          nextFieldErrors.guardian ||
+          'Please check the highlighted fields.'
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
       if (mode === 'signup') {
-        await emailSignUp(name, email, password);
+        await emailSignUp(name, email.trim(), password);
         try {
           localStorage.setItem(
             'learnmate_signup_consent_v1',
@@ -578,13 +638,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           // ignore storage error
         }
       } else {
-        await emailSignIn(email, password);
+        await emailSignIn(email.trim(), password);
       }
       onAuthComplete();
     } catch (err: any) {
       setErrorMsg(
         err?.message ||
-          'Authentication failed. Ensure Email/Password is enabled in your Firebase project or use Continue with Google.'
+          'Authentication failed. Ensure your credentials are correct or continue with Google.'
       );
     } finally {
       setLoading(false);
@@ -593,7 +653,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white text-slate-900">
-      {/* Left Brand Showcase Panel matching Screenshot 12 */}
+      {/* Left Brand Showcase Panel */}
       <div className="lg:col-span-6 bg-gradient-to-br from-[#3730A3] via-[#4F46E5] to-[#6D28D9] text-white p-8 sm:p-14 flex flex-col justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center">
@@ -643,8 +703,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         </div>
       </div>
 
-      {/* Right Auth Form Panel matching Screenshot 12 (with No Demo Button per user instruction) */}
-      <div className="lg:col-span-6 p-8 sm:p-14 flex flex-col justify-center max-w-md mx-auto w-full">
+      {/* Right Auth Form Panel */}
+      <div className="lg:col-span-6 p-6 sm:p-14 flex flex-col justify-center max-w-md mx-auto w-full">
         <button
           type="button"
           onClick={onBackToLanding}
@@ -654,173 +714,301 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           <span>Back to LearnMate</span>
         </button>
 
-        <h2 className="font-display font-bold text-2xl text-slate-900">
-          {mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
-        </h2>
-        <p className="text-xs text-slate-500 mt-1 mb-6">
-          Your notes, practice and progress stay private to your account.
-        </p>
-
-        {/* Official Google Sign-In Button */}
-        <button
-          type="button"
-          disabled={loading}
-          onClick={handleGoogleLogin}
-          className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-3 text-sm font-semibold text-slate-800 transition-colors cursor-pointer shadow-2xs"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 48 48">
-            <path
-              fill="#EA4335"
-              d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-            />
-            <path
-              fill="#4285F4"
-              d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-            />
-            <path
-              fill="#34A853"
-              d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-            />
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-
-        <div className="relative my-6 flex items-center justify-center">
-          <div className="border-t border-slate-200 w-full" />
-          <span className="bg-white px-3 text-[11px] text-slate-400 whitespace-nowrap">
-            or use email
-          </span>
-          <div className="border-t border-slate-200 w-full" />
-        </div>
-
-        <form onSubmit={handleEmailSubmit} className="space-y-4">
-          {mode === 'signup' && (
+        {resetMode ? (
+          <div className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Your name
-              </label>
-              <div className="relative">
-                <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Aarav Sharma"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#4F46E5]"
-                />
-              </div>
+              <h2 className="font-display font-bold text-2xl text-slate-900">
+                Reset your password
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Enter your registered email address and we will send a Firebase password reset link.
+              </p>
             </div>
-          )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#4F46E5]"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters, letters and numbers"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#4F46E5]"
-              />
-            </div>
-          </div>
-
-          {mode === 'signup' && (
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
-              <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isUnder18}
-                  onChange={(e) => setIsUnder18(e.target.checked)}
-                  className="rounded accent-indigo-600"
-                />
-                <span>I am under 18 years old (parent / guardian consent required)</span>
-              </label>
-              {isUnder18 && (
-                <div className="space-y-2 pl-1">
+            <form onSubmit={handlePasswordResetSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="email"
-                    value={guardianEmail}
-                    onChange={(e) => setGuardianEmail(e.target.value)}
-                    placeholder="Parent / Guardian email address"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-[#4F46E5]"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#4F46E5]"
                   />
-                  <label className="flex items-start gap-2 text-[11px] text-slate-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={guardianConsent}
-                      onChange={(e) => setGuardianConsent(e.target.checked)}
-                      className="mt-0.5 rounded accent-indigo-600"
-                    />
-                    <span>
-                      Parent / Guardian consents to private study workspace processing under India DPDP Act 2023 &amp; GDPR.
-                    </span>
-                  </label>
+                </div>
+              </div>
+
+              {resetSent && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+                  Password reset email sent to <strong>{resetEmail}</strong>! Check your inbox and spam folder.
                 </div>
               )}
-            </div>
-          )}
 
-          {errorMsg && (
-            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
-              {errorMsg}
-            </div>
-          )}
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+                  {errorMsg}
+                </div>
+              )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <ArrowRight className="w-4 h-4" />
-            <span>{mode === 'signup' ? 'Create account' : 'Sign in'}</span>
-          </button>
-        </form>
-
-        <p className="text-center text-xs text-slate-500 mt-5">
-          {mode === 'signup' ? (
-            <>
-              Already have an account?{' '}
               <button
-                type="button"
-                onClick={() => setMode('signin')}
-                className="font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60"
               >
-                Sign in
+                <span>{loading ? 'Sending...' : 'Send Reset Link'}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
-            </>
-          ) : (
-            <>
-              New to LearnMate JEE?{' '}
+            </form>
+
+            <button
+              type="button"
+              onClick={() => {
+                setResetMode(false);
+                setResetSent(false);
+                setErrorMsg(null);
+              }}
+              className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+            >
+              ← Back to Sign In
+            </button>
+          </div>
+        ) : (
+          <>
+            <h2 className="font-display font-bold text-2xl text-slate-900">
+              {mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
+            </h2>
+            <p className="text-xs text-slate-500 mt-1 mb-6">
+              Your notes, practice and progress stay private to your account.
+            </p>
+
+            {/* Instant Password-less Google Sign-In Button */}
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleGoogleLogin}
+              className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-3 text-sm font-semibold text-slate-800 transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 48 48">
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                />
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <div className="relative my-6 flex items-center justify-center">
+              <div className="border-t border-slate-200 w-full" />
+              <span className="bg-white px-3 text-[11px] text-slate-400 whitespace-nowrap">
+                or use email
+              </span>
+              <div className="border-t border-slate-200 w-full" />
+            </div>
+
+            <form onSubmit={handleEmailSubmit} noValidate className="space-y-4">
+              {mode === 'signup' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Your name
+                  </label>
+                  <div className="relative">
+                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                      }}
+                      placeholder="e.g. Aarav Sharma"
+                      className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-sm focus:outline-none ${
+                        fieldErrors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#4F46E5]'
+                      }`}
+                    />
+                  </div>
+                  {fieldErrors.name && (
+                    <p className="mt-1 text-[11px] text-red-600">{fieldErrors.name}</p>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
+                    placeholder="you@example.com"
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-sm focus:outline-none ${
+                      fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#4F46E5]'
+                    }`}
+                  />
+                </div>
+                {fieldErrors.email && (
+                  <p className="mt-1 text-[11px] text-red-600">{fieldErrors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
+                    placeholder="At least 6 characters"
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-sm focus:outline-none ${
+                      fieldErrors.password ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#4F46E5]'
+                    }`}
+                  />
+                </div>
+                {fieldErrors.password && (
+                  <p className="mt-1 text-[11px] text-red-600">{fieldErrors.password}</p>
+                )}
+                {mode === 'signin' && (
+                  <div className="mt-1.5 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetEmail(email);
+                        setResetMode(true);
+                        setResetSent(false);
+                        setErrorMsg(null);
+                      }}
+                      className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {mode === 'signup' && (
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
+                  <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isUnder18}
+                      onChange={(e) => setIsUnder18(e.target.checked)}
+                      className="rounded accent-indigo-600"
+                    />
+                    <span>I am under 18 years old (parent / guardian consent required)</span>
+                  </label>
+                  {isUnder18 && (
+                    <div className="space-y-2 pl-1">
+                      <input
+                        type="email"
+                        value={guardianEmail}
+                        onChange={(e) => setGuardianEmail(e.target.value)}
+                        placeholder="Parent / Guardian email address"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-[#4F46E5]"
+                      />
+                      <label className="flex items-start gap-2 text-[11px] text-slate-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={guardianConsent}
+                          onChange={(e) => setGuardianConsent(e.target.checked)}
+                          className="mt-0.5 rounded accent-indigo-600"
+                        />
+                        <span>
+                          Parent / Guardian consents to private study workspace processing under India DPDP Act 2023 &amp; GDPR.
+                        </span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+                  {errorMsg}
+                </div>
+              )}
+
               <button
-                type="button"
-                onClick={() => setMode('signup')}
-                className="font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60"
               >
-                Create account
+                <ArrowRight className="w-4 h-4" />
+                <span>{mode === 'signup' ? 'Create account' : 'Sign in'}</span>
               </button>
-            </>
-          )}
-        </p>
+            </form>
+
+            <p className="text-center text-xs text-slate-500 mt-5">
+              {mode === 'signup' ? (
+                <>
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('signin');
+                      setErrorMsg(null);
+                      setFieldErrors({});
+                    }}
+                    className="font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                </>
+              ) : (
+                <>
+                  New to LearnMate JEE?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('signup');
+                      setErrorMsg(null);
+                      setFieldErrors({});
+                    }}
+                    className="font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                  >
+                    Create account
+                  </button>
+                </>
+              )}
+            </p>
+
+            {onTryDemo && (
+              <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
+                <button
+                  type="button"
+                  onClick={onTryDemo}
+                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Compass className="w-3.5 h-3.5 text-[#4F46E5]" />
+                  <span>Try Demo Without Account</span>
+                </button>
+                <p className="text-[11px] text-center text-slate-400">
+                  Local demo preview only — cloud sync, saved library, and live AI quotas require Google or Email sign-in.
+                </p>
+              </div>
+            )}
+          </>
+        )}
 
         <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-500">
           <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />

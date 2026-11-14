@@ -71,6 +71,7 @@ import {
   requestSignedCloudStorageUrl,
   confirmCloudUpload,
 } from '../services/workspaceService';
+import { wsUrl } from '../config/apiConfig';
 import {
   getDaysToJeeMain2027Session1,
   GLOBAL_PPP_PRICING,
@@ -2227,8 +2228,7 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
         return;
       }
 
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${window.location.host}/api/live`, [
+      const ws = new WebSocket(wsUrl('/api/live'), [
         `learnmate-auth.${token}`,
       ]);
       activeWs = ws;
@@ -3027,7 +3027,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 Student Profile &amp; Preferences
               </h2>
               <p className="text-xs text-slate-500">
-                {formState.email || 'Private Encrypted Student Account'} · Level {level} Scholar (
+                {formState.email || 'Signed-in Student Account'} · Level {level} Scholar (
                 {xp} XP · {streakDays}d Streak)
               </p>
             </div>

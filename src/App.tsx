@@ -60,6 +60,7 @@ export function App() {
             initialMode={s.authInitialMode}
             onBackToLanding={() => s.setUnauthScreen('landing')}
             onAuthComplete={() => s.setActiveTab('Home')}
+            onTryDemo={s.enterDemoMode}
             onOpenLegal={s.handleOpenLegal}
           />
         )}
@@ -371,6 +372,7 @@ export function App() {
       />
 
       <PwaOfflineAndJobsBar
+        isAdmin={s.isAdmin}
         onOpenAdminConsole={() => s.setProModalOpen(true)}
         onOpenAdminQuestionBank={() => s.setQuestionBankModalOpen(true)}
       />

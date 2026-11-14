@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { ThinkingLevel, Type } from '@google/genai';
 import { AuthenticatedRequest } from '../middleware/authAndSecurity';
 import {
+  buildThinkingFallbackChain,
   generateWithModelFallback,
   getModelRoutingConfig,
   getValidatedGenAIClient,
@@ -145,10 +146,12 @@ aiTutorRouter.post('/tutor', async (req: AuthenticatedRequest, res: Response) =>
       }`,
     });
 
-    const primaryModel = difficultyLevel === 'jee_advanced' ? models.thinking : models.fast;
+    const tutorModels =
+      difficultyLevel === 'jee_advanced'
+        ? buildThinkingFallbackChain(models.thinking)
+        : [models.fast, ...buildThinkingFallbackChain(models.thinking)];
     const { result, modelUsed, fallbackUsed } = await generateWithModelFallback(
-      primaryModel,
-      models.lite,
+      tutorModels,
       (model) =>
         ai.models.generateContent({
           model,
@@ -208,8 +211,7 @@ aiTutorRouter.post('/think', async (req: AuthenticatedRequest, res: Response) =>
 
     if (mode === 'custom_set') {
       const { result, modelUsed } = await generateWithModelFallback(
-        models.reasoning,
-        models.fast,
+        buildThinkingFallbackChain(models.thinking),
         (model) =>
           ai.models.generateContent({
             model,
@@ -217,7 +219,7 @@ aiTutorRouter.post('/think', async (req: AuthenticatedRequest, res: Response) =>
             config: {
               systemInstruction:
                 'You are a senior IIT-JEE faculty member creating high-yield JEE questions. Return a JSON array of 5 questions with id, subject, section ("Section A"), text, options (array of 4 strings), correctIndex (0-3), chapter, and explanation. Use $...$ for all math/physics/chemistry symbols.',
-              ...(model === models.reasoning
+              ...(model === models.thinking
                 ? { thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH } }
                 : {}),
               responseMimeType: 'application/json',
@@ -297,8 +299,7 @@ aiTutorRouter.post('/think', async (req: AuthenticatedRequest, res: Response) =>
         : 'Break down every solution into: 1) **Core Concept & Governing Formula**, 2) **Step-by-Step Derivation & Solution**, and 3) *Common JEE Exam Trap to Avoid*, followed by a brief check-in question.';
 
     const { result, modelUsed, fallbackUsed } = await generateWithModelFallback(
-      models.reasoning,
-      models.fast,
+      buildThinkingFallbackChain(models.thinking),
       (model) =>
         ai.models.generateContent({
           model,
@@ -307,7 +308,7 @@ aiTutorRouter.post('/think', async (req: AuthenticatedRequest, res: Response) =>
           }`,
           config: {
             systemInstruction: `You are LearnMate JEE's Senior Classroom Teacher. ${langInstruction} ${MATH_FORMAT_INSTRUCTION} ${contextModeRule} ${socraticInstruction}`,
-            ...(model === models.reasoning
+            ...(model === models.thinking
               ? { thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH } }
               : {}),
           },
@@ -349,8 +350,7 @@ aiTutorRouter.post('/fast', async (req: AuthenticatedRequest, res: Response) => 
         : 'Explain in crisp, intuitive English (2-4 bullet points max).';
 
     const { result, modelUsed } = await generateWithModelFallback(
-      models.lite,
-      models.fast,
+      [models.fast, ...buildThinkingFallbackChain(models.thinking)],
       (model) =>
         ai.models.generateContent({
           model,
@@ -412,8 +412,7 @@ aiTutorRouter.post('/analyze', async (req: AuthenticatedRequest, res: Response) 
     parts.push({ text: analysisPrompt });
 
     const { result, modelUsed, fallbackUsed } = await generateWithModelFallback(
-      models.thinking,
-      models.fast,
+      buildThinkingFallbackChain(models.analyze),
       (model) =>
         ai.models.generateContent({
           model,
@@ -455,8 +454,7 @@ aiTutorRouter.post('/search', async (req: AuthenticatedRequest, res: Response) =
 
     if (mode === 'svg_diagram') {
       const { result, modelUsed } = await generateWithModelFallback(
-        models.fast,
-        models.lite,
+        [models.fast, ...buildThinkingFallbackChain(models.thinking)],
         (model) =>
           ai.models.generateContent({
             model,
@@ -482,8 +480,7 @@ aiTutorRouter.post('/search', async (req: AuthenticatedRequest, res: Response) =
     }
 
     const { result, modelUsed } = await generateWithModelFallback(
-      models.fast,
-      models.lite,
+      [models.fast, ...buildThinkingFallbackChain(models.thinking)],
       (model) =>
         ai.models.generateContent({
           model,
@@ -534,16 +531,20 @@ aiTutorRouter.post('/image-pro', async (req: AuthenticatedRequest, res: Response
 
     const models = getModelRoutingConfig();
     const ai = getValidatedGenAIClient();
-    const response = await ai.models.generateContent({
-      model: models.image,
-      contents: `High-clarity scientific textbook educational diagram for JEE student: ${prompt.slice(0, 1000)}. Clean white paper style, high contrast labels, zero clutter.`,
-      config: {
-        imageConfig: {
-          aspectRatio,
-          imageSize,
-        },
-      },
-    });
+    const { result: response } = await generateWithModelFallback(
+      [models.image, models.imageEdit],
+      (model) =>
+        ai.models.generateContent({
+          model,
+          contents: `High-clarity scientific textbook educational diagram for JEE student: ${prompt.slice(0, 1000)}. Clean white paper style, high contrast labels, zero clutter.`,
+          config: {
+            imageConfig: {
+              aspectRatio,
+              imageSize,
+            },
+          },
+        })
+    );
 
     const parts = response.candidates?.[0]?.content?.parts ?? [];
     for (const part of parts) {
@@ -589,10 +590,14 @@ aiTutorRouter.post('/image-edit', async (req: AuthenticatedRequest, res: Respons
     }
     parts.push({ text: prompt });
 
-    const response = await ai.models.generateContent({
-      model: models.imageEdit,
-      contents: { parts },
-    });
+    const { result: response } = await generateWithModelFallback(
+      [models.imageEdit, models.image],
+      (model) =>
+        ai.models.generateContent({
+          model,
+          contents: { parts },
+        })
+    );
 
     const resParts = response.candidates?.[0]?.content?.parts ?? [];
     for (const part of resParts) {
@@ -743,24 +748,28 @@ aiTutorRouter.post('/transcribe', async (req: AuthenticatedRequest, res: Respons
 
     const models = getModelRoutingConfig();
     const ai = getValidatedGenAIClient();
-    const response = await ai.models.generateContent({
-      model: models.transcribe,
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              mimeType,
-              data: String(audioBase64).replace(/^data:[^;]+;base64,/, '').trim(),
-            },
+    const { result: response, modelUsed } = await generateWithModelFallback(
+      [models.transcribe, ...buildThinkingFallbackChain(models.fast)],
+      (model) =>
+        ai.models.generateContent({
+          model,
+          contents: {
+            parts: [
+              {
+                inlineData: {
+                  mimeType,
+                  data: String(audioBase64).replace(/^data:[^;]+;base64,/, '').trim(),
+                },
+              },
+              {
+                text: 'Transcribe this spoken JEE doubt or study note accurately, preserving mathematical terms and chemical formulas.',
+              },
+            ],
           },
-          {
-            text: 'Transcribe this spoken JEE doubt or study note accurately, preserving mathematical terms and chemical formulas.',
-          },
-        ],
-      },
-    });
+        })
+    );
 
-    res.json({ transcript: response.text ?? '' });
+    res.json({ transcript: response.text ?? '', modelUsed });
   } catch (error: any) {
     sendStructuredUpstreamError(res, error, '/api/ai/transcribe', req.requestId);
   }
@@ -791,31 +800,35 @@ aiTutorRouter.post('/tts', async (req: AuthenticatedRequest, res: Response) => {
 
     const models = getModelRoutingConfig();
     const ai = getValidatedGenAIClient();
-    const response = await ai.models.generateContent({
-      model: models.tts,
-      contents: [
-        {
-          role: 'user',
-          parts: [
+    const { result: response } = await generateWithModelFallback(
+      [models.tts],
+      (model) =>
+        ai.models.generateContent({
+          model,
+          contents: [
             {
-              text: `Tutor: <breath> ${String(text).slice(0, 4000)}`,
-              speechMetadata: {
-                speaker: 'Tutor',
-                style: styleByPersona,
-              },
+              role: 'user',
+              parts: [
+                {
+                  text: `Tutor: <breath> ${String(text).slice(0, 4000)}`,
+                  speechMetadata: {
+                    speaker: 'Tutor',
+                    style: styleByPersona,
+                  },
+                },
+              ],
             },
           ],
-        },
-      ],
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName },
+          config: {
+            responseModalities: ['AUDIO'],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName },
+              },
+            },
           },
-        },
-      },
-    });
+        })
+    );
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (!base64Audio) {

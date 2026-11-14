@@ -8,7 +8,7 @@ import {
   logStructuredEvent,
 } from '../middleware/authAndSecurity';
 import { consumeDailyUidQuota, consumeTokenBucket } from '../middleware/rateLimiterAndQuotas';
-import { getValidatedGenAIClient } from '../coreStudyEngine';
+import { getModelRoutingConfig, getValidatedGenAIClient } from '../coreStudyEngine';
 
 const MAX_WS_PAYLOAD_BYTES = 1024 * 1024; // 1 MB per frame
 const WS_IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
@@ -124,8 +124,9 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
 
     try {
       const ai = getValidatedGenAIClient();
+      const models = getModelRoutingConfig();
       const sessionPromise = ai.live.connect({
-        model: process.env.GEMINI_MODEL_LIVE || 'gemini-3.8-live',
+        model: models.live,
         config: {
           responseModalities: [Modality.AUDIO],
           inputAudioTranscription: {},

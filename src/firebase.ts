@@ -3,8 +3,11 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   updateProfile,
   onAuthStateChanged,
   User,
@@ -12,7 +15,10 @@ import {
 import {
   getFirestore,
   doc,
+  getDoc,
   getDocFromServer,
+  serverTimestamp,
+  setDoc,
 } from 'firebase/firestore';
 
 export interface FirebaseEnvConfig {
@@ -86,29 +92,31 @@ export function formatFirebaseAuthError(error: any): string {
     code === 'auth/configuration-not-found' ||
     code === 'auth/admin-restricted-operation'
   ) {
-    return 'Email/Password sign-in is not yet enabled in Firebase Console for this project. Please use "Continue with Google" above, or enable Email/Password under Firebase Console → Authentication → Sign-in method.';
+    return 'Email/Password sign-in is not enabled in Firebase Console for this project. Please use "Continue with Google" above or enable Email/Password sign-in.';
   }
   if (code === 'auth/unauthorized-domain') {
-    return 'This preview or custom domain is not yet in your Firebase Authorized Domains list. Add it in Firebase Console → Authentication → Settings → Authorized domains.';
+    return 'This domain is not yet authorized in Firebase Authentication. Add this hostname under Firebase Console → Authentication → Settings → Authorized domains.';
   }
-  if (
-    code === 'auth/invalid-credential' ||
-    code === 'auth/user-not-found' ||
-    code === 'auth/wrong-password'
-  ) {
-    return 'Incorrect email or password. Double-check your credentials or continue with Google.';
+  if (code === 'auth/user-not-found') {
+    return 'No account was found with this email address. Double-check the email or create a free account.';
+  }
+  if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+    return 'Incorrect email or password. Double-check your credentials, use "Forgot Password?", or continue with Google.';
+  }
+  if (code === 'auth/invalid-email') {
+    return 'Please enter a valid email address (for example, student@example.com).';
   }
   if (code === 'auth/email-already-in-use') {
     return 'An account with this email already exists. Switch to "Sign in" or continue with Google.';
   }
   if (code === 'auth/weak-password') {
-    return 'Please choose a stronger password (at least 6 characters).';
+    return 'Password is too weak. Please choose at least 6 characters.';
   }
   if (code === 'auth/too-many-requests') {
-    return 'Too many attempts from this browser. Please wait a minute and try again.';
+    return 'Too many attempts from this browser. Please wait a few minutes and try again.';
   }
   if (code === 'auth/network-request-failed') {
-    return 'Network error reaching Firebase Authentication. Check your connection and try again.';
+    return 'Network error reaching Firebase Authentication. Check your internet connection and try again.';
   }
   return msg || 'Authentication failed. Please try again or continue with Google.';
 }
@@ -185,7 +193,7 @@ export const getFirebaseIdToken = async (): Promise<string | null> => {
       return null;
     }
   }
-  if (fallbackUser?.uid) {
+  if (fallbackUser?.uid && fallbackUser.uid.startsWith('local_') && !import.meta.env.PROD) {
     return `local_token_${fallbackUser.uid}`;
   }
   return null;
@@ -229,11 +237,65 @@ export interface GoogleSignInOutcome {
   accessToken: string | null;
   token?: string | null;
   cancelled?: boolean;
+  redirected?: boolean;
   errorCode?: string;
   errorMessage?: string;
 }
 
-export const googleSignIn = async (
+export async function upsertGoogleUserProfile(user: User): Promise<void> {
+  if (!isFirebaseConfigured || !db || !user?.uid) return;
+  try {
+    const userRef = doc(db, 'users', user.uid);
+    const snap = await getDoc(userRef);
+    const displayName = (
+      user.displayName ||
+      user.email?.split('@')[0] ||
+      'JEE Aspirant'
+    ).slice(0, 95);
+
+    if (!snap.exists()) {
+      await setDoc(
+        userRef,
+        {
+          uid: user.uid,
+          userId: user.uid,
+          email: (user.email || '').slice(0, 155),
+          displayName,
+          photoURL: (user.photoURL || '').slice(0, 480),
+          plan: 'free',
+          targetExam: 'JEE Main 2027',
+          preferredLanguage: 'English',
+          streakDays: 0,
+          xp: 0,
+          level: 1,
+          focusMinutes: 0,
+          physicsMastery: 0,
+          chemistryMastery: 0,
+          mathsMastery: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } else {
+      await setDoc(
+        userRef,
+        {
+          uid: user.uid,
+          email: (user.email || '').slice(0, 155),
+          displayName,
+          photoURL: (user.photoURL || '').slice(0, 480),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    }
+  } catch (err) {
+    console.warn('[LearnMate JEE] Could not upsert Google profile in Firestore:', err);
+  }
+}
+
+export const signInWithGoogle = async (
   includeWorkspaceScopes = false
 ): Promise<GoogleSignInOutcome> => {
   if (!isFirebaseConfigured) {
@@ -243,17 +305,19 @@ export const googleSignIn = async (
       token: null,
       cancelled: false,
       errorCode: 'FIREBASE_NOT_CONFIGURED',
-      errorMessage: 'Google Sign-In requires Firebase configuration. Please use email sign-in or configure Firebase.',
+      errorMessage: 'Google Sign-In requires Firebase configuration. Please sign in with email or configure Firebase.',
     };
   }
+  const provider = includeWorkspaceScopes ? workspaceGoogleProvider : basicGoogleProvider;
+  provider.setCustomParameters({ prompt: includeWorkspaceScopes ? 'consent' : 'select_account' });
   try {
     isSigningIn = true;
-    const provider = includeWorkspaceScopes ? workspaceGoogleProvider : basicGoogleProvider;
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     if (credential?.accessToken) {
       cachedAccessToken = credential.accessToken;
     }
+    await upsertGoogleUserProfile(result.user);
     return {
       user: result.user,
       accessToken: cachedAccessToken,
@@ -261,12 +325,29 @@ export const googleSignIn = async (
       cancelled: false,
     };
   } catch (error: any) {
-    const code = error?.code || '';
-    if (
-      code === 'auth/popup-closed-by-user' ||
-      code === 'auth/cancelled-popup-request' ||
-      code === 'auth/popup-blocked'
-    ) {
+    const code = String(error?.code || '');
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+      try {
+        await signInWithRedirect(auth, provider);
+        return {
+          user: null,
+          accessToken: null,
+          token: null,
+          cancelled: false,
+          redirected: true,
+        };
+      } catch (redirectError: any) {
+        return {
+          user: null,
+          accessToken: null,
+          token: null,
+          cancelled: false,
+          errorCode: String(redirectError?.code || code),
+          errorMessage: formatFirebaseAuthError(redirectError),
+        };
+      }
+    }
+    if (code === 'auth/popup-closed-by-user') {
       return {
         user: auth.currentUser,
         accessToken: cachedAccessToken,
@@ -288,9 +369,57 @@ export const googleSignIn = async (
   }
 };
 
-export const signInWithGoogleWorkspace = async (): Promise<GoogleSignInOutcome> => {
-  return googleSignIn(true);
+export const googleSignIn = signInWithGoogle;
+
+export const handleGoogleRedirectResult = async (): Promise<User | null> => {
+  if (!isFirebaseConfigured) return null;
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result?.user) return null;
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (credential?.accessToken) {
+      cachedAccessToken = credential.accessToken;
+    }
+    await upsertGoogleUserProfile(result.user);
+    return result.user;
+  } catch (err) {
+    console.warn('[LearnMate JEE] Google redirect result handling failed:', err);
+    return null;
+  }
 };
+
+export const resetPassword = async (email: string): Promise<void> => {
+  const cleanEmail = email.trim();
+  if (!cleanEmail) {
+    throw new Error('Please enter your email address.');
+  }
+  if (!isFirebaseConfigured) {
+    throw new Error('Password reset requires Firebase Authentication to be configured.');
+  }
+  try {
+    await sendPasswordResetEmail(auth, cleanEmail);
+  } catch (err: any) {
+    throw new Error(formatFirebaseAuthError(err));
+  }
+};
+
+export const signInWithGoogleWorkspace = async (): Promise<GoogleSignInOutcome> => {
+  return signInWithGoogle(true);
+};
+
+export function createDemoGuestSession(): User {
+  const demoUser = {
+    uid: 'demo_guest_student',
+    email: '',
+    displayName: 'Demo Aspirant',
+    emailVerified: false,
+    isAnonymous: true,
+    providerData: [],
+  } as unknown as User;
+  fallbackUser = demoUser;
+  authListeners.forEach((fn) => fn(demoUser));
+  return demoUser;
+}
 
 function createLocalAccountSession(name: string, email: string): User {
   if (import.meta.env.PROD) {

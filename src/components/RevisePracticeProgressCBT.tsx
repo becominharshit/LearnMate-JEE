@@ -42,6 +42,7 @@ import {
   reportQuestionIssueOnServer,
   verifySinglePyqAnswerOnServer,
   gradeCbtAttemptOnServerApi,
+  fetchLazyPyqPack,
   CbtInProgressDraft,
 } from '../services/workspaceService';
 import { MathRichText } from './MathRichText';
@@ -1450,14 +1451,84 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
     'Official Papers' | 'PYQs' | 'Custom Set' | 'Analysis'
   >('Official Papers');
   const [paperFilter, setPaperFilter] = useState<
-    'All' | 'JEE Main' | 'JEE Advanced' | 'NEET UG' | 'BITSAT' | '2025' | '2024'
+    | 'All'
+    | 'JEE Main'
+    | 'JEE Advanced'
+    | 'NEET UG'
+    | 'BITSAT'
+    | '2026'
+    | '2025'
+    | '2024'
+    | '2023'
+    | '2022'
+    | '2021'
+    | '2020'
   >('All');
+  const [packQuestions, setPackQuestions] = useState<
+    Array<CBTQuestion & { paperId?: string; year?: number }>
+  >([]);
   const [savedDraft, setSavedDraft] = useState<CbtInProgressDraft | null>(() =>
     loadCbtInProgressDraft()
   );
 
   useEffect(() => {
     setSavedDraft(loadCbtInProgressDraft());
+    let active = true;
+    Promise.allSettled([
+      fetchLazyPyqPack('jee-main-shifts'),
+      fetchLazyPyqPack('jee-advanced-papers'),
+    ]).then(([mainRes, advRes]) => {
+      if (!active) return;
+      const normalizePack = (packData: any, examType: ExamTrack) => {
+        const list = Array.isArray(packData?.questions) ? packData.questions : [];
+        return list.map((q: any, idx: number) => ({
+          id: String(q.id),
+          number: Number(q.questionNumber || idx + 1),
+          subject: q.subject || 'Physics',
+          section: q.section || 'Section A',
+          chapter: q.chapter || 'General',
+          stem: q.stem || '',
+          options: Array.isArray(q.options) ? q.options : [],
+          correctIndex: -1,
+          explanation: '',
+          examType,
+          examVersion: q.examVersion,
+          advancedFormat:
+            q.questionType === 'MULTI_MCQ'
+              ? 'multiple'
+              : q.questionType === 'MATRIX_MATCH'
+              ? 'matrix'
+              : q.questionType === 'PARAGRAPH'
+              ? 'paragraph'
+              : q.questionType === 'NUMERICAL'
+              ? 'numerical'
+              : undefined,
+          matrixListI: q.matrixRows,
+          matrixListII: q.matrixCols,
+          paragraphContext: q.paragraphPassage,
+          difficultyBucket:
+            q.difficulty === 'Easy'
+              ? 'Beginner'
+              : q.difficulty === 'Tough'
+              ? 'Advanced Climb'
+              : 'Must-Do',
+          pyqTag: q.shift || `${q.year || ''} ${examType}`.trim(),
+          provenanceType: q.provenanceType,
+          verificationStatus: q.verificationStatus,
+          paperId: q.paperId,
+          year: Number(q.year || 0),
+        })) as Array<CBTQuestion & { paperId?: string; year?: number }>;
+      };
+
+      const mainQs =
+        mainRes.status === 'fulfilled' ? normalizePack(mainRes.value, 'JEE Main') : [];
+      const advQs =
+        advRes.status === 'fulfilled' ? normalizePack(advRes.value, 'JEE Advanced') : [];
+      setPackQuestions([...mainQs, ...advQs]);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // PYQ Bank Filters (Including MathonGo Marks-style Buckets)
@@ -1502,6 +1573,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
   });
 
   const combinedPyqPool = [
+    ...packQuestions,
     ...CBT_MOCK_QUESTIONS.slice(0, 30),
     ...JEE_ADVANCED_PAPER_QUESTIONS,
     ...NEET_UG_PAPER_QUESTIONS,
@@ -1513,6 +1585,31 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
       pyqBucketFilter === 'All' || (q.difficultyBucket || 'Must-Do') === pyqBucketFilter;
     return subjMatch && bucketMatch;
   });
+
+  const getQuestionsForOfficialPaper = (paperItem: (typeof OFFICIAL_PAPERS_LIST)[number]): CBTQuestion[] => {
+    if (paperItem.paper.includes('NEET UG')) return NEET_UG_PAPER_QUESTIONS;
+    if (paperItem.paper.includes('BITSAT')) return BITSAT_PAPER_QUESTIONS;
+    const isAdv = paperItem.paper.includes('Advanced');
+    const exactShift = packQuestions.filter((q) => q.paperId === paperItem.id);
+    const sameYear = packQuestions.filter(
+      (q) =>
+        q.paperId !== paperItem.id &&
+        String(q.year || '') === String(paperItem.year) &&
+        (isAdv ? q.examType === 'JEE Advanced' : q.examType === 'JEE Main')
+    );
+    const fallbackPool = isAdv ? JEE_ADVANCED_PAPER_QUESTIONS : CBT_MOCK_QUESTIONS.slice(0, 12);
+    const seen = new Set<string>();
+    const combined: CBTQuestion[] = [];
+    for (const q of [...exactShift, ...sameYear, ...fallbackPool]) {
+      if (!seen.has(q.id)) {
+        seen.add(q.id);
+        combined.push(q);
+      }
+      if (combined.length >= 10 && exactShift.length === 0) break;
+      if (exactShift.length > 0 && combined.length >= Math.max(exactShift.length, 6)) break;
+    }
+    return combined;
+  };
 
   const handleToggleCustomSubject = (subj: 'Physics' | 'Chemistry' | 'Mathematics') => {
     setCustomSubjects((prev) =>
@@ -1539,16 +1636,16 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
   };
 
   return (
-    <div className="w-full px-6 lg:px-10 xl:px-12 py-6 space-y-6">
+    <div className="w-full px-3 sm:px-6 lg:px-10 xl:px-12 py-5 sm:py-6 space-y-6">
       {/* Sub-Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3.5">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Practice &amp; Mock Tests
           </h1>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {(['Official Papers', 'PYQs', 'Custom Set', 'Analysis'] as const).map((tab) => {
             const active = activeSubTab === tab;
             return (
@@ -1556,7 +1653,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                 key={tab}
                 type="button"
                 onClick={() => setActiveSubTab(tab)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   active
                     ? 'bg-indigo-600 text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100'
@@ -1573,11 +1670,11 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
       {savedDraft && (
         <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50/90 dark:bg-amber-950/40 p-4 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 dark:text-amber-300">
                   Crash-Recovery Auto-Save Ready
                 </span>
@@ -1592,7 +1689,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => onStartCBTMock(savedDraft.examMode)}
@@ -1615,9 +1712,9 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
       )}
 
       {/* Hero Banner with Multi-Exam CBT Launchers */}
-      <div className="bg-gradient-to-r from-[#243B82] via-[#2E4696] to-[#3B5BDB] rounded-3xl p-6 lg:p-7 text-white shadow-md flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="bg-gradient-to-r from-[#243B82] via-[#2E4696] to-[#3B5BDB] rounded-3xl p-5 sm:p-6 lg:p-7 text-white shadow-md flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
         <div className="space-y-1.5 max-w-xl">
-          <h2 className="text-xl lg:text-2xl font-extrabold tracking-tight">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold tracking-tight">
             Multi-Exam Proctored CBT Simulator
           </h2>
           <p className="text-xs sm:text-sm text-indigo-100 leading-relaxed">
@@ -1625,12 +1722,12 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           {onOpenCustomTestModal && (
             <button
               type="button"
               onClick={onOpenCustomTestModal}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-400 text-slate-950 hover:bg-emerald-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+              className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-emerald-400 text-slate-950 hover:bg-emerald-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
             >
               Custom Test →
             </button>
@@ -1638,28 +1735,28 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
           <button
             type="button"
             onClick={() => onStartCBTMock('JEE Main')}
-            className="px-4 py-2.5 rounded-2xl bg-white text-[#1E3272] hover:bg-indigo-50 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-white text-[#1E3272] hover:bg-indigo-50 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
           >
             JEE Main CBT →
           </button>
           <button
             type="button"
             onClick={() => onStartCBTMock('JEE Advanced')}
-            className="px-4 py-2.5 rounded-2xl bg-amber-400 text-slate-950 hover:bg-amber-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-amber-400 text-slate-950 hover:bg-amber-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
           >
             JEE Advanced CBT →
           </button>
           <button
             type="button"
             onClick={() => onStartCBTMock('NEET UG')}
-            className="px-4 py-2.5 rounded-2xl bg-teal-300 text-slate-950 hover:bg-teal-200 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-teal-300 text-slate-950 hover:bg-teal-200 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
           >
             NEET UG CBT →
           </button>
           <button
             type="button"
             onClick={() => onStartCBTMock('BITSAT')}
-            className="px-4 py-2.5 rounded-2xl bg-rose-300 text-slate-950 hover:bg-rose-200 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-rose-300 text-slate-950 hover:bg-rose-200 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
           >
             BITSAT CBT →
           </button>
@@ -1672,7 +1769,20 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
           <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 flex-wrap">
               {(
-                ['All', 'JEE Main', 'JEE Advanced', 'NEET UG', 'BITSAT', '2025', '2024'] as const
+                [
+                  'All',
+                  'JEE Main',
+                  'JEE Advanced',
+                  'NEET UG',
+                  'BITSAT',
+                  '2026',
+                  '2025',
+                  '2024',
+                  '2023',
+                  '2022',
+                  '2021',
+                  '2020',
+                ] as const
               ).map((f) => (
                 <button
                   key={f}
@@ -1689,7 +1799,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
               ))}
             </div>
             <span className="text-xs font-bold text-slate-500">
-              Showing {filteredPapers.length} Official Past Shift Papers
+              Showing {filteredPapers.length} Official Past Shift Papers (2020–2026)
             </span>
           </div>
 
@@ -1710,8 +1820,8 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                   key={paperItem.id}
                   className="p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
                           isAdv
@@ -1729,7 +1839,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                         {paperItem.paper}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500 flex items-center gap-3">
+                    <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 sm:gap-3">
                       <span>Year: {paperItem.year}</span>
                       <span>•</span>
                       <span>Session: {paperItem.session}</span>
@@ -1738,18 +1848,23 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => onOpenInstantPractice(paperItem.paper)}
-                      className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-xs font-extrabold text-slate-700 dark:text-slate-200 cursor-pointer"
+                      onClick={() =>
+                        onOpenInstantPractice(
+                          paperItem.paper,
+                          getQuestionsForOfficialPaper(paperItem)
+                        )
+                      }
+                      className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-xs font-extrabold text-slate-700 dark:text-slate-200 cursor-pointer"
                     >
                       Practice (Instant Solver)
                     </button>
                     <button
                       type="button"
                       onClick={() => onStartCBTMock(paperTrack)}
-                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-2xs cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-2xs cursor-pointer"
                     >
                       CBT Mode →
                     </button>

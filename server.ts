@@ -94,8 +94,7 @@ export function createLearnMateExpressApp() {
         const models = getModelRoutingConfig();
         const ai = getValidatedGenAIClient();
         const { result } = await generateWithModelFallback(
-          models.lite,
-          models.fast,
+          [models.fast, 'gemini-3.6-flash', models.thinking],
           (model) =>
             ai.models.generateContent({
               model,

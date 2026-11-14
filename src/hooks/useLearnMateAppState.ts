@@ -5,6 +5,8 @@ import {
   initAuth,
   logoutUser,
   handleFirestoreError,
+  handleGoogleRedirectResult,
+  createDemoGuestSession,
   OperationType,
 } from '../firebase';
 import { User as FirebaseUser } from 'firebase/auth';
@@ -73,6 +75,21 @@ export function useLearnMateAppState() {
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [unauthScreen, setUnauthScreen] = useState<'landing' | 'auth'>('landing');
   const [authInitialMode, setAuthInitialMode] = useState<'signin' | 'signup'>('signup');
+
+  const isDemoMode = currentUser?.uid === 'demo_guest_student';
+  const adminEmails = String(
+    (import.meta.env.VITE_ADMIN_EMAILS as string | undefined) || ''
+  )
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdmin = Boolean(
+    import.meta.env.DEV ||
+      (currentUser?.email && adminEmails.includes(currentUser.email.toLowerCase()))
+  );
+
+  const isLocalOrDemoUid = (uid?: string | null) =>
+    !uid || uid.startsWith('local_') || uid === 'demo_guest_student';
 
   const [activeTab, setActiveTab] = useState<PrimaryTab>('Home');
   const [studySubTab, setStudySubTab] = useState<StudySubTabId>('Chapter Notes');
@@ -158,6 +175,14 @@ export function useLearnMateAppState() {
 
   const handleOpenLegal = (tab: LegalModalTabId = 'privacy') => {
     setLegalModalState({ isOpen: true, tab });
+  };
+
+  const enterDemoMode = () => {
+    const demoUser = createDemoGuestSession();
+    setCurrentUser(demoUser);
+    setAuthLoading(false);
+    setActiveTab('Home');
+    showToast('Demo mode active (local only). Sign in with Google or Email for cloud sync & live AI.');
   };
 
   // Load UID-scoped study caches & query server-authoritative subscription entitlements
@@ -439,6 +464,15 @@ export function useLearnMateAppState() {
       setAuthLoading(false);
     }
 
+    handleGoogleRedirectResult()
+      .then((redirectUser) => {
+        if (redirectUser) {
+          setCurrentUser(redirectUser);
+          setAuthLoading(false);
+        }
+      })
+      .catch(() => {});
+
     const fallbackTimer = setTimeout(() => {
       setAuthLoading(false);
     }, 1500);
@@ -459,7 +493,7 @@ export function useLearnMateAppState() {
           }
         }
 
-        if (user.uid.startsWith('local_') || !isFirebaseConfigured || !db) {
+        if (isLocalOrDemoUid(user.uid) || !isFirebaseConfigured || !db) {
           setStudentProfile((prev) => ({
             ...prev,
             ...localParsed,
@@ -467,7 +501,7 @@ export function useLearnMateAppState() {
               localParsed.displayName ||
               user.displayName ||
               user.email?.split('@')[0] ||
-              'JEE Aspirant',
+              (user.uid === 'demo_guest_student' ? 'Demo Aspirant' : 'JEE Aspirant'),
             email: user.email || '',
           }));
           return;
@@ -562,7 +596,7 @@ export function useLearnMateAppState() {
   }, []);
 
   useEffect(() => {
-    if (!currentUser || currentUser.uid.startsWith('local_') || !isFirebaseConfigured || !db) {
+    if (!currentUser || isLocalOrDemoUid(currentUser.uid) || !isFirebaseConfigured || !db) {
       return;
     }
     const materialsRef = collection(db, 'users', currentUser.uid, 'materials');
@@ -627,7 +661,7 @@ export function useLearnMateAppState() {
     setStudentProfile(updated);
     if (!currentUser) return;
     localStorage.setItem(`learnmate_profile_${currentUser.uid}`, JSON.stringify(updated));
-    if (!currentUser.uid.startsWith('local_') && isFirebaseConfigured && db) {
+    if (!isLocalOrDemoUid(currentUser.uid) && isFirebaseConfigured && db) {
       const userRef = doc(db, 'users', currentUser.uid);
       try {
         const snap = await getDoc(userRef);
@@ -761,7 +795,7 @@ export function useLearnMateAppState() {
       }).catch(() => {});
     }
 
-    if (currentUser && !currentUser.uid.startsWith('local_') && isFirebaseConfigured && db) {
+    if (currentUser && !isLocalOrDemoUid(currentUser.uid) && isFirebaseConfigured && db) {
       const syncRes = await syncChunkedMaterialToFirestore(currentUser.uid, newId, {
         title: newMat.title,
         subject: newMat.subject,
@@ -818,7 +852,7 @@ export function useLearnMateAppState() {
 
   const handleAddFlashcard = async (node: MindMapNodeItem) => {
     showToast(`Added "${node.title}" to Spaced-Repetition Flashcards!`);
-    if (currentUser && !currentUser.uid.startsWith('local_') && isFirebaseConfigured && db) {
+    if (currentUser && !isLocalOrDemoUid(currentUser.uid) && isFirebaseConfigured && db) {
       const cardId = `card_${node.id}_${Date.now()}`.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
       const cardRef = doc(db, 'users', currentUser.uid, 'flashcards', cardId);
       try {
@@ -883,7 +917,7 @@ export function useLearnMateAppState() {
       showToast(`CBT Submitted! Score: ${summary.totalScore}/${maxMarks} (Scaled: ${scaledScore}/300)`);
     }
 
-    if (currentUser && !currentUser.uid.startsWith('local_') && isFirebaseConfigured && db) {
+    if (currentUser && !isLocalOrDemoUid(currentUser.uid) && isFirebaseConfigured && db) {
       const attemptRef = doc(db, 'users', currentUser.uid, 'mockAttempts', attemptId);
       const mappedExamType =
         cbtExamMode === 'JEE Advanced'
@@ -919,6 +953,9 @@ export function useLearnMateAppState() {
 
   return {
     currentUser,
+    isDemoMode,
+    isAdmin,
+    enterDemoMode,
     authLoading,
     unauthScreen,
     setUnauthScreen,

@@ -21,6 +21,7 @@ import {
   Sparkles,
   FolderOpen,
   Mic,
+  Menu,
 } from 'lucide-react';
 import { MaterialItem } from './HomeAndStudyViews';
 import { PrimaryTab, StudySubTabId } from '../hooks/useLearnMateAppState';
@@ -97,6 +98,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
   onStartCBTMock,
   toastMessage,
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
   return (
     <div
       className={`min-h-screen transition-colors ${
@@ -144,7 +147,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           <button
             type="button"
             onClick={onOpenProModal}
-            className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-extrabold transition-all cursor-pointer ${
+            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-extrabold transition-all cursor-pointer ${
               subscriptionTier === 'pro' || subscriptionTier === 'institute'
                 ? 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
                 : 'border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300'
@@ -187,7 +190,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenStudyTools}
             aria-label="Study Tools"
-            className="inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shrink-0"
           >
             <Grid className="w-3.5 h-3.5 text-indigo-600" />
             <span className="hidden lg:inline leading-tight text-left">Study Tools</span>
@@ -210,7 +213,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onToggleDarkMode}
             aria-label="Toggle Theme"
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-all cursor-pointer shrink-0"
             title="Toggle Theme"
           >
             {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
@@ -286,11 +289,21 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenVoiceTutor}
             aria-label="Voice Tutor"
-            className="inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/70 hover:bg-indigo-100 text-xs font-extrabold text-indigo-700 dark:text-indigo-300 transition-all cursor-pointer shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/70 hover:bg-indigo-100 text-xs font-extrabold text-indigo-700 dark:text-indigo-300 transition-all cursor-pointer shrink-0"
             title="Open Live Classroom Voice JEE Tutor"
           >
             <Mic className="w-3.5 h-3.5 text-indigo-600" />
             <span className="hidden lg:inline">Voice Tutor</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label="Open Mobile Study Menu"
+            aria-expanded={mobileMenuOpen}
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer shrink-0"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
 
           <button
@@ -304,6 +317,79 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           </button>
         </div>
       </header>
+
+      {/* MOBILE (<768px) HAMBURGER DRAWER FOR SECONDARY CONTROLS */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl p-4 space-y-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenProModal();
+            }}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 dark:bg-indigo-950/60 dark:border-indigo-800 text-xs font-extrabold text-indigo-700 dark:text-indigo-300 cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>
+                {subscriptionTier === 'institute'
+                  ? 'Institute Seat'
+                  : subscriptionTier === 'pro'
+                  ? 'Pro Aspirant'
+                  : `Free • ${Math.min(5, materials.length)}/5 Scans`}
+              </span>
+            </span>
+            <span>Plans →</span>
+          </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenStudyTools();
+              }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+            >
+              <Grid className="w-4 h-4 text-indigo-600" />
+              <span>Study Tools</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onToggleFocusTimer();
+              }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+            >
+              <Clock className="w-4 h-4 text-indigo-600" />
+              <span>Pomodoro {focusClockLabel}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenVoiceTutor();
+              }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 text-xs font-extrabold text-indigo-700 cursor-pointer"
+            >
+              <Mic className="w-4 h-4 text-indigo-600" />
+              <span>Voice Tutor</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onToggleNotifications();
+              }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+            >
+              <Bell className="w-4 h-4 text-slate-600" />
+              <span>Alerts ({materials.length})</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* FULL-DESKTOP SHELL (>=1024px): SIDEBAR + 100% FLUID STAGE */}
       <div className="flex min-h-[calc(100vh-4rem)] w-full">
@@ -449,7 +535,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 w-full pb-24 lg:pb-12">{children}</main>
+        <main className="flex-1 min-w-0 w-full pb-24 lg:pb-20">{children}</main>
       </div>
 
       {/* MOBILE & TABLET (<1024px) PERMANENT 5-TAB BOTTOM NAVIGATION BAR (NO COLLAPSIBLE SIDEBAR) */}
@@ -573,7 +659,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
       )}
 
       {toastMessage && (
-        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-slate-700">
+        <div className="fixed bottom-28 md:bottom-14 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-auto max-w-md px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-slate-700">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
