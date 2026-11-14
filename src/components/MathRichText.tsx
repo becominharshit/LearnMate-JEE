@@ -16,7 +16,6 @@ interface MathRichTextProps {
  * Normalizes LaTeX delimiters:
  * - Converts \[ ... \] into $$ ... $$
  * - Converts \( ... \) into $ ... $
- * - Normalizes plain -> in chemical equations inside math blocks to \rightarrow
  */
 export function normalizeLatexDelimiters(input: string): string {
   if (!input) return '';
@@ -58,8 +57,8 @@ export const MathRichText: React.FC<MathRichTextProps> = ({
     );
   }
 
-  // Use react-markdown + remark-math + remark-gfm + rehype-katex for full multi-line markdown/tables/lists/math
-  if (!inline && (normalized.includes('\n') || normalized.includes('|') || normalized.includes('###'))) {
+  // Always run full markdown + remark-math + rehype-katex for non-inline blocks (prevents raw * leakage around $...$)
+  if (!inline) {
     return (
       <div className={`leading-relaxed space-y-1.5 ${className}`}>
         <ReactMarkdown
@@ -71,12 +70,12 @@ export const MathRichText: React.FC<MathRichTextProps> = ({
           components={{
             p: ({ children }) => <p className="leading-relaxed">{children}</p>,
             strong: ({ children }) => (
-              <strong className="font-bold text-slate-900 dark:text-white bg-amber-100/70 dark:bg-amber-900/40 px-1 py-0.5 rounded">
+              <strong className="font-semibold text-[#1C1917] dark:text-[#F5F0E6] bg-[#D4653B]/10 px-1 py-0.5 rounded">
                 {children}
               </strong>
             ),
             em: ({ children }) => (
-              <em className="italic font-semibold text-indigo-700 dark:text-indigo-300 underline decoration-indigo-300/70 underline-offset-2">
+              <em className="italic font-medium text-[#D4653B] dark:text-[#E07348] underline decoration-[#D4653B]/40 underline-offset-2">
                 {children}
               </em>
             ),
@@ -90,37 +89,38 @@ export const MathRichText: React.FC<MathRichTextProps> = ({
     );
   }
 
-  // Fast inline / single-line tokenizer with KaTeX rendering for stems, options, flashcards, and formulas
-  const tokens = normalized.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
+  // Inline markdown + math mode (handles bold/italic wrapping $...$ cleanly via ReactMarkdown inline paragraphs)
+  if (normalized.includes('*')) {
+    return (
+      <span className={`leading-relaxed ${className}`}>
+        <ReactMarkdown
+          remarkPlugins={[remarkMath, remarkGfm]}
+          rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: false, trust: false }]]}
+          urlTransform={(url) =>
+            /^https?:\/\//i.test(url) || url.startsWith('#') || url.startsWith('/') ? url : ''
+          }
+          components={{
+            p: ({ children }) => <span>{children}</span>,
+            strong: ({ children }) => (
+              <strong className="font-semibold text-[#1C1917] dark:text-[#F5F0E6] bg-[#D4653B]/10 px-1 py-0.5 rounded">
+                {children}
+              </strong>
+            ),
+            em: ({ children }) => (
+              <em className="italic font-medium text-[#D4653B] dark:text-[#E07348] underline decoration-[#D4653B]/40 underline-offset-2">
+                {children}
+              </em>
+            ),
+          }}
+        >
+          {normalized}
+        </ReactMarkdown>
+      </span>
+    );
+  }
 
-  const renderMarkdownFormatting = (text: string, keyPrefix: string) => {
-    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*\n]+\*)/g);
-    return parts.map((part, idx) => {
-      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-        const inner = part.slice(2, -2);
-        return (
-          <strong
-            key={`${keyPrefix}-b-${idx}`}
-            className="font-bold text-slate-900 dark:text-white bg-amber-100/70 dark:bg-amber-900/40 px-1 py-0.5 rounded"
-          >
-            {inner}
-          </strong>
-        );
-      }
-      if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
-        const inner = part.slice(1, -1);
-        return (
-          <em
-            key={`${keyPrefix}-i-${idx}`}
-            className="italic font-semibold text-indigo-700 dark:text-indigo-300 underline decoration-indigo-300/70 underline-offset-2"
-          >
-            {inner}
-          </em>
-        );
-      }
-      return <React.Fragment key={`${keyPrefix}-t-${idx}`}>{part}</React.Fragment>;
-    });
-  };
+  // Fast pure-inline KaTeX tokenizer when no asterisks are present
+  const tokens = normalized.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
 
   return (
     <span className={`leading-relaxed ${className}`}>
@@ -148,7 +148,7 @@ export const MathRichText: React.FC<MathRichTextProps> = ({
             />
           );
         }
-        return <React.Fragment key={i}>{renderMarkdownFormatting(token, `seg-${i}`)}</React.Fragment>;
+        return <React.Fragment key={i}>{token}</React.Fragment>;
       })}
     </span>
   );

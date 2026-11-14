@@ -14,11 +14,10 @@ import {
   Lock,
   ArrowLeft,
   Compass,
-  Grid,
-  Headphones,
 } from 'lucide-react';
 import { signInWithGoogle, emailSignIn, emailSignUp, resetPassword } from '../firebase';
 import { apiFetch } from '../config/apiConfig';
+import { BrandLogo } from './BrandLogo';
 import {
   getDaysToJeeMain2027Session1,
   GLOBAL_PPP_PRICING,
@@ -84,165 +83,150 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#0F172A] flex flex-col relative">
-      {/* Top Bar matching Screenshot 13 & 14 */}
-      <header className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#4F46E5] flex items-center justify-center text-white shadow-sm">
-            <BookOpen className="w-5 h-5" />
-          </div>
-          <span className="font-display font-bold text-xl tracking-tight text-slate-900">
-            LearnMate
-          </span>
-          <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[#EEF2FF] text-[#4F46E5] tracking-wide">
-            JEE
-          </span>
-        </div>
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#09090B] text-[#1C1917] dark:text-[#F5F0E6] flex flex-col relative">
+      {/* Top Bar */}
+      <header className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-[#E7E2DA] dark:border-white/[0.08]">
+        <BrandLogo className="w-8 h-7" showWordmark badgeText="JEE" />
 
         <div className="flex md:hidden items-center gap-2">
           <button
             type="button"
             onClick={() => onOpenAuth('signin')}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-900 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] text-xs font-medium cursor-pointer"
           >
             Sign in
           </button>
         </div>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-          <a href="#how-it-works" className="hover:text-slate-900 transition-colors">
-            How it works
+        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#57534E] dark:text-[#A1A1AA]">
+          <a href="#how-it-works" className="hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150">
+            Workflow
           </a>
-          <a href="#try-question" className="hover:text-slate-900 transition-colors">
-            Try a question
+          <a href="#try-question" className="hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150">
+            Try Doubt
           </a>
-          <a href="#faq" className="hover:text-slate-900 transition-colors">
+          <a href="#faq" className="hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150">
             FAQ
           </a>
           <button
             type="button"
             onClick={() => onOpenAuth('signin')}
-            className="font-semibold text-slate-900 hover:text-[#4F46E5] transition-colors cursor-pointer"
+            className="font-medium text-[#1C1917] dark:text-[#F5F0E6] hover:text-[#D4653B] dark:hover:text-[#E07348] transition-colors cursor-pointer"
           >
             Sign in
           </button>
           <button
             type="button"
             onClick={() => onOpenAuth('signup')}
-            className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-sm flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+            className="btn-terracotta px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-pointer"
           >
-            <span>Create free account</span>
+            <span>Get Started</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </nav>
       </header>
 
-      {/* Hero Section matching Screenshot 13 */}
+      {/* Hero Section */}
       <main className="flex-1">
-        <section className="max-w-[1280px] mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16 sm:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-center">
+        <section className="max-w-[1280px] mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-center">
           <div className="lg:col-span-7 space-y-6">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2FF] text-[#4F46E5] text-xs font-semibold border border-indigo-100">
-                <Sparkles className="w-3.5 h-3.5" />
-                JEE Main 2027 · Session 1
-              </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-medium border border-slate-200">
-                {daysToJee2027} days to JEE Main Session 1
-              </span>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#57534E] dark:text-[#A1A1AA]">
+              <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
+              <span>JEE Main 2027 · Session 1</span>
+              <span>·</span>
+              <span className="tabular-nums">{daysToJee2027}d left</span>
             </div>
 
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-[54px] leading-[1.1] tracking-tight text-slate-900">
-              Your JEE notes, turned into a tutor that{' '}
-              <span className="text-[#4F46E5]">explains, quizzes and revises.</span>
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[54px] leading-[1.08] tracking-[-0.03em] text-[#1C1917] dark:text-[#F5F0E6]">
+              Your JEE notes, turned into an active study system.
             </h1>
 
-            <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl">
-              Bring your own chapter. Learn it step by step in English, Hinglish, or Hindi, check yourself
-              with JEE-style questions, then revise only what you keep getting wrong.
+            <p className="text-[#57534E] dark:text-[#A1A1AA] text-base sm:text-lg leading-relaxed max-w-xl">
+              Upload chapters in English, Hinglish, or Hindi. Drill NTA CBT papers and review only what you miss.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+            <div className="flex flex-wrap items-center gap-3.5 pt-1">
               <button
                 type="button"
                 onClick={() => onOpenAuth('signup')}
-                className="px-6 py-3.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-sm flex items-center gap-2.5 shadow-sm transition-colors cursor-pointer"
+                className="btn-terracotta px-6 py-3 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-pointer"
               >
                 <span>Create free account</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs">
-                <label htmlFor="landing-currency-select" className="font-semibold text-slate-600">
-                  Global PPP:
+              <div className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] text-xs">
+                <label htmlFor="landing-currency-select" className="text-[#57534E] dark:text-[#A1A1AA] font-medium">
+                  PPP
                 </label>
                 <select
                   id="landing-currency-select"
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
-                  className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
+                  className="bg-transparent font-mono font-semibold text-[#1C1917] dark:text-[#F5F0E6] focus:outline-none cursor-pointer"
                 >
                   {(Object.keys(GLOBAL_PPP_PRICING) as SupportedCurrency[]).map((code) => (
-                    <option key={code} value={code}>
+                    <option key={code} value={code} className="bg-[#FFFFFF] dark:bg-[#121214] text-[#1C1917] dark:text-[#F5F0E6]">
                       {code} ({GLOBAL_PPP_PRICING[code].symbol}
                       {GLOBAL_PPP_PRICING[code].proMonthly}/mo)
                     </option>
                   ))}
                 </select>
-                <span className="text-slate-500 hidden sm:inline">
+                <span className="text-[#57534E] dark:text-[#A1A1AA] font-mono hidden sm:inline">
                   Pro {activePricing.symbol}
                   {activePricing.proMonthly}/mo
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-slate-500 pt-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Free starter tier included. No ads. Your material stays private to your account.</span>
+            <div className="flex items-center gap-2 text-xs text-[#57534E] dark:text-[#A1A1AA]">
+              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Free tier included · Private per-account library</span>
             </div>
           </div>
 
-          {/* Interactive Sample Card on Right (Conditional Probability) */}
-          <div className="lg:col-span-5 relative pb-4">
-            <div className="rounded-2xl bg-white border border-slate-200/90 shadow-lg p-6 pb-9 space-y-4">
+          {/* Interactive Sample Card */}
+          <div className="lg:col-span-5 relative pb-6">
+            <div className="rounded-2xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] p-6 pb-9 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#4F46E5]">
-                  <span>✎ Conditional probability</span>
-                </div>
-                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-medium">
+                <span className="text-xs font-medium text-[#1C1917] dark:text-[#F5F0E6]">
+                  Conditional probability
+                </span>
+                <span className="font-mono text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
                   Page 1
                 </span>
               </div>
 
-              <p className="text-sm text-slate-700 leading-relaxed">
+              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA] leading-relaxed">
                 {sampleLang === 'English'
-                  ? 'If B has already happened, how likely is A? The sample space shrinks from every outcome to just B.'
+                  ? 'If B has already happened, how likely is A? The sample space shrinks to B.'
                   : sampleLang === 'Hindi'
-                  ? 'यदि घटना B पहले ही घटित हो चुकी है, तो घटना A के होने की प्रायिकता क्या होगी? प्रतिदर्श समष्टि सिकुड़कर केवल B रह जाती है।'
-                  : 'Agar event B pehle hi ho chuka hai, toh A hone ki probability kya hogi? Sample space shrink hokar sirf B reh jaata hai.'}
+                  ? 'यदि घटना B पहले ही घटित हो चुकी है, तो घटना A के होने की प्रायिकता क्या होगी? प्रतिदर्श समष्टि केवल B रह जाती है।'
+                  : 'Agar event B pehle hi ho chuka hai, toh A hone ki probability kya hogi? Sample space sirf B reh jaata hai.'}
               </p>
 
-              <div className="px-4 py-3.5 rounded-xl bg-[#EEF2FF]/70 border border-indigo-100 font-mono text-sm font-semibold text-[#4F46E5]">
+              <div className="px-4 py-3.5 rounded-xl bg-[#F3EFEA] dark:bg-[#1A1A1D] border border-[#E7E2DA] dark:border-white/[0.08] font-mono text-sm font-semibold text-[#1C1917] dark:text-[#F5F0E6]">
                 P(A | B) = P(A ∩ B) / P(B)
               </div>
 
-              <div className="space-y-2 text-xs text-slate-600">
+              <div className="space-y-2 text-xs text-[#57534E] dark:text-[#A1A1AA]">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>
                     {sampleLang === 'English'
-                      ? 'Division by the condition, not by P(A).'
+                      ? 'Divide by condition P(B), not P(A).'
                       : sampleLang === 'Hindi'
                       ? 'हमेशा दी गई शर्त P(B) से भाग दें, P(A) से नहीं।'
                       : 'Hamesha given condition P(B) se divide karein, P(A) se nahi.'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>
                     {sampleLang === 'English'
-                      ? 'P(A | B) and P(B | A) are different.'
+                      ? 'P(A | B) and P(B | A) differ.'
                       : sampleLang === 'Hindi'
                       ? 'P(A | B) और P(B | A) का मान अलग होता है।'
-                      : 'P(A | B) aur P(B | A) bilkul alag hote hain.'}
+                      : 'P(A | B) aur P(B | A) alag hote hain.'}
                   </span>
                 </div>
               </div>
@@ -251,30 +235,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
                 <button
                   type="button"
                   onClick={() => onOpenAuth('signup')}
-                  className="text-xs font-semibold text-[#4F46E5] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-medium text-[#D4653B] dark:text-[#E07348] hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Open the full sample chapter</span>
-                  <span>›</span>
+                  <span>Open sample chapter</span>
+                  <span>→</span>
                 </button>
               </div>
             </div>
 
-            {/* Floating English / Hinglish / Hindi Toggle */}
-            <div className="mt-4 sm:mt-0 sm:absolute sm:-bottom-2 sm:-left-6 bg-white border border-slate-200 shadow-md rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                <Languages className="w-4 h-4" />
-              </div>
+            {/* Language Switcher */}
+            <div className="mt-4 sm:mt-0 sm:absolute sm:-bottom-1 sm:-left-4 bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] rounded-xl px-3 py-2 flex items-center gap-2 shadow-sm">
+              <Languages className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
               <div className="flex items-center gap-1 text-xs font-medium">
                 {(['English', 'Hinglish', 'Hindi'] as const).map((lang, i) => (
                   <React.Fragment key={lang}>
-                    {i > 0 && <span className="text-slate-300">/</span>}
+                    {i > 0 && <span className="text-[#E7E2DA] dark:text-zinc-700">/</span>}
                     <button
                       type="button"
                       onClick={() => setSampleLang(lang)}
-                      className={`px-2 py-0.5 rounded cursor-pointer ${
+                      className={`px-2 py-0.5 rounded cursor-pointer transition-colors duration-150 ${
                         sampleLang === lang
-                          ? 'font-bold text-slate-900 bg-slate-100'
-                          : 'text-slate-500 hover:text-slate-800'
+                          ? 'font-semibold text-[#D4653B] dark:text-[#E07348] bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12]'
+                          : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
                       }`}
                     >
                       {lang}
@@ -286,51 +268,48 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
           </div>
         </section>
 
-        {/* How It Works & Try a Question Section */}
-        <section id="how-it-works" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 border-t border-slate-100">
-          <p className="text-[11px] font-bold tracking-widest uppercase text-[#4F46E5] mb-2">
-            BUILT FOR JEE MAIN & ADVANCED
+        {/* Workflow */}
+        <section id="how-it-works" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 border-t border-[#E7E2DA] dark:border-white/[0.08]">
+          <p className="text-[11px] font-mono uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA] mb-4">
+            JEE Main &amp; Advanced Workflow
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2">
-              <h3 className="font-display font-bold text-base text-slate-900">
-                01. Bring your own material
+            <div className="p-6 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+              <h3 className="font-display font-semibold text-base">
+                01. Bring your material
               </h3>
-              <p className="text-sm text-slate-600">
-                Upload PDFs up to 60 pages, handwritten coaching notes photos, YouTube lectures, or
-                import directly from Google Drive and Google Docs.
+              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA]">
+                PDFs, handwritten scans, or YouTube lectures.
               </p>
             </div>
-            <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2">
-              <h3 className="font-display font-bold text-base text-slate-900">
-                02. Visualise with 3D, SVG & Video
+            <div className="p-6 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+              <h3 className="font-display font-semibold text-base">
+                02. 3D, SVG &amp; Video Studio
               </h3>
-              <p className="text-sm text-slate-600">
-                Turn tricky Free-Body Diagrams, VSEPR complexes, and ray optics into interactive 2D
-                SVGs, Three.js 3D models, and Omni Flash animated lessons.
+              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA]">
+                Free-body diagrams, VSEPR models, and concept visuals.
               </p>
             </div>
-            <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2">
-              <h3 className="font-display font-bold text-base text-slate-900">
-                03. NTA CBT Mocks & Mistake DNA
+            <div className="p-6 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+              <h3 className="font-display font-semibold text-base">
+                03. NTA CBT &amp; Mistake DNA
               </h3>
-              <p className="text-sm text-slate-600">
-                Practice in an authentic NTA CBT exam interface, track focus events, and export
-                revision Mind Maps to Google Slides and Keep.
+              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA]">
+                75-Q CBT simulator, spaced repetition, and formula sheets.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Try a Question Interactive Bar */}
+        {/* Try a Question */}
         <section id="try-question" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-          <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="p-6 rounded-2xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h2 className="font-display font-bold text-lg text-slate-900">
-                Try asking a quick JEE concept question
+              <h2 className="font-display font-semibold text-lg">
+                Try a JEE concept question
               </h2>
-              <p className="text-xs text-slate-500">
-                Powered by low-latency Gemini 3.5 Flash Lite in {sampleLang}.
+              <p className="text-xs text-[#57534E] dark:text-[#A1A1AA]">
+                Instant answer in {sampleLang}.
               </p>
             </div>
             <form onSubmit={handleTryQuestion} className="w-full md:w-auto flex-1 max-w-xl flex gap-2">
@@ -338,55 +317,53 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
                 type="text"
                 value={quickQuestion}
                 onChange={(e) => setQuickQuestion(e.target.value)}
-                placeholder="e.g., Why is Zn not considered a transition element?"
-                className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:border-[#4F46E5]"
+                placeholder="Why is Zn not considered a transition element?"
+                className="flex-1 px-3.5 py-2 rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] border border-[#E7E2DA] dark:border-white/[0.08] text-sm text-[#1C1917] dark:text-[#F5F0E6] placeholder:text-[#57534E] dark:placeholder:text-[#A1A1AA] focus:outline-none focus:border-[#D4653B]"
               />
               <button
                 type="submit"
                 disabled={quickLoading}
-                className="px-4 py-2.5 rounded-xl bg-[#4F46E5] text-white text-sm font-semibold hover:bg-[#4338CA] transition-colors cursor-pointer"
+                className="btn-terracotta px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer"
               >
-                {quickLoading ? 'Thinking...' : 'Ask'}
+                {quickLoading ? '...' : 'Ask'}
               </button>
             </form>
           </div>
           {quickAnswer && (
-            <div className="mt-3 p-4 rounded-xl bg-indigo-50/60 border border-indigo-100 text-sm text-slate-800 whitespace-pre-wrap">
+            <div className="mt-3 p-4 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] text-sm text-[#57534E] dark:text-[#A1A1AA] whitespace-pre-wrap">
               {quickAnswer}
             </div>
           )}
         </section>
 
-        {/* FAQ Section matching Screenshot 14 */}
+        {/* FAQ */}
         <section id="faq" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5">
-            <h2 className="font-display font-bold text-2xl text-slate-900">
-              Frequently asked questions
-            </h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Everything you need to know about privacy, AI capabilities, and JEE exam preparation.
+            <h2 className="font-display font-semibold text-2xl">FAQ</h2>
+            <p className="text-sm text-[#57534E] dark:text-[#A1A1AA] mt-1">
+              Privacy, models, and exam accuracy.
             </p>
           </div>
-          <div className="lg:col-span-7 space-y-3">
+          <div className="lg:col-span-7 space-y-2.5">
             {faqs.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-xl border border-slate-200 bg-white overflow-hidden"
+                className="rounded-xl border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] overflow-hidden"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full px-5 py-4 text-left flex items-center justify-between font-semibold text-sm text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+                  className="w-full px-5 py-4 text-left flex items-center justify-between font-medium text-sm hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] transition-colors duration-150 cursor-pointer"
                 >
                   <span>{item.q}</span>
                   {openFaq === idx ? (
-                    <Minus className="w-4 h-4 text-[#4F46E5]" />
+                    <Minus className="w-4 h-4 text-[#57534E] dark:text-[#A1A1AA] shrink-0" />
                   ) : (
-                    <Plus className="w-4 h-4 text-[#4F46E5]" />
+                    <Plus className="w-4 h-4 text-[#57534E] dark:text-[#A1A1AA] shrink-0" />
                   )}
                 </button>
                 {openFaq === idx && (
-                  <div className="px-5 pb-4 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                  <div className="px-5 pb-4 text-sm text-[#57534E] dark:text-[#A1A1AA] leading-relaxed border-t border-[#E7E2DA] dark:border-white/[0.08] pt-3">
                     {item.a}
                   </div>
                 )}
@@ -395,23 +372,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
           </div>
         </section>
 
-        {/* Bottom Purple Conversion Banner matching Screenshot 14 */}
-        <section className="w-full bg-[#F8FAFC] py-16 px-6 border-t border-slate-100">
-          <div className="max-w-[920px] mx-auto rounded-3xl bg-gradient-to-r from-[#3B28CC] via-[#4F46E5] to-[#6D28D9] p-8 sm:p-12 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-            <div className="space-y-3 max-w-lg">
-              <h2 className="font-display font-extrabold text-2xl sm:text-3xl leading-tight">
-                Start with one chapter you already have.
+        {/* Minimalist Conversion Section */}
+        <section className="w-full py-14 px-6 border-t border-[#E7E2DA] dark:border-white/[0.08]">
+          <div className="max-w-[920px] mx-auto rounded-2xl bg-[#121214] obsidian-sheen border border-white/[0.08] p-8 sm:p-12 text-[#F5F0E6] flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div className="space-y-2.5 max-w-lg">
+              <h2 className="font-display font-bold text-2xl sm:text-3xl leading-tight">
+                Start with one chapter.
               </h2>
-              <p className="text-indigo-100 text-sm leading-relaxed">
-                Create a free account, add your material and ask your first doubt. Your notes,
-                practice and progress stay private to your own account.
+              <p className="text-[#A1A1AA] text-sm leading-relaxed">
+                Upload notes, drill CBT mocks, and keep your workspace private.
               </p>
             </div>
             <div className="flex flex-col gap-2.5 shrink-0 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => onOpenAuth('signup')}
-                className="px-6 py-3 rounded-xl bg-white text-[#4F46E5] font-bold text-sm flex items-center justify-center gap-2 shadow-sm hover:bg-indigo-50 transition-colors cursor-pointer"
+                className="btn-terracotta px-6 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Create free account</span>
                 <ArrowRight className="w-4 h-4" />
@@ -419,91 +395,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
               <button
                 type="button"
                 onClick={() => onOpenAuth('signin')}
-                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/25 transition-colors cursor-pointer"
+                className="px-6 py-2 rounded-lg bg-[#1A1A1D] hover:bg-[#222226] text-[#F5F0E6] font-medium text-xs border border-white/[0.08] transition-colors duration-150 cursor-pointer"
               >
-                Sign in to existing account
+                Sign in
               </button>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Floating Right Quick Dock from Screenshot 13 & 14 */}
-      <div className="hidden lg:flex fixed right-3 top-1/2 -translate-y-1/2 flex-col gap-2 z-30">
-        <button
-          type="button"
-          onClick={() => onOpenAuth('signup')}
-          title="Study Workbench"
-          className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md hover:bg-[#4F46E5] transition-colors cursor-pointer"
-        >
-          <BookOpen className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => onOpenAuth('signup')}
-          title="Voice Tutor"
-          className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md hover:bg-[#4F46E5] transition-colors cursor-pointer"
-        >
-          <Headphones className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => onOpenAuth('signup')}
-          title="Study Tools"
-          className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md hover:bg-[#4F46E5] transition-colors cursor-pointer"
-        >
-          <Grid className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Footer matching Screenshot 14 with interactive Legal & Compliance Center triggers */}
-      <footer className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-10 text-xs text-slate-500 space-y-4">
-        <div className="flex flex-wrap items-center gap-6 font-medium text-slate-700">
-          <span className="font-display font-bold text-slate-900">LearnMate</span>
-          <button
-            type="button"
-            onClick={() => onOpenLegal('privacy')}
-            className="hover:text-[#4F46E5] transition-colors cursor-pointer"
-          >
-            Privacy Policy
+      {/* Footer */}
+      <footer className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-10 text-xs text-[#57534E] dark:text-[#A1A1AA] space-y-4 border-t border-[#E7E2DA] dark:border-white/[0.08]">
+        <div className="flex flex-wrap items-center gap-6 font-medium text-[#1C1917] dark:text-[#F5F0E6]">
+          <BrandLogo className="w-6 h-5" showWordmark />
+          <button type="button" onClick={() => onOpenLegal('privacy')} className="hover:underline cursor-pointer">
+            Privacy
           </button>
-          <button
-            type="button"
-            onClick={() => onOpenLegal('terms')}
-            className="hover:text-[#4F46E5] transition-colors cursor-pointer"
-          >
-            Terms &amp; Conditions
+          <button type="button" onClick={() => onOpenLegal('terms')} className="hover:underline cursor-pointer">
+            Terms
           </button>
-          <button
-            type="button"
-            onClick={() => onOpenLegal('ai-safety')}
-            className="hover:text-[#4F46E5] transition-colors cursor-pointer"
-          >
-            AI &amp; Safety Policy
+          <button type="button" onClick={() => onOpenLegal('ai-safety')} className="hover:underline cursor-pointer">
+            AI Safety
           </button>
-          <button
-            type="button"
-            onClick={() => onOpenLegal('google-api')}
-            className="hover:text-[#4F46E5] transition-colors cursor-pointer"
-          >
-            Google API Disclosure
+          <button type="button" onClick={() => onOpenLegal('google-api')} className="hover:underline cursor-pointer">
+            Google API
           </button>
-          <button
-            type="button"
-            onClick={() => onOpenLegal('contact')}
-            className="hover:text-[#4F46E5] transition-colors cursor-pointer"
-          >
-            Contact &amp; Report Answer
+          <button type="button" onClick={() => onOpenLegal('contact')} className="hover:underline cursor-pointer">
+            Contact &amp; Report
           </button>
         </div>
-        <p className="leading-relaxed max-w-3xl text-[11px] text-slate-400">
-          LearnMate is an independent study tool for JEE aspirants. It is not affiliated with the
-          National Testing Agency (NTA), IITs or any coaching institute. AI answers can make
-          mistakes; always verify important steps against your textbook or teacher. NTA bans
-          calculators and all electronic devices in the exam hall.
+        <p className="leading-relaxed max-w-3xl text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
+          Independent JEE study tool. Not affiliated with NTA or IITs. Verify critical derivations against textbooks.
         </p>
-        <p className="text-[11px] text-slate-400">
-          © 2026 LearnMate · Built for JEE Main 2027 Session 1 · GDPR &amp; India DPDP Act 2023 Compliant
+        <p className="text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
+          © 2026 LearnMate · JEE Main 2027 Session 1 · GDPR &amp; India DPDP Act 2023 Compliant
         </p>
       </footer>
     </div>
@@ -558,13 +483,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         onAuthComplete();
       } else if (outcome.cancelled) {
         setErrorMsg(
-          'Google Sign-In window was closed before completing. Click "Continue with Google" to try again, or sign in with your email below.'
+          'Google Sign-In was closed. Retry or sign in with email.'
         );
       } else if (outcome.errorMessage) {
         setErrorMsg(outcome.errorMessage);
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Google Sign-In could not be completed. Please try again.');
+      setErrorMsg(err?.message || 'Google Sign-In failed.');
     } finally {
       setLoading(false);
     }
@@ -576,7 +501,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     setResetSent(false);
     const trimmed = resetEmail.trim();
     if (!EMAIL_PATTERN.test(trimmed)) {
-      setErrorMsg('Please enter a valid email address to receive your reset link.');
+      setErrorMsg('Enter a valid email address.');
       return;
     }
     setLoading(true);
@@ -584,7 +509,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       await resetPassword(trimmed);
       setResetSent(true);
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Unable to send password reset email. Please verify your email and retry.');
+      setErrorMsg(err?.message || 'Unable to send reset email.');
     } finally {
       setLoading(false);
     }
@@ -595,17 +520,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     setErrorMsg(null);
     const nextFieldErrors: typeof fieldErrors = {};
     if (mode === 'signup' && !name.trim()) {
-      nextFieldErrors.name = 'Please enter your full name.';
+      nextFieldErrors.name = 'Enter your name.';
     }
     if (!EMAIL_PATTERN.test(email.trim())) {
-      nextFieldErrors.email = 'Enter a valid email address.';
+      nextFieldErrors.email = 'Enter a valid email.';
     }
     if (password.length < 6) {
-      nextFieldErrors.password = 'Password must be at least 6 characters.';
+      nextFieldErrors.password = 'Minimum 6 characters.';
     }
     if (mode === 'signup' && isUnder18 && (!EMAIL_PATTERN.test(guardianEmail.trim()) || !guardianConsent)) {
       nextFieldErrors.guardian =
-        'Under India DPDP Act 2023 / GDPR, minors under 18 require a valid parent/guardian email and consent.';
+        'Under 18 requires guardian email and consent.';
     }
 
     setFieldErrors(nextFieldErrors);
@@ -615,7 +540,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           nextFieldErrors.email ||
           nextFieldErrors.password ||
           nextFieldErrors.guardian ||
-          'Please check the highlighted fields.'
+          'Check highlighted fields.'
       );
       return;
     }
@@ -644,7 +569,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     } catch (err: any) {
       setErrorMsg(
         err?.message ||
-          'Authentication failed. Ensure your credentials are correct or continue with Google.'
+          'Authentication failed. Check credentials or continue with Google.'
       );
     } finally {
       setLoading(false);
@@ -652,54 +577,38 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white text-slate-900">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#FAF8F5] dark:bg-[#09090B] text-[#1C1917] dark:text-[#F5F0E6]">
       {/* Left Brand Showcase Panel */}
-      <div className="lg:col-span-6 bg-gradient-to-br from-[#3730A3] via-[#4F46E5] to-[#6D28D9] text-white p-8 sm:p-14 flex flex-col justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-display font-bold text-xl">LearnMate</span>
-          <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-white/20 text-white">
-            JEE
-          </span>
-        </div>
+      <div className="lg:col-span-6 bg-[#09090B] obsidian-sheen border-r border-white/[0.08] text-[#F5F0E6] p-8 sm:p-14 flex flex-col justify-between">
+        <BrandLogo className="w-8 h-7" tone="dark-surface" showWordmark badgeText="JEE" />
 
         <div className="my-12 space-y-6 max-w-lg">
-          <h1 className="font-display font-extrabold text-3xl sm:text-4xl leading-tight">
-            Turn your own JEE notes into explanations, practice and revision.
+          <h1 className="font-display font-bold text-3xl sm:text-4xl leading-tight tracking-[-0.025em]">
+            Your JEE workspace, built around your notes.
           </h1>
 
-          <div className="space-y-4 text-sm text-indigo-100">
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                <BookOpen className="w-4 h-4" />
-              </div>
-              <span>Study from your own chapters, coaching modules and notes.</span>
+          <div className="space-y-3.5 text-sm text-[#A1A1AA]">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-4 h-4 text-[#E07348] shrink-0" />
+              <span>Chapter notes, scans, and 12h lecture transcripts.</span>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Languages className="w-4 h-4" />
-              </div>
-              <span>Step-by-step explanations in English, Hinglish, or Hindi.</span>
+            <div className="flex items-center gap-3">
+              <Languages className="w-4 h-4 text-[#E07348] shrink-0" />
+              <span>English, Hinglish, and Hindi study modes.</span>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Target className="w-4 h-4" />
-              </div>
-              <span>JEE-style practice and revision made from your material.</span>
+            <div className="flex items-center gap-3">
+              <Target className="w-4 h-4 text-[#E07348] shrink-0" />
+              <span>75-Q NTA CBT simulator &amp; SM-2 Mistake DNA.</span>
             </div>
           </div>
 
-          <div className="pt-2">
-            <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/15 border border-white/20 text-xs font-semibold">
-              {daysToJee2027} days to JEE Main 2027 Session 1
-            </span>
+          <div className="pt-1 font-mono text-xs text-[#A1A1AA]">
+            {daysToJee2027}d to JEE Main 2027 Session 1
           </div>
         </div>
 
-        <div className="text-xs text-indigo-200">
-          Private per-student encrypted workspace · Powered by Firebase Auth & Firestore
+        <div className="text-xs text-[#A1A1AA]">
+          Private per-student workspace · Firebase Auth &amp; Firestore
         </div>
       </div>
 
@@ -708,46 +617,46 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         <button
           type="button"
           onClick={onBackToLanding}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 mb-6 cursor-pointer w-fit"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-[#fafafa] mb-6 cursor-pointer w-fit"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to LearnMate</span>
+          <span>Back</span>
         </button>
 
         {resetMode ? (
           <div className="space-y-5">
             <div>
-              <h2 className="font-display font-bold text-2xl text-slate-900">
-                Reset your password
+              <h2 className="font-display font-semibold text-2xl">
+                Reset password
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Enter your registered email address and we will send a Firebase password reset link.
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                We&apos;ll email you a reset link.
               </p>
             </div>
 
             <form onSubmit={handlePasswordResetSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
                   <input
                     type="email"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#4F46E5]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-sm focus:outline-none focus:border-zinc-400"
                   />
                 </div>
               </div>
 
               {resetSent && (
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
-                  Password reset email sent to <strong>{resetEmail}</strong>! Check your inbox and spam folder.
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400">
+                  Reset email sent to <strong>{resetEmail}</strong>.
                 </div>
               )}
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
                   {errorMsg}
                 </div>
               )}
@@ -755,7 +664,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60"
+                className="w-full py-2.5 rounded-lg btn-terracotta font-semibold text-sm flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer disabled:opacity-60"
               >
                 <span>{loading ? 'Sending...' : 'Send Reset Link'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -769,18 +678,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 setResetSent(false);
                 setErrorMsg(null);
               }}
-              className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+              className="text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:underline cursor-pointer"
             >
               ← Back to Sign In
             </button>
           </div>
         ) : (
           <>
-            <h2 className="font-display font-bold text-2xl text-slate-900">
-              {mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
+            <h2 className="font-display font-semibold text-2xl">
+              {mode === 'signup' ? 'Create account' : 'Sign in'}
             </h2>
-            <p className="text-xs text-slate-500 mt-1 mb-6">
-              Your notes, practice and progress stay private to your account.
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 mb-6">
+              Private encrypted study workspace.
             </p>
 
             {/* Instant Password-less Google Sign-In Button */}
@@ -788,45 +697,33 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               type="button"
               disabled={loading}
               onClick={handleGoogleLogin}
-              className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-3 text-sm font-semibold text-slate-800 transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
+              className="w-full py-2.5 px-4 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#18181b] flex items-center justify-center gap-3 text-sm font-medium transition-colors duration-150 cursor-pointer disabled:opacity-60"
             >
               <svg className="w-4 h-4" viewBox="0 0 48 48">
-                <path
-                  fill="#EA4335"
-                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-                />
-                <path
-                  fill="#4285F4"
-                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-                />
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
               </svg>
               <span>Continue with Google</span>
             </button>
 
             <div className="relative my-6 flex items-center justify-center">
-              <div className="border-t border-slate-200 w-full" />
-              <span className="bg-white px-3 text-[11px] text-slate-400 whitespace-nowrap">
-                or use email
+              <div className="border-t border-zinc-200 dark:border-white/[0.07] w-full" />
+              <span className="bg-[#fafafa] dark:bg-[#09090b] px-3 text-[11px] text-zinc-400 whitespace-nowrap">
+                or email
               </span>
-              <div className="border-t border-slate-200 w-full" />
+              <div className="border-t border-zinc-200 dark:border-white/[0.07] w-full" />
             </div>
 
             <form onSubmit={handleEmailSubmit} noValidate className="space-y-4">
               {mode === 'signup' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Your name
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Name
                   </label>
                   <div className="relative">
-                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <UserIcon className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
                     <input
                       type="text"
                       value={name}
@@ -834,22 +731,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                         setName(e.target.value);
                         setFieldErrors((prev) => ({ ...prev, name: undefined }));
                       }}
-                      placeholder="e.g. Aarav Sharma"
-                      className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-sm focus:outline-none ${
-                        fieldErrors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#4F46E5]'
+                      placeholder="Aarav Sharma"
+                      className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111113] text-sm focus:outline-none ${
+                        fieldErrors.name ? 'border-red-500' : 'border-zinc-200 dark:border-white/[0.07] focus:border-zinc-400'
                       }`}
                     />
                   </div>
                   {fieldErrors.name && (
-                    <p className="mt-1 text-[11px] text-red-600">{fieldErrors.name}</p>
+                    <p className="mt-1 text-[11px] text-red-500">{fieldErrors.name}</p>
                   )}
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
                   <input
                     type="email"
                     value={email}
@@ -858,20 +755,20 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setFieldErrors((prev) => ({ ...prev, email: undefined }));
                     }}
                     placeholder="you@example.com"
-                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-sm focus:outline-none ${
-                      fieldErrors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#4F46E5]'
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111113] text-sm focus:outline-none ${
+                      fieldErrors.email ? 'border-red-500' : 'border-zinc-200 dark:border-white/[0.07] focus:border-zinc-400'
                     }`}
                   />
                 </div>
                 {fieldErrors.email && (
-                  <p className="mt-1 text-[11px] text-red-600">{fieldErrors.email}</p>
+                  <p className="mt-1 text-[11px] text-red-500">{fieldErrors.email}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Password</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
                   <input
                     type="password"
                     value={password}
@@ -879,14 +776,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setPassword(e.target.value);
                       setFieldErrors((prev) => ({ ...prev, password: undefined }));
                     }}
-                    placeholder="At least 6 characters"
-                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-sm focus:outline-none ${
-                      fieldErrors.password ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#4F46E5]'
+                    placeholder="Minimum 6 characters"
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111113] text-sm focus:outline-none ${
+                      fieldErrors.password ? 'border-red-500' : 'border-zinc-200 dark:border-white/[0.07] focus:border-zinc-400'
                     }`}
                   />
                 </div>
                 {fieldErrors.password && (
-                  <p className="mt-1 text-[11px] text-red-600">{fieldErrors.password}</p>
+                  <p className="mt-1 text-[11px] text-red-500">{fieldErrors.password}</p>
                 )}
                 {mode === 'signin' && (
                   <div className="mt-1.5 flex justify-end">
@@ -898,7 +795,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                         setResetSent(false);
                         setErrorMsg(null);
                       }}
-                      className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                      className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-[#fafafa] hover:underline cursor-pointer"
                     >
                       Forgot Password?
                     </button>
@@ -907,15 +804,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </div>
 
               {mode === 'signup' && (
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
-                  <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                <div className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2.5 text-xs">
+                  <label className="flex items-center gap-2 font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isUnder18}
                       onChange={(e) => setIsUnder18(e.target.checked)}
-                      className="rounded accent-indigo-600"
+                      className="rounded accent-zinc-900 dark:accent-[#fafafa]"
                     />
-                    <span>I am under 18 years old (parent / guardian consent required)</span>
+                    <span>Under 18 (guardian consent required)</span>
                   </label>
                   {isUnder18 && (
                     <div className="space-y-2 pl-1">
@@ -923,18 +820,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                         type="email"
                         value={guardianEmail}
                         onChange={(e) => setGuardianEmail(e.target.value)}
-                        placeholder="Parent / Guardian email address"
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-[#4F46E5]"
+                        placeholder="Parent / Guardian email"
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs bg-zinc-50 dark:bg-[#18181b] focus:outline-none"
                       />
-                      <label className="flex items-start gap-2 text-[11px] text-slate-600 cursor-pointer">
+                      <label className="flex items-start gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={guardianConsent}
                           onChange={(e) => setGuardianConsent(e.target.checked)}
-                          className="mt-0.5 rounded accent-indigo-600"
+                          className="mt-0.5 rounded accent-zinc-900 dark:accent-[#fafafa]"
                         />
                         <span>
-                          Parent / Guardian consents to private study workspace processing under India DPDP Act 2023 &amp; GDPR.
+                          Guardian consents under India DPDP Act 2023 &amp; GDPR.
                         </span>
                       </label>
                     </div>
@@ -943,7 +840,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               )}
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400">
                   {errorMsg}
                 </div>
               )}
@@ -951,17 +848,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60"
+                className="btn-terracotta w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 <ArrowRight className="w-4 h-4" />
                 <span>{mode === 'signup' ? 'Create account' : 'Sign in'}</span>
               </button>
             </form>
 
-            <p className="text-center text-xs text-slate-500 mt-5">
+            <p className="text-center text-xs text-[#57534E] dark:text-[#A1A1AA] mt-5">
               {mode === 'signup' ? (
                 <>
-                  Already have an account?{' '}
+                  Have an account?{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -969,14 +866,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setErrorMsg(null);
                       setFieldErrors({});
                     }}
-                    className="font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                    className="font-semibold text-[#D4653B] dark:text-[#E07348] hover:underline cursor-pointer"
                   >
                     Sign in
                   </button>
                 </>
               ) : (
                 <>
-                  New to LearnMate JEE?{' '}
+                  New to LearnMate?{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -984,7 +881,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setErrorMsg(null);
                       setFieldErrors({});
                     }}
-                    className="font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                    className="font-semibold text-[#D4653B] dark:text-[#E07348] hover:underline cursor-pointer"
                   >
                     Create account
                   </button>
@@ -993,26 +890,26 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             </p>
 
             {onTryDemo && (
-              <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
+              <div className="mt-5 pt-4 border-t border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
                 <button
                   type="button"
                   onClick={onTryDemo}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] text-xs font-medium flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer"
                 >
-                  <Compass className="w-3.5 h-3.5 text-[#4F46E5]" />
+                  <Compass className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
                   <span>Try Demo Without Account</span>
                 </button>
-                <p className="text-[11px] text-center text-slate-400">
-                  Local demo preview only — cloud sync, saved library, and live AI quotas require Google or Email sign-in.
+                <p className="text-[11px] text-center text-[#57534E] dark:text-[#A1A1AA]">
+                  Local preview only.
                 </p>
               </div>
             )}
           </>
         )}
 
-        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-500">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Each student’s material and results are private to their own account.</span>
+        <div className="mt-6 pt-4 border-t border-[#E7E2DA] dark:border-white/[0.08] flex items-center gap-2 text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
+          <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>Private to your account.</span>
         </div>
       </div>
     </div>

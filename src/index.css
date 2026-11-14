@@ -3,13 +3,40 @@
 
 @layer base {
   :root {
-    --font-display: 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-sans: 'DM Sans', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --bg-canvas: #FAF8F5;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #F3EFEA;
+    --bg-elevated-hover: #EAE4DC;
+    --border-subtle: #E7E2DA;
+    --text-primary: #1C1917;
+    --text-muted: #57534E;
+    --accent-primary: #D4653B;
+    --accent-hover: #C2562E;
+    --accent-highlight: #E07348;
+    --accent-soft: rgba(212, 101, 59, 0.10);
+    --font-display: 'Inter', 'Geist', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Inter', 'Geist', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+
+  .dark {
+    --bg-canvas: #09090B;
+    --bg-surface: #121214;
+    --bg-elevated: #1A1A1D;
+    --bg-elevated-hover: #222226;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --text-primary: #F5F0E6;
+    --text-muted: #A1A1AA;
+    --accent-primary: #D4653B;
+    --accent-hover: #E07348;
+    --accent-highlight: #E07348;
+    --accent-soft: rgba(212, 101, 59, 0.08);
   }
 
   body {
     font-family: var(--font-sans);
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
@@ -19,6 +46,7 @@
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 
   .font-mono, .tabular-nums {
@@ -27,7 +55,23 @@
   }
 }
 
-/* Prevent KaTeX FOIT blank flash (node_modules katex.min.css defaults to font-display: block) */
+/* Primary Terracotta CTA utility */
+.btn-terracotta {
+  background: linear-gradient(135deg, #D4653B 0%, #E07348 100%);
+  color: #FAF8F5;
+  transition: filter 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.btn-terracotta:hover:not(:disabled) {
+  background: linear-gradient(135deg, #C2562E 0%, #D4653B 100%);
+}
+
+/* Subtle top-edge sheen for dark hero surfaces (no neon glow) */
+.obsidian-sheen {
+  background-image: linear-gradient(180deg, rgba(245, 240, 230, 0.025) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+/* Prevent KaTeX FOIT blank flash */
 @font-face {
   font-family: 'KaTeX_Main';
   font-style: normal;
@@ -79,33 +123,33 @@
 .paper-ruled {
   background-color: #fffef7;
   background-image:
-    linear-gradient(90deg, transparent 44px, rgba(239, 68, 68, 0.35) 44px, rgba(239, 68, 68, 0.35) 46px, transparent 46px),
-    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(99, 102, 241, 0.16) 29px, rgba(99, 102, 241, 0.16) 30px);
+    linear-gradient(90deg, transparent 44px, rgba(212, 101, 59, 0.30) 44px, rgba(212, 101, 59, 0.30) 45px, transparent 45px),
+    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(87, 83, 78, 0.14) 29px, rgba(87, 83, 78, 0.14) 30px);
   padding-left: 58px !important;
 }
 
 .dark .paper-ruled {
-  background-color: #0f172a;
+  background-color: #121214;
   background-image:
-    linear-gradient(90deg, transparent 44px, rgba(244, 63, 94, 0.35) 44px, rgba(244, 63, 94, 0.35) 46px, transparent 46px),
-    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(148, 163, 184, 0.14) 29px, rgba(148, 163, 184, 0.14) 30px);
+    linear-gradient(90deg, transparent 44px, rgba(212, 101, 59, 0.32) 44px, rgba(212, 101, 59, 0.32) 45px, transparent 45px),
+    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(255, 255, 255, 0.05) 29px, rgba(255, 255, 255, 0.05) 30px);
   padding-left: 58px !important;
 }
 
 .paper-grid {
-  background-color: #fcfcfd;
+  background-color: #FAF8F5;
   background-size: 22px 22px;
   background-image:
-    linear-gradient(to right, rgba(99, 102, 241, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+    linear-gradient(to right, rgba(87, 83, 78, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(87, 83, 78, 0.1) 1px, transparent 1px);
 }
 
 .dark .paper-grid {
-  background-color: #0f172a;
+  background-color: #121214;
   background-size: 22px 22px;
   background-image:
-    linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
 .paper-plain {
@@ -113,48 +157,69 @@
 }
 
 .dark .paper-plain {
-  background-color: #0f172a;
+  background-color: #121214;
 }
 
-/* Global Dark Mode Alignment Guarantees */
-.dark .bg-white {
-  background-color: #0f172a;
+/* Global Dark Mode Semantic Fallbacks (Zero Purple/Navy Tint, Zero Bright White Glare) */
+.dark .bg-white,
+.dark .bg-white\/95,
+.dark .bg-white\/90 {
+  background-color: #121214;
 }
 
-.dark .bg-white\/95 {
-  background-color: rgba(15, 23, 42, 0.95);
+.dark .bg-slate-950 {
+  background-color: #09090B;
+}
+
+.dark .bg-slate-900,
+.dark .bg-slate-900\/95 {
+  background-color: #121214;
 }
 
 .dark .bg-slate-50,
 .dark .bg-slate-50\/50,
 .dark .bg-slate-50\/60,
-.dark .bg-slate-50\/70 {
-  background-color: rgba(30, 41, 59, 0.65);
-}
-
-.dark .bg-slate-100 {
-  background-color: #1e293b;
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/80,
+.dark .bg-slate-100,
+.dark .bg-slate-800,
+.dark .bg-slate-800\/80,
+.dark .bg-slate-800\/60,
+.dark .bg-slate-800\/50,
+.dark .bg-slate-800\/40 {
+  background-color: #1A1A1D;
 }
 
 .dark .border-slate-200,
 .dark .border-slate-200\/90,
 .dark .border-slate-200\/80,
-.dark .border-slate-100 {
-  border-color: #334155;
+.dark .border-slate-200\/60,
+.dark .border-slate-100,
+.dark .border-slate-300,
+.dark .border-slate-700,
+.dark .border-slate-800 {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .divide-slate-100 > :not(:last-child),
+.dark .divide-slate-200 > :not(:last-child),
+.dark .divide-slate-800 > :not(:last-child) {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .dark .text-slate-900,
 .dark .text-slate-800 {
-  color: #f8fafc;
+  color: #F5F0E6;
 }
 
 .dark .text-slate-700,
 .dark .text-slate-600 {
-  color: #cbd5e1;
+  color: #A1A1AA;
 }
 
-.dark .text-slate-500 {
-  color: #94a3b8;
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #71717A;
 }
 
 /* Custom subtle scrollbars for study panes */
@@ -168,10 +233,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(113, 113, 122, 0.35);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: rgba(161, 161, 170, 0.55);
 }

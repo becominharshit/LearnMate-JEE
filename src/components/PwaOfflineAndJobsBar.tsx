@@ -50,37 +50,35 @@ export const PwaOfflineAndJobsBar: React.FC<PwaOfflineAndJobsBarProps> = ({
   const showDeveloperConsoles = Boolean(isAdmin || import.meta.env.DEV);
 
   return (
-    <div className="hidden lg:flex fixed bottom-0 inset-x-0 z-30 h-8 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/90 dark:border-slate-800 px-4 lg:px-8 items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-300">
+    <div className="hidden lg:flex fixed bottom-0 inset-x-0 z-30 h-8 bg-white dark:bg-[#111113] border-t border-zinc-200 dark:border-white/[0.07] px-4 lg:px-8 items-center justify-between text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
       <div className="flex items-center gap-4">
         <span className="inline-flex items-center gap-1.5">
           {isOnline ? (
-            <Wifi className="w-3.5 h-3.5 text-emerald-600" />
+            <Wifi className="w-3 h-3 text-emerald-500" />
           ) : (
-            <WifiOff className="w-3.5 h-3.5 text-amber-500" />
+            <WifiOff className="w-3 h-3 text-amber-500" />
           )}
-          <span>{isOnline ? 'Cloud Sync Connected' : 'Offline Mode Active'}</span>
+          <span>{isOnline ? 'Synced' : 'Offline'}</span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 text-slate-500">
-          <Database className="w-3.5 h-3.5 text-indigo-600" />
-          <span>
-            Offline PYQ Packs Cached: {cachedPacksCount}/2 {swReady ? '• SW Ready' : ''}
+        <span className="inline-flex items-center gap-1.5">
+          <Database className="w-3 h-3 text-zinc-400" />
+          <span className="font-mono tabular-nums">
+            PYQ Cache {cachedPacksCount}/2{swReady ? ' · Ready' : ''}
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 text-slate-500">
-          {pendingSyncCount > 0 ? (
-            <>
-              <CloudUpload className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-              <span>{pendingSyncCount} Background Sync Job(s)</span>
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>58 NTA Chapters &amp; Telemetry Synced</span>
-            </>
-          )}
-        </span>
+        {pendingSyncCount > 0 ? (
+          <span className="inline-flex items-center gap-1.5 text-amber-500">
+            <CloudUpload className="w-3 h-3 animate-pulse" />
+            <span>Syncing {pendingSyncCount}</span>
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+            <span>58 Chapters Ready</span>
+          </span>
+        )}
       </div>
 
       {showDeveloperConsoles && (
@@ -89,18 +87,18 @@ export const PwaOfflineAndJobsBar: React.FC<PwaOfflineAndJobsBarProps> = ({
             <button
               type="button"
               onClick={onOpenAdminQuestionBank}
-              className="text-[10px] font-extrabold text-slate-500 hover:text-indigo-600 cursor-pointer"
+              className="text-[10px] font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-[#fafafa] cursor-pointer transition-colors duration-150"
             >
-              PYQ Bank Inspector
+              PYQ Bank
             </button>
           )}
           {onOpenAdminConsole && (
             <button
               type="button"
               onClick={onOpenAdminConsole}
-              className="text-[10px] font-extrabold text-slate-500 hover:text-indigo-600 cursor-pointer"
+              className="text-[10px] font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-[#fafafa] cursor-pointer transition-colors duration-150"
             >
-              Commercial Scale Console
+              Plans Console
             </button>
           )}
         </div>

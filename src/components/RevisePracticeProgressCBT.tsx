@@ -10,6 +10,9 @@ import {
   Upload,
   Copy,
   Printer,
+  Lock,
+  Maximize2,
+  Check,
 } from 'lucide-react';
 import {
   MindMapNodeItem,
@@ -161,9 +164,14 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
   // Flashcard 3D flip & SRS state
   const [cardIndex, setCardIndex] = useState(0);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
-  const [srsStats, setSrsStats] = useState<{ intervalDays: number; easeFactor: number }>({
+  const [srsStats, setSrsStats] = useState<{
+    intervalDays: number;
+    easeFactor: number;
+    repetition: number;
+  }>({
     intervalDays: 1,
     easeFactor: 2.5,
+    repetition: 1,
   });
 
   // Custom Sticky Notes added by student
@@ -205,8 +213,17 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
   const activeFlashcard = mindMapNodes[cardIndex % Math.max(1, mindMapNodes.length)] || null;
 
   const handleRateFlashcard = (rating: 'Again' | 'Hard' | 'Good' | 'Easy') => {
-    const next = calculateNextSRSReview(rating, srsStats.intervalDays, srsStats.easeFactor);
-    setSrsStats({ intervalDays: next.nextIntervalDays, easeFactor: next.nextEaseFactor });
+    const next = calculateNextSRSReview(
+      rating,
+      srsStats.intervalDays,
+      srsStats.easeFactor,
+      srsStats.repetition
+    );
+    setSrsStats({
+      intervalDays: next.nextIntervalDays,
+      easeFactor: next.nextEaseFactor,
+      repetition: next.nextRepetition,
+    });
     setIsCardFlipped(false);
     if (mindMapNodes.length > 0) {
       setCardIndex((prev) => (prev + 1) % mindMapNodes.length);
@@ -279,22 +296,22 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
   return (
     <div className="w-full px-6 lg:px-10 xl:px-12 py-6 space-y-6">
       {/* Header & Material Selector */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 dark:border-white/[0.07] pb-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-xl font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white">
               Revise
             </h1>
             {activeMaterial && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                {activeMaterial.subject} • {activeMaterial.chapter}
+              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                · {activeMaterial.subject} · {activeMaterial.chapter}
               </span>
             )}
           </div>
         </div>
 
         {/* Sub-Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1">
           {(
             [
               'Mind Map',
@@ -312,15 +329,15 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                 key={tab}
                 type="button"
                 onClick={() => setActiveSubTab(tab)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5 ${
                   active
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#18181b]'
                 }`}
               >
-                {tab}
+                <span>{tab}</span>
                 {tab === 'Mistake DNA' && mistakesNotebook.length > 0 && (
-                  <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px]">
+                  <span className="font-mono tabular-nums text-[10px] font-semibold text-rose-500">
                     {mistakesNotebook.length}
                   </span>
                 )}
@@ -332,10 +349,10 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
 
       {/* Uploaded Material Switcher Bar */}
       {materials.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 shadow-2xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-3.5">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mr-1">
-              Active Material:
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-400 dark:text-zinc-500 mr-1">
+              Material:
             </span>
             {materials.map((mat) => {
               const isSelected = activeMaterial?.id === mat.id;
@@ -344,10 +361,10 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                   key={mat.id}
                   type="button"
                   onClick={() => onSelectMaterial(mat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                     isSelected
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
+                      ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
+                      : 'bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23]'
                   }`}
                 >
                   {mat.title} ({mat.subject})
@@ -358,46 +375,43 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           <button
             type="button"
             onClick={() => onOpenAddMaterial('photo')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 text-indigo-700 text-xs font-extrabold hover:bg-indigo-100 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-zinc-200 text-xs font-medium transition-colors duration-150 cursor-pointer"
           >
-            <Upload className="w-3.5 h-3.5" />
-            Upload Handwritten Photo / PDF
+            <Upload className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+            Upload Photo / PDF
           </button>
         </div>
       )}
 
       {/* CLEAN ZERO-STATE WHEN NO MATERIALS ARE UPLOADED */}
       {materials.length === 0 && activeSubTab !== 'Mistake DNA' ? (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10 text-center max-w-3xl mx-auto my-6 space-y-5 shadow-2xs">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 flex items-center justify-center mx-auto">
-            <Layers className="w-7 h-7" />
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-10 text-center max-w-2xl mx-auto my-6 space-y-5">
+          <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-300 flex items-center justify-center mx-auto">
+            <Layers className="w-6 h-6" />
           </div>
-          <div className="space-y-2">
-            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-extrabold uppercase tracking-wider">
-              100% Clean Zero-State Workspace
-            </span>
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-              Upload Your Study Material to Generate Mind Maps, Handwritten Notes &amp; Flashcards
+          <div className="space-y-1.5">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white">
+              No materials yet
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-              Your revision workspace starts completely clean with zero preloaded chapters. Upload any PDF, handwritten notebook photo, or up-to-12-hour YouTube lecture to automatically build multi-level concept mind maps, complete chapter formula books, handwritten revision sheets, sticky notes, and 3D flashcards.
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+              Upload a PDF, handwritten notes photo, or YouTube lecture to generate mind maps, formula books, and flashcards.
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
             <button
               type="button"
               onClick={() => onOpenAddMaterial('pdf')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              Upload PDF or Handwritten Notes
+              <Plus className="w-3.5 h-3.5" />
+              Upload Material
             </button>
             <button
               type="button"
               onClick={() => onOpenAddMaterial('youtube')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-extrabold hover:bg-slate-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-zinc-700 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer"
             >
-              Extract 12-Hour YouTube Marathon
+              Extract YouTube
             </button>
           </div>
         </div>
@@ -409,15 +423,15 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           {activeSubTab === 'Mind Map' && activeMaterial && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left 8 Cols: Multi-Level Hierarchical Mind Map Canvas */}
-              <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden flex flex-col">
-                <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-900">
+              <div className="lg:col-span-8 bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] overflow-hidden flex flex-col">
+                <div className="px-5 py-3.5 border-b border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-3 bg-zinc-50 dark:bg-[#141417]">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-extrabold text-slate-900 dark:text-white">
-                      Multi-Level Concept Hierarchy: {activeMaterial.chapter}
+                    <span className="text-xs font-semibold text-zinc-900 dark:text-white">
+                      {activeMaterial.chapter}
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold">
-                      {mindMapNodes.length} Primary Branches •{' '}
-                      {mindMapNodes.reduce((acc, n) => acc + (n.subNodes?.length || 0), 0)} Sub-Nodes
+                    <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 font-mono tabular-nums">
+                      · {mindMapNodes.length} branches ·{' '}
+                      {mindMapNodes.reduce((acc, n) => acc + (n.subNodes?.length || 0), 0)} sub-nodes
                     </span>
                   </div>
 
@@ -425,24 +439,24 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setMindMapZoom((z) => Math.max(80, z - 10))}
-                      className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                     >
                       −
                     </button>
-                    <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-1.5">
+                    <span className="text-xs font-mono tabular-nums font-medium text-zinc-600 dark:text-zinc-400 px-1.5">
                       {mindMapZoom}%
                     </span>
                     <button
                       type="button"
                       onClick={() => setMindMapZoom((z) => Math.min(125, z + 10))}
-                      className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                     >
                       +
                     </button>
                     <button
                       type="button"
                       onClick={() => setMindMapZoom(100)}
-                      className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                     >
                       Reset
                     </button>
@@ -451,7 +465,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
 
                 {/* Hierarchical Tree Canvas */}
                 <div
-                  className="p-6 overflow-x-auto bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:18px_18px]"
+                  className="p-6 overflow-x-auto bg-[radial-gradient(#e4e4e7_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:18px_18px]"
                   style={{
                     transform: `scale(${mindMapZoom / 100})`,
                     transformOrigin: 'top center',
@@ -459,14 +473,14 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                 >
                   {/* Level 0: Central Root Hub */}
                   <div className="flex flex-col items-center">
-                    <div className="px-6 py-3.5 rounded-2xl bg-indigo-950 text-white shadow-lg border-2 border-indigo-400 text-center max-w-md">
-                      <div className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-300">
-                        CENTRAL CHAPTER HUB ({activeMaterial.subject})
+                    <div className="px-6 py-3.5 rounded-2xl bg-zinc-900 dark:bg-[#18181b] text-white border border-zinc-800 dark:border-white/[0.12] obsidian-sheen text-center max-w-md">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                        {activeMaterial.subject}
                       </div>
-                      <div className="text-base font-extrabold mt-0.5">{activeMaterial.chapter}</div>
+                      <div className="text-base font-semibold tracking-[-0.01em] mt-0.5">{activeMaterial.chapter}</div>
                     </div>
 
-                    <div className="w-0.5 h-6 bg-indigo-300" />
+                    <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-700" />
 
                     {/* Level 1: Primary Concept Nodes */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
@@ -479,25 +493,25 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                               setSelectedNodeId(node.id);
                               setSelectedSubNodeId(node.subNodes?.[0]?.id || null);
                             }}
-                            className={`rounded-2xl border-2 p-4 transition-all cursor-pointer flex flex-col justify-between ${
+                            className={`rounded-2xl border p-4 transition-colors duration-150 cursor-pointer flex flex-col justify-between ${
                               isSelected
-                                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md'
-                                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-300'
+                                ? 'border-zinc-900 dark:border-white/30 bg-zinc-50 dark:bg-[#1f1f23]'
+                                : 'border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#18181b]'
                             }`}
                           >
                             <div>
                               <div className="flex items-center justify-between gap-2 mb-1.5">
-                                <span className="px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900/70 text-indigo-800 dark:text-indigo-200 text-[10px] font-extrabold">
-                                  Branch {idx + 1} • {node.pageRef}
+                                <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 font-mono tabular-nums">
+                                  Branch {idx + 1} · {node.pageRef}
                                 </span>
                                 {node.badgeType && (
                                   <span
-                                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                                    className={`text-[11px] font-semibold ${
                                       node.badgeType === 'High Weightage'
-                                        ? 'bg-amber-100 text-amber-800'
+                                        ? 'text-amber-600 dark:text-amber-400'
                                         : node.badgeType === 'Exception Trap'
-                                        ? 'bg-rose-100 text-rose-800'
-                                        : 'bg-emerald-100 text-emerald-800'
+                                        ? 'text-rose-600 dark:text-rose-400'
+                                        : 'text-emerald-600 dark:text-emerald-400'
                                     }`}
                                   >
                                     {node.badgeType}
@@ -505,16 +519,16 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                                 )}
                               </div>
 
-                              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
                                 {node.title}
                               </h3>
 
-                              <div className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
+                              <div className="text-xs text-zinc-600 dark:text-zinc-300 mt-1.5 leading-relaxed">
                                 <MathRichText content={node.definition} />
                               </div>
 
                               {node.formulaLatex && (
-                                <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 text-xs">
+                                <div className="mt-2.5 p-2.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-xs">
                                   <MathRichText content={node.formulaLatex} />
                                 </div>
                               )}
@@ -522,9 +536,9 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
 
                             {/* Level 2: Secondary Sub-Nodes */}
                             {node.subNodes && node.subNodes.length > 0 && (
-                              <div className="mt-3.5 pt-3 border-t border-slate-200/70 dark:border-slate-800 space-y-2">
-                                <div className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                                  Sub-Branches &amp; Micro-Formulas:
+                              <div className="mt-3.5 pt-3 border-t border-zinc-200 dark:border-white/[0.07] space-y-2">
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
+                                  Sub-Branches
                                 </div>
                                 <div className="space-y-1.5">
                                   {node.subNodes.map((sub) => {
@@ -537,22 +551,22 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                                           setSelectedNodeId(node.id);
                                           setSelectedSubNodeId(sub.id);
                                         }}
-                                        className={`p-2.5 rounded-xl border text-xs transition-all ${
+                                        className={`p-2.5 rounded-xl border text-xs transition-colors duration-150 ${
                                           subActive
-                                            ? 'border-indigo-500 bg-white dark:bg-slate-800 shadow-2xs'
-                                            : 'border-slate-200/80 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-white'
+                                            ? 'border-zinc-900 dark:border-white/25 bg-white dark:bg-[#18181b]'
+                                            : 'border-zinc-200 dark:border-white/[0.06] bg-zinc-50 dark:bg-[#141417] hover:bg-white dark:hover:bg-[#18181b]'
                                         }`}
                                       >
                                         <div className="flex items-center justify-between gap-2">
-                                          <span className="font-extrabold text-slate-800 dark:text-slate-100">
+                                          <span className="font-semibold text-zinc-800 dark:text-zinc-100">
                                             ↳ {sub.label}
                                           </span>
                                         </div>
-                                        <div className="text-[11px] text-slate-600 dark:text-slate-300 mt-1">
+                                        <div className="text-[11px] text-zinc-600 dark:text-zinc-400 mt-1">
                                           <MathRichText content={sub.microNote} />
                                         </div>
                                         {sub.formulaLatex && (
-                                          <div className="mt-1 text-[11px] font-semibold text-indigo-900 dark:text-indigo-200">
+                                          <div className="mt-1 text-[11px] font-medium text-zinc-900 dark:text-zinc-200">
                                             <MathRichText content={sub.formulaLatex} />
                                           </div>
                                         )}
@@ -571,61 +585,61 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
               </div>
 
               {/* Right 4 Cols: Selected Node Deep-Dive & Flashcard Action */}
-              <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs space-y-4 sticky top-20">
+              <div className="lg:col-span-4 bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5 space-y-4 sticky top-20">
                 {selectedNode ? (
                   <>
-                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div className="flex items-center justify-between gap-2 border-b border-zinc-200 dark:border-white/[0.07] pb-3">
                       <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">
-                          SELECTED NODE INSPECTOR ({selectedNode.pageRef})
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 font-mono">
+                          NODE · {selectedNode.pageRef}
                         </span>
-                        <h2 className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">
+                        <h2 className="text-base font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white mt-0.5">
                           {selectedNode.title}
                         </h2>
                       </div>
                       {selectedNode.badgeType && (
-                        <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold">
+                        <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
                           {selectedNode.badgeType}
                         </span>
                       )}
                     </div>
 
                     <div className="space-y-3 text-xs">
-                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 space-y-1">
-                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                          Core Law &amp; Definition
+                      <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-1">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-zinc-400 dark:text-zinc-500">
+                          Core Law
                         </div>
-                        <div className="text-slate-800 dark:text-slate-100 leading-relaxed">
+                        <div className="text-zinc-800 dark:text-zinc-100 leading-relaxed">
                           <MathRichText content={selectedNode.definition} />
                         </div>
                       </div>
 
                       {selectedNode.formulaLatex && (
-                        <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/50 border border-indigo-200/80 dark:border-indigo-800 space-y-1">
-                          <div className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
-                            Core Mathematical Expression
+                        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-1">
+                          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
+                            Expression
                           </div>
-                          <div className="text-slate-900 dark:text-white">
+                          <div className="text-zinc-900 dark:text-white">
                             <MathRichText content={selectedNode.formulaLatex} />
                           </div>
                         </div>
                       )}
 
-                      <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800 space-y-1">
-                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-                          JEE Application &amp; Example
+                      <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-1">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-emerald-600 dark:text-emerald-400">
+                          Application
                         </div>
-                        <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+                        <div className="text-zinc-800 dark:text-zinc-200 leading-relaxed">
                           <MathRichText content={selectedNode.example} />
                         </div>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800 space-y-1">
-                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-900 dark:text-amber-300 flex items-center gap-1">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                          Common JEE Exam Trap
+                      <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-1">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Exam Trap
                         </div>
-                        <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+                        <div className="text-zinc-800 dark:text-zinc-200 leading-relaxed">
                           <MathRichText content={selectedNode.commonTrap} />
                         </div>
                       </div>
@@ -635,17 +649,17 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                       <button
                         type="button"
                         onClick={() => onAddFlashcard(selectedNode)}
-                        className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+                        className="w-full py-2.5 px-4 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
-                        Add Node to Spaced-Repetition Flashcards
+                        Add to Flashcards
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveSubTab('Handwritten Notes')}
-                        className="w-full py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                        className="w-full py-2 px-4 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#1f1f23] text-zinc-700 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer"
                       >
-                        Convert Chapter to Handwritten Notebook →
+                        Open Handwritten Notebook →
                       </button>
                     </div>
                   </>
@@ -660,10 +674,10 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           {activeSubTab === 'Handwritten Notes' && activeMaterial && (
             <div className="space-y-5">
               {/* Top Controls Bar */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs space-y-4">
+              <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                    <h2 className="text-lg font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white">
                       Handwritten Notebook
                     </h2>
                   </div>
@@ -672,10 +686,10 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenAddMaterial('photo')}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-extrabold hover:bg-indigo-100 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-800 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      OCR Scan Handwritten Photo / PDF
+                      OCR Photo / PDF
                     </button>
                     <button
                       type="button"
@@ -683,19 +697,19 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                         window.print();
                         showToast('Opened print/PDF export for your Handwritten Notebook!');
                       }}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
                     >
-                      Export Handwritten PDF
+                      Export PDF
                     </button>
                   </div>
                 </div>
 
                 {/* Font Switcher, Paper Background & Source Selector */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-zinc-200 dark:border-white/[0.07]">
                   {/* 4-Font Switcher */}
                   <div>
-                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-                      1. Choose Handwriting Font Style
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-2">
+                      1. Handwriting Style
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {(Object.keys(HANDWRITING_FONT_MAP) as HandwritingFontId[]).map((fontKey) => {
@@ -706,16 +720,16 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                             key={fontKey}
                             type="button"
                             onClick={() => setHandFont(fontKey)}
-                            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                            className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
                               active
-                                ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 shadow-2xs'
-                                : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                                ? 'border-zinc-900 dark:border-white/30 bg-zinc-100 dark:bg-[#1f1f23] text-zinc-900 dark:text-white'
+                                : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                             }`}
                           >
                             <div className={`text-base font-bold ${item.cssClass}`}>
                               {item.label.split(' ')[0]}
                             </div>
-                            <div className="text-[10px] text-slate-500 font-semibold">
+                            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
                               {item.badge}
                             </div>
                           </button>
@@ -727,13 +741,13 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                   {/* Paper Style & Ink Color */}
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-                        2. Notebook Paper Texture
+                      <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-2">
+                        2. Paper Texture
                       </label>
                       <div className="flex items-center gap-2">
                         {(
                           [
-                            { id: 'ruled', label: 'Ruled Notebook' },
+                            { id: 'ruled', label: 'Ruled' },
                             { id: 'grid', label: 'Math Grid' },
                             { id: 'plain', label: 'Plain Ivory' },
                           ] as const
@@ -742,10 +756,10 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                             key={p.id}
                             type="button"
                             onClick={() => setPaperStyle(p.id)}
-                            className={`flex-1 py-2 px-2.5 rounded-xl border text-xs font-bold cursor-pointer ${
+                            className={`flex-1 py-2 px-2.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
                               paperStyle === p.id
-                                ? 'border-indigo-600 bg-indigo-600 text-white'
-                                : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                                ? 'border-[#1C1917] bg-[#1C1917] text-[#FAF8F5] dark:border-white/20 dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
+                                : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-300'
                             }`}
                           >
                             {p.label}
@@ -755,27 +769,27 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">
-                        Ballpoint / Gel Ink Color
+                      <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-1.5">
+                        Ink Color
                       </label>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {[
-                          { color: '#1D4ED8', name: 'Royal Gel Blue' },
-                          { color: '#1E293B', name: 'Carbon Black' },
-                          { color: '#047857', name: 'Emerald Pen' },
+                          { color: '#1D4ED8', name: 'Royal Blue' },
+                          { color: '#1E293B', name: 'Carbon' },
+                          { color: '#047857', name: 'Emerald' },
                         ].map((ink) => (
                           <button
                             key={ink.color}
                             type="button"
                             onClick={() => setInkColor(ink.color as typeof inkColor)}
-                            className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 cursor-pointer ${
+                            className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
                               inkColor === ink.color
-                                ? 'border-slate-900 bg-slate-100 dark:bg-slate-800'
-                                : 'border-slate-200'
+                                ? 'border-zinc-900 dark:border-white/30 bg-zinc-100 dark:bg-[#1f1f23]'
+                                : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b]'
                             }`}
                           >
                             <span
-                              className="w-3 h-3 rounded-full inline-block"
+                              className="w-2.5 h-2.5 rounded-full inline-block"
                               style={{ backgroundColor: ink.color }}
                             />
                             {ink.name}
@@ -787,26 +801,26 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
 
                   {/* Source Material to Convert */}
                   <div>
-                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-                      3. Source Content to Render in Handwriting
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-2">
+                      3. Source Content
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {(
                         [
                           { id: 'chapter_notes', label: 'Chapter Notes' },
                           { id: 'sticky_notes', label: 'Sticky Notes' },
-                          { id: 'summary_sheet', label: 'Quick Revision Sheet' },
-                          { id: 'custom_text', label: 'Custom Note Converter' },
+                          { id: 'summary_sheet', label: 'Quick Summary' },
+                          { id: 'custom_text', label: 'Custom Note' },
                         ] as const
                       ).map((src) => (
                         <button
                           key={src.id}
                           type="button"
                           onClick={() => setHandSourceType(src.id)}
-                          className={`p-2.5 rounded-xl border text-xs font-bold text-left cursor-pointer ${
+                          className={`p-2.5 rounded-xl border text-xs font-medium text-left transition-colors cursor-pointer ${
                             handSourceType === src.id
-                              ? 'border-indigo-600 bg-indigo-50 text-indigo-800'
-                              : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                              ? 'border-zinc-900 dark:border-white/30 bg-zinc-100 dark:bg-[#1f1f23] text-zinc-900 dark:text-white font-semibold'
+                              : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                           }`}
                         >
                           {src.label}
@@ -822,8 +836,8 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                       rows={3}
                       value={customHandText}
                       onChange={(e) => setCustomHandText(e.target.value)}
-                      placeholder="Paste or type any JEE derivation, formula ($E = mc^2$), or summary here to instantly render it in realistic notebook handwriting..."
-                      className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium"
+                      placeholder="Paste any JEE derivation or formula ($E = mc^2$) to render in handwriting..."
+                      className="w-full p-3 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-xs font-medium"
                     />
                   </div>
                 )}
@@ -831,7 +845,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
 
               {/* Realistic Handwritten Notebook Page Sheet */}
               <div
-                className={`rounded-3xl border-2 border-amber-200/90 shadow-lg p-8 lg:p-12 min-h-[540px] relative transition-all ${
+                className={`rounded-2xl border border-amber-300/80 shadow-md p-8 lg:p-12 min-h-[540px] relative transition-all ${
                   paperStyle === 'ruled'
                     ? 'paper-ruled'
                     : paperStyle === 'grid'
@@ -876,7 +890,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                           </div>
                           {pg.sections.map((sec, sIdx) => (
                             <div key={sIdx} className="space-y-2">
-                              <div className="font-bold text-indigo-900">{sec.numberTitle}</div>
+                              <div className="font-bold text-[#1C1917]">{sec.numberTitle}</div>
                               {sec.paragraphs?.map((par, pIdx) => (
                                 <div key={pIdx}>
                                   <MathRichText content={par} />
@@ -911,13 +925,13 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                       {[...customStickyNotes, ...activeBundle.stickyNotes].map((st) => (
                         <div
                           key={st.id}
-                          className="p-5 rounded-2xl bg-yellow-100/90 border-2 border-yellow-300 shadow-sm space-y-2"
+                          className="p-5 rounded-2xl bg-amber-50/90 border border-amber-300 shadow-xs space-y-2"
                         >
-                          <div className="text-xs font-sans font-extrabold uppercase tracking-wider text-amber-800">
+                          <div className="text-xs font-sans font-semibold uppercase tracking-wider text-amber-800">
                             {st.subject}
                           </div>
-                          <div className="text-xl font-bold text-slate-900">{st.title}</div>
-                          <div className="text-slate-800">
+                          <div className="text-xl font-bold text-zinc-900">{st.title}</div>
+                          <div className="text-zinc-800">
                             <MathRichText content={st.body} />
                           </div>
                         </div>
@@ -928,7 +942,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                   {handSourceType === 'summary_sheet' && activeBundle && (
                     <div className="space-y-5 text-lg sm:text-xl leading-relaxed">
                       <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-300">
-                        <div className="text-xs font-sans font-extrabold uppercase text-emerald-800 mb-1">
+                        <div className="text-xs font-sans font-semibold uppercase text-emerald-800 mb-1">
                           Executive Chapter Summary
                         </div>
                         <MathRichText content={activeMaterial.contentSummary} />
@@ -937,11 +951,11 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                         {activeBundle.formulas.map((fc) => (
                           <div
                             key={fc.id}
-                            className="p-4 rounded-2xl bg-white/85 border border-indigo-200 space-y-1.5"
+                            className="p-4 rounded-2xl bg-white/90 border border-zinc-200 space-y-1.5"
                           >
-                            <div className="font-bold text-indigo-950">{fc.title}</div>
+                            <div className="font-bold text-zinc-900">{fc.title}</div>
                             <MathRichText content={fc.formula} />
-                            <div className="text-base text-slate-700">
+                            <div className="text-base text-zinc-700">
                               <MathRichText content={fc.notes} />
                             </div>
                           </div>
@@ -971,75 +985,74 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           {activeSubTab === 'Flashcards' && activeMaterial && activeFlashcard && (
             <div className="max-w-3xl mx-auto space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                  Card {(cardIndex % mindMapNodes.length) + 1} of {mindMapNodes.length} •{' '}
-                  <span className="text-indigo-600 font-extrabold">
-                    Current SRS Interval: {srsStats.intervalDays}d (Ease{' '}
-                    {srsStats.easeFactor.toFixed(2)})
+                <div className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Card <span className="font-mono tabular-nums">{(cardIndex % mindMapNodes.length) + 1}/{mindMapNodes.length}</span> ·{' '}
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold font-mono tabular-nums">
+                    Interval {srsStats.intervalDays}d · Ease {srsStats.easeFactor.toFixed(2)}
                   </span>
                 </div>
-                <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                <label className="inline-flex items-center gap-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={useHandFontOnCards}
                     onChange={(e) => setUseHandFontOnCards(e.target.checked)}
-                    className="rounded text-indigo-600"
+                    className="rounded accent-zinc-900 dark:accent-white"
                   />
-                  Render Flashcard in Handwriting Font ({HANDWRITING_FONT_MAP[handFont].label})
+                  Handwriting ({HANDWRITING_FONT_MAP[handFont].label})
                 </label>
               </div>
 
               <div
                 onClick={() => setIsCardFlipped((f) => !f)}
-                className={`rounded-3xl border-2 p-8 sm:p-10 min-h-[320px] flex flex-col justify-between transition-all cursor-pointer shadow-md ${
+                className={`rounded-2xl border p-8 sm:p-10 min-h-[320px] flex flex-col justify-between transition-colors duration-150 cursor-pointer obsidian-sheen ${
                   isCardFlipped
-                    ? 'bg-indigo-950 text-white border-indigo-500'
-                    : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-200 dark:border-slate-800 hover:border-indigo-400'
+                    ? 'bg-zinc-900 dark:bg-[#18181b] text-white border-zinc-800 dark:border-white/20'
+                    : 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-white border-zinc-200 dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-white/20'
                 } ${useHandFontOnCards ? HANDWRITING_FONT_MAP[handFont].cssClass : ''}`}
               >
-                <div className="flex items-center justify-between text-xs font-sans font-extrabold uppercase tracking-wider opacity-75">
+                <div className="flex items-center justify-between text-[11px] font-sans font-semibold uppercase tracking-[0.06em] opacity-70">
                   <span>
                     {isCardFlipped
-                      ? 'BACK: FORMULA, APPLICATION & EXAM TRAP'
-                      : `FRONT: CONCEPT PROMPT (${activeFlashcard.pageRef})`}
+                      ? 'Back · Formula & Trap'
+                      : `Front · ${activeFlashcard.pageRef}`}
                   </span>
-                  <span>Click Card to Flip ↻</span>
+                  <span>Click to flip</span>
                 </div>
 
                 {!isCardFlipped ? (
-                  <div className="my-auto py-6 text-center space-y-4">
-                    <h3 className="text-2xl sm:text-3xl font-extrabold">
+                  <div className="my-auto py-6 text-center space-y-3">
+                    <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em]">
                       {activeFlashcard.title}
                     </h3>
-                    <p className="text-sm font-sans text-slate-500 dark:text-slate-400">
-                      State the core law, mathematical formula, and JEE exception trap for this concept.
+                    <p className="text-xs font-sans text-zinc-500 dark:text-zinc-400">
+                      Recall the law, formula, and common trap.
                     </p>
                   </div>
                 ) : (
                   <div className="my-auto py-4 space-y-4 text-base sm:text-lg">
                     <div>
-                      <span className="text-xs font-sans font-extrabold uppercase text-indigo-300 block mb-1">
-                        Core Definition &amp; Law:
+                      <span className="text-[11px] font-sans font-semibold uppercase tracking-[0.06em] text-zinc-400 block mb-1">
+                        Core Definition
                       </span>
                       <MathRichText content={activeFlashcard.definition} />
                     </div>
                     {activeFlashcard.formulaLatex && (
-                      <div className="p-3 rounded-xl bg-white/10 border border-white/15">
+                      <div className="p-3 rounded-xl bg-white/[0.06] border border-white/[0.12]">
                         <MathRichText content={activeFlashcard.formulaLatex} />
                       </div>
                     )}
                     <div className="text-amber-300 text-sm sm:text-base">
-                      <strong className="font-sans uppercase text-xs tracking-wider mr-1">
-                        JEE Trap:
+                      <strong className="font-sans uppercase text-[11px] tracking-[0.06em] mr-1">
+                        Trap:
                       </strong>
                       <MathRichText content={activeFlashcard.commonTrap} inline />
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between text-xs font-sans font-bold opacity-75 pt-3 border-t border-slate-200/20">
+                <div className="flex items-center justify-between text-xs font-sans font-medium opacity-70 pt-3 border-t border-zinc-200/20">
                   <span>{activeMaterial.chapter}</span>
-                  <span>SM-2 Spaced Repetition Active</span>
+                  <span>SM-2 Active</span>
                 </div>
               </div>
 
@@ -1047,22 +1060,32 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {(
                   [
-                    { label: 'Again', sub: '< 10 mins', style: 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100' },
-                    { label: 'Hard', sub: '2 days', style: 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100' },
-                    { label: 'Good', sub: '4 days', style: 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100' },
-                    { label: 'Easy', sub: '7 days', style: 'border-indigo-200 bg-indigo-50 text-indigo-800 hover:bg-indigo-100' },
+                    { label: 'Again', style: 'border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400 hover:bg-rose-500/20' },
+                    { label: 'Hard', style: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20' },
+                    { label: 'Good', style: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20' },
+                    { label: 'Easy', style: 'border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]' },
                   ] as const
-                ).map((btn) => (
-                  <button
-                    key={btn.label}
-                    type="button"
-                    onClick={() => handleRateFlashcard(btn.label)}
-                    className={`py-3 px-4 rounded-2xl border font-extrabold text-xs transition-all cursor-pointer flex flex-col items-center gap-0.5 ${btn.style}`}
-                  >
-                    <span>{btn.label}</span>
-                    <span className="text-[10px] opacity-75">{btn.sub}</span>
-                  </button>
-                ))}
+                ).map((btn) => {
+                  const preview = calculateNextSRSReview(
+                    btn.label,
+                    srsStats.intervalDays,
+                    srsStats.easeFactor,
+                    srsStats.repetition
+                  );
+                  const sub =
+                    btn.label === 'Again' ? '< 10m' : `${preview.nextIntervalDays}d`;
+                  return (
+                    <button
+                      key={btn.label}
+                      type="button"
+                      onClick={() => handleRateFlashcard(btn.label)}
+                      className={`py-3 px-4 rounded-xl border font-semibold text-xs transition-colors cursor-pointer flex flex-col items-center gap-0.5 ${btn.style}`}
+                    >
+                      <span>{btn.label}</span>
+                      <span className="text-[10px] font-mono tabular-nums opacity-75">{sub}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1074,52 +1097,52 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
             <div className="space-y-6">
               <form
                 onSubmit={handleAddCustomSticky}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center gap-3 shadow-2xs"
+                className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-4 flex flex-wrap items-center gap-3"
               >
                 <input
                   type="text"
                   value={newStickyTitle}
                   onChange={(e) => setNewStickyTitle(e.target.value)}
-                  placeholder="Sticky title (e.g., Adiabatic Work Sign Convention)..."
-                  className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold flex-1 min-w-[200px]"
+                  placeholder="Sticky title..."
+                  className="px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-xs font-medium flex-1 min-w-[200px]"
                 />
                 <input
                   type="text"
                   value={newStickyBody}
                   onChange={(e) => setNewStickyBody(e.target.value)}
                   placeholder="Sticky note with formula ($W = -nC_V\Delta T$)..."
-                  className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex-2 min-w-[260px]"
+                  className="px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-xs flex-2 min-w-[260px]"
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold cursor-pointer"
+                  className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
                 >
-                  + Pin Sticky Note
+                  + Pin Note
                 </button>
               </form>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {[...customStickyNotes, ...activeBundle.stickyNotes].map((note, idx) => {
                   const bgColors = [
-                    'bg-yellow-50/90 border-yellow-300',
-                    'bg-indigo-50/80 border-indigo-200',
-                    'bg-emerald-50/80 border-emerald-200',
+                    'bg-amber-50/95 border-amber-300/80 dark:bg-[#18181b] dark:border-amber-500/30',
+                    'bg-zinc-50 border-zinc-200 dark:bg-[#18181b] dark:border-white/[0.08]',
+                    'bg-emerald-50/80 border-emerald-200 dark:bg-[#18181b] dark:border-emerald-500/30',
                   ];
                   return (
                     <div
                       key={note.id}
-                      className={`p-5 rounded-2xl border-2 shadow-xs space-y-2.5 ${
+                      className={`p-5 rounded-2xl border space-y-2.5 ${
                         bgColors[idx % bgColors.length]
                       } ${useHandFontOnCards ? HANDWRITING_FONT_MAP[handFont].cssClass : ''}`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="px-2 py-0.5 rounded bg-white/80 text-[10px] font-sans font-extrabold uppercase tracking-wider text-slate-700">
+                        <span className="text-[11px] font-sans font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
                           {note.subject}
                         </span>
-                        <Bookmark className="w-4 h-4 text-slate-500" />
+                        <Bookmark className="w-4 h-4 text-zinc-400" />
                       </div>
-                      <h3 className="text-lg font-extrabold text-slate-900">{note.title}</h3>
-                      <div className="text-sm sm:text-base text-slate-800 leading-relaxed">
+                      <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{note.title}</h3>
+                      <div className="text-sm sm:text-base text-zinc-700 dark:text-zinc-300 leading-relaxed">
                         <MathRichText content={note.body} />
                       </div>
                     </div>
@@ -1133,14 +1156,14 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           {/* SUB-TAB 5: SUMMARY SHEET                                          */}
           {/* ================================================================= */}
           {activeSubTab === 'Summary Sheet' && activeMaterial && activeBundle && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 lg:p-8 shadow-2xs space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-6 lg:p-8 space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 dark:border-white/[0.07] pb-4">
                 <div>
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">
-                    ONE-PAGE HIGH-YIELD REVISION SHEET
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
+                    Revision Summary
                   </span>
-                  <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-                    {activeMaterial.chapter} ({activeMaterial.subject})
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white">
+                    {activeMaterial.chapter} · {activeMaterial.subject}
                   </h2>
                 </div>
                 <button
@@ -1149,9 +1172,9 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                     setHandSourceType('summary_sheet');
                     setActiveSubTab('Handwritten Notes');
                   }}
-                  className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-extrabold hover:bg-indigo-100 cursor-pointer"
+                  className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer"
                 >
-                  View in Topper Handwriting Font →
+                  View Handwritten →
                 </button>
               </div>
 
@@ -1159,18 +1182,18 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                 {activeBundle.pages.map((pg) => (
                   <div
                     key={pg.pageNumber}
-                    className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-3"
+                    className="p-5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-3"
                   >
-                    <div className="text-xs font-extrabold uppercase tracking-wider text-indigo-600">
-                      Section {pg.pageNumber} • {pg.heading}
+                    <div className="text-xs font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
+                      Section {pg.pageNumber} · {pg.heading}
                     </div>
-                    <div className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                    <div className="text-xs text-zinc-700 dark:text-zinc-200 leading-relaxed">
                       <MathRichText content={pg.aiTutorSummary.english} />
                     </div>
                     {pg.sections.map((sec, sIdx) => (
                       <ul
                         key={sIdx}
-                        className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 list-disc pl-4"
+                        className="space-y-1.5 text-xs text-zinc-600 dark:text-zinc-300 list-disc pl-4"
                       >
                         {sec.bullets?.map((bText, bIdx) => (
                           <li key={bIdx}>
@@ -1191,22 +1214,22 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           {activeSubTab === 'Formula Book' && (
             <div className="space-y-6">
               {/* Formula Book Top Action & Chapter Filter Bar */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs space-y-4">
+              <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
-                      Formula Book ({allExtractedFormulas.length})
+                    <h2 className="text-lg font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white">
+                      Formula Book <span className="font-mono tabular-nums text-sm text-zinc-500 dark:text-zinc-400">({allExtractedFormulas.length})</span>
                     </h2>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setShowAddFormulaForm((v) => !v)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span>{showAddFormulaForm ? 'Close Form' : '+ Add Custom Formula'}</span>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{showAddFormulaForm ? 'Close Form' : 'Add Formula'}</span>
                     </button>
                     <button
                       type="button"
@@ -1214,29 +1237,29 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                         window.print();
                         showToast('Opened Print / Save as PDF for your Chapter Formula Book!');
                       }}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs font-extrabold cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer"
                     >
-                      <Printer className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Export Formula Sheet PDF</span>
+                      <Printer className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                      <span>Export PDF</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Chapter Filter Pills */}
+                {/* Chapter Filter Tabs */}
                 {availableFormulaChapters.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mr-1">
-                      Filter by Chapter:
+                  <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-zinc-200 dark:border-white/[0.07]">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-400 dark:text-zinc-500 mr-1">
+                      Chapter:
                     </span>
                     {['All', ...availableFormulaChapters].map((ch) => (
                       <button
                         key={ch}
                         type="button"
                         onClick={() => setFormulaChapterFilter(ch)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer ${
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                           formulaChapterFilter === ch
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                            ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
+                            : 'bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-300'
                         }`}
                       >
                         {ch}
@@ -1249,24 +1272,24 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                 {showAddFormulaForm && (
                   <form
                     onSubmit={handleAddCustomFormula}
-                    className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-slate-800/80 border border-indigo-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"
+                    className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"
                   >
                     <div>
-                      <label className="block font-extrabold text-slate-700 dark:text-slate-200 mb-1">
-                        Formula Title / Law Name
+                      <label className="block font-semibold text-zinc-700 dark:text-zinc-200 mb-1">
+                        Formula Title
                       </label>
                       <input
                         type="text"
                         required
                         value={newFormulaTitle}
                         onChange={(e) => setNewFormulaTitle(e.target.value)}
-                        placeholder="e.g., Parallel Axis Theorem / Nernst Equation"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white dark:bg-slate-900"
+                        placeholder="e.g., Parallel Axis Theorem"
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
                       />
                     </div>
                     <div>
-                      <label className="block font-extrabold text-slate-700 dark:text-slate-200 mb-1">
-                        Mathematical Equation
+                      <label className="block font-semibold text-zinc-700 dark:text-zinc-200 mb-1">
+                        Equation
                       </label>
                       <input
                         type="text"
@@ -1274,31 +1297,31 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                         value={newFormulaLatex}
                         onChange={(e) => setNewFormulaLatex(e.target.value)}
                         placeholder="e.g., I = I_{cm} + M d^2"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 font-mono"
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100 font-mono"
                       />
                     </div>
                     <div>
-                      <label className="block font-extrabold text-slate-700 dark:text-slate-200 mb-1">
-                        Variable Definitions
+                      <label className="block font-semibold text-zinc-700 dark:text-zinc-200 mb-1">
+                        Variables
                       </label>
                       <input
                         type="text"
                         value={newFormulaVariables}
                         onChange={(e) => setNewFormulaVariables(e.target.value)}
-                        placeholder="e.g., I_cm = COM inertia, M = total mass, d = perpendicular distance"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white dark:bg-slate-900"
+                        placeholder="e.g., I_cm = COM inertia, M = mass"
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
                       />
                     </div>
                     <div>
-                      <label className="block font-extrabold text-slate-700 dark:text-slate-200 mb-1">
-                        SI Units &amp; Dimensions
+                      <label className="block font-semibold text-zinc-700 dark:text-zinc-200 mb-1">
+                        SI Units
                       </label>
                       <input
                         type="text"
                         value={newFormulaUnits}
                         onChange={(e) => setNewFormulaUnits(e.target.value)}
-                        placeholder="e.g., kg·m² · [M¹ L² T⁰]"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white dark:bg-slate-900"
+                        placeholder="e.g., kg·m²"
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
                       />
                     </div>
                     <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-3">
@@ -1306,14 +1329,14 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                         type="text"
                         value={newFormulaNotes}
                         onChange={(e) => setNewFormulaNotes(e.target.value)}
-                        placeholder="Important condition or exam trap (e.g., Axes must be strictly parallel)..."
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white dark:bg-slate-900"
+                        placeholder="Key condition or exam trap..."
+                        className="flex-1 px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
                       />
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold cursor-pointer"
+                        className="px-4 py-2 rounded-lg btn-terracotta font-semibold transition-colors cursor-pointer"
                       >
-                        Save Formula to Chapter
+                        Save Formula
                       </button>
                     </div>
                   </form>
@@ -1332,11 +1355,11 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                 return (
                   <div key={chapterName} className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+                      <h3 className="text-base font-semibold tracking-[-0.01em] text-zinc-900 dark:text-white flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400" />
                         <span>{chapterName}</span>
-                        <span className="text-xs font-bold text-slate-400">
-                          ({chapterFormulas.length} formulas)
+                        <span className="text-xs font-mono tabular-nums text-zinc-400 dark:text-zinc-500">
+                          · {chapterFormulas.length}
                         </span>
                       </h3>
                     </div>
@@ -1345,12 +1368,12 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                       {chapterFormulas.map((fc) => (
                         <div
                           key={fc.id}
-                          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs flex flex-col justify-between space-y-3"
+                          className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5 flex flex-col justify-between space-y-3"
                         >
                           <div className="space-y-3">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold">
-                                {fc.subject} • {fc.chapter}
+                              <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                                {fc.subject} · {fc.chapter}
                               </span>
                               <button
                                 type="button"
@@ -1358,7 +1381,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                                   navigator.clipboard?.writeText(fc.formula);
                                   showToast(`Copied "${fc.title}" formula to clipboard!`);
                                 }}
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-[11px] font-bold text-slate-600 cursor-pointer"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-[11px] font-medium text-zinc-600 dark:text-zinc-300 cursor-pointer"
                                 title="Copy Equation"
                               >
                                 <Copy className="w-3 h-3" />
@@ -1366,25 +1389,25 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                               </button>
                             </div>
 
-                            <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                            <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
                               {fc.title}
                             </h4>
 
-                            <div className="p-3.5 rounded-xl bg-indigo-50/50 dark:bg-slate-800 border border-indigo-200/80 dark:border-slate-700">
+                            <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07]">
                               <MathRichText content={fc.formula} />
                             </div>
 
                             {(fc.variables || fc.units) && (
-                              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700 text-[11px] space-y-1">
+                              <div className="p-2.5 rounded-xl bg-zinc-50/70 dark:bg-[#141417] border border-zinc-200 dark:border-white/[0.06] text-[11px] space-y-1">
                                 {fc.variables && (
-                                  <div className="text-slate-700 dark:text-slate-300">
-                                    <strong className="text-slate-900 dark:text-white">Variables: </strong>
+                                  <div className="text-zinc-700 dark:text-zinc-300">
+                                    <strong className="text-zinc-900 dark:text-white">Variables: </strong>
                                     <MathRichText content={fc.variables} inline />
                                   </div>
                                 )}
                                 {fc.units && (
-                                  <div className="text-indigo-700 dark:text-indigo-300 font-semibold">
-                                    <strong>SI Units / Dimensions: </strong>
+                                  <div className="text-zinc-500 dark:text-zinc-400 font-medium">
+                                    <strong>SI Units: </strong>
                                     <MathRichText content={fc.units} inline />
                                   </div>
                                 )}
@@ -1392,7 +1415,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                             )}
                           </div>
 
-                          <div className="text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <div className="text-xs text-zinc-600 dark:text-zinc-300 pt-2 border-t border-zinc-200 dark:border-white/[0.07]">
                             <MathRichText content={fc.notes} />
                           </div>
                         </div>
@@ -1640,9 +1663,9 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
   return (
     <div className="w-full px-3 sm:px-6 lg:px-10 xl:px-12 py-5 sm:py-6 space-y-6">
       {/* Sub-Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 dark:border-white/[0.07] pb-3.5">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-lg sm:text-xl font-bold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
             Practice &amp; Mock Tests
           </h1>
         </div>
@@ -1655,10 +1678,10 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                 key={tab}
                 type="button"
                 onClick={() => setActiveSubTab(tab)}
-                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                   active
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100'
+                    ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-[#18181b]'
                 }`}
               >
                 {tab}
@@ -1670,24 +1693,26 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
 
       {/* Crash-Recovery Auto-Saved CBT Mock Banner */}
       {savedDraft && (
-        <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50/90 dark:bg-amber-950/40 p-4 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] dark:bg-amber-500/[0.08] p-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold shrink-0">
-              <Clock className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 dark:text-amber-300">
-                  Crash-Recovery Auto-Save Ready
+                <span className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                  Crash-Recovery Draft
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-950 text-[10px] font-extrabold">
+                <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-200 text-[10px] font-mono tabular-nums font-semibold">
                   {savedDraft.examMode} • Q{savedDraft.currentQNumber}
                 </span>
               </div>
-              <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
-                Interrupted session saved with{' '}
-                <strong>{formatCountdownTimer(savedDraft.secondsRemaining)}</strong> remaining (Auto-saved at{' '}
-                {new Date(savedDraft.savedAt).toLocaleTimeString()}).
+              <p className="text-xs text-zinc-700 dark:text-zinc-300 mt-0.5">
+                Saved with{' '}
+                <strong className="font-mono tabular-nums">
+                  {formatCountdownTimer(savedDraft.secondsRemaining)}
+                </strong>{' '}
+                remaining ({new Date(savedDraft.savedAt).toLocaleTimeString()}).
               </p>
             </div>
           </div>
@@ -1695,7 +1720,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
             <button
               type="button"
               onClick={() => onStartCBTMock(savedDraft.examMode, { resume: true })}
-              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold cursor-pointer shadow-2xs"
+              className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold cursor-pointer transition-colors"
             >
               Resume Interrupted Mock →
             </button>
@@ -1705,7 +1730,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                 void clearCbtInProgressDraft();
                 setSavedDraft(null);
               }}
-              className="px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-amber-100/60 cursor-pointer"
+              className="px-3 py-2 rounded-lg border border-zinc-300 dark:border-white/[0.1] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors"
             >
               Discard
             </button>
@@ -1714,51 +1739,51 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
       )}
 
       {/* Hero Banner with Multi-Exam CBT Launchers */}
-      <div className="bg-gradient-to-r from-[#243B82] via-[#2E4696] to-[#3B5BDB] rounded-3xl p-5 sm:p-6 lg:p-7 text-white shadow-md flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+      <div className="bg-zinc-950 dark:bg-[#111113] border border-zinc-800 dark:border-white/[0.08] obsidian-sheen rounded-2xl p-5 sm:p-6 text-white flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
         <div className="space-y-1.5 max-w-xl">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold tracking-tight">
-            Multi-Exam Proctored CBT Simulator
+          <h2 className="text-lg sm:text-xl font-bold tracking-[-0.02em] text-zinc-50">
+            Proctored CBT Simulator
           </h2>
-          <p className="text-xs sm:text-sm text-indigo-100 leading-relaxed">
-            JEE Main (+4/-1), JEE Advanced (+4/-2 Partial), NEET UG (+4/-1), and BITSAT Speed CBT (+3/-1) with 15s auto-save and fullscreen proctoring.
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+            JEE Main (+4/-1), JEE Advanced (+4/-2 Partial), NEET UG, and BITSAT tracks with 15s auto-save and fullscreen proctoring.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <button
+            type="button"
+            onClick={() => onStartCBTMock('JEE Main')}
+            className="px-3.5 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
+          >
+            JEE Main CBT →
+          </button>
           {onOpenCustomTestModal && (
             <button
               type="button"
               onClick={onOpenCustomTestModal}
-              className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-emerald-400 text-slate-950 hover:bg-emerald-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+              className="px-3.5 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 text-xs font-semibold transition-colors cursor-pointer"
             >
               Custom Test →
             </button>
           )}
           <button
             type="button"
-            onClick={() => onStartCBTMock('JEE Main')}
-            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-white text-[#1E3272] hover:bg-indigo-50 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
-          >
-            JEE Main CBT →
-          </button>
-          <button
-            type="button"
             onClick={() => onStartCBTMock('JEE Advanced')}
-            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-amber-400 text-slate-950 hover:bg-amber-300 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 rounded-lg bg-[#18181b] hover:bg-[#1f1f23] border border-white/[0.1] text-zinc-200 text-xs font-semibold transition-colors cursor-pointer"
           >
             JEE Advanced CBT →
           </button>
           <button
             type="button"
             onClick={() => onStartCBTMock('NEET UG')}
-            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-teal-300 text-slate-950 hover:bg-teal-200 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 rounded-lg bg-[#18181b] hover:bg-[#1f1f23] border border-white/[0.1] text-zinc-200 text-xs font-semibold transition-colors cursor-pointer"
           >
             NEET UG CBT →
           </button>
           <button
             type="button"
             onClick={() => onStartCBTMock('BITSAT')}
-            className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-rose-300 text-slate-950 hover:bg-rose-200 text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+            className="px-3.5 py-2 rounded-lg bg-[#18181b] hover:bg-[#1f1f23] border border-white/[0.1] text-zinc-200 text-xs font-semibold transition-colors cursor-pointer"
           >
             BITSAT CBT →
           </button>
@@ -1767,8 +1792,8 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
 
       {/* SUB-TAB 1: OFFICIAL PAPERS */}
       {activeSubTab === 'Official Papers' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] overflow-hidden">
+          <div className="p-4 border-b border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 flex-wrap">
               {(
                 [
@@ -1790,22 +1815,22 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                   key={f}
                   type="button"
                   onClick={() => setPaperFilter(f)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                     paperFilter === f
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                      : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23] hover:text-zinc-900 dark:hover:text-zinc-200'
                   }`}
                 >
                   {f}
                 </button>
               ))}
             </div>
-            <span className="text-xs font-bold text-slate-500">
-              Showing {filteredPapers.length} Official Past Shift Papers (2020–2026)
+            <span className="text-xs font-mono tabular-nums font-medium text-zinc-500 dark:text-zinc-400">
+              {filteredPapers.length} Papers (2020–2026)
             </span>
           </div>
 
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="divide-y divide-zinc-200 dark:divide-white/[0.06]">
             {filteredPapers.map((paperItem) => {
               const isAdv = paperItem.paper.includes('Advanced');
               const isNeet = paperItem.paper.includes('NEET UG');
@@ -1820,33 +1845,33 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
               return (
                 <div
                   key={paperItem.id}
-                  className="p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
+                  className="p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 hover:bg-zinc-50 dark:hover:bg-[#18181b] transition-colors"
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide border ${
                           isAdv
-                            ? 'bg-amber-100 text-amber-900'
+                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'
                             : isNeet
-                            ? 'bg-teal-100 text-teal-900'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
                             : isBitsat
-                            ? 'bg-rose-100 text-rose-900'
-                            : 'bg-indigo-50 text-indigo-700'
+                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400'
+                            : 'bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-400'
                         }`}
                       >
                         {paperTrack}
                       </span>
-                      <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                         {paperItem.paper}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 sm:gap-3">
-                      <span>Year: {paperItem.year}</span>
-                      <span>•</span>
-                      <span>Session: {paperItem.session}</span>
-                      <span>•</span>
-                      <span>Shift: {paperItem.shift}</span>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center gap-2 sm:gap-3 font-mono tabular-nums">
+                      <span>{paperItem.year}</span>
+                      <span>·</span>
+                      <span>{paperItem.session}</span>
+                      <span>·</span>
+                      <span>{paperItem.shift}</span>
                     </div>
                   </div>
 
@@ -1859,14 +1884,14 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                           getQuestionsForOfficialPaper(paperItem)
                         )
                       }
-                      className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-xs font-extrabold text-slate-700 dark:text-slate-200 cursor-pointer"
+                      className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-xs font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer transition-colors"
                     >
                       Practice (Instant Solver)
                     </button>
                     <button
                       type="button"
                       onClick={() => onStartCBTMock(paperTrack)}
-                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-2xs cursor-pointer"
+                      className="px-3.5 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
                     >
                       CBT Mode →
                     </button>
@@ -1881,18 +1906,20 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
       {/* SUB-TAB 2: PYQs WITH MATHONGO MARKS-STYLE DIFFICULTY BUCKETS */}
       {activeSubTab === 'PYQs' && (
         <div className="space-y-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
+          <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-4 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-extrabold text-slate-500 mr-1">Subject:</span>
+              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mr-1">
+                Subject:
+              </span>
               {(['All', 'Physics', 'Chemistry', 'Mathematics'] as const).map((subj) => (
                 <button
                   key={subj}
                   type="button"
                   onClick={() => setPyqSubjectFilter(subj)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                     pyqSubjectFilter === subj
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                      : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23]'
                   }`}
                 >
                   {subj}
@@ -1901,18 +1928,18 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
             </div>
 
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-extrabold text-slate-500 mr-1">
-                Marks-Style Bucket:
+              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mr-1">
+                Bucket:
               </span>
               {(['All', 'Beginner', 'Must-Do', 'Advanced Climb'] as const).map((b) => (
                 <button
                   key={b}
                   type="button"
                   onClick={() => setPyqBucketFilter(b)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                     pyqBucketFilter === b
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
+                      : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23]'
                   }`}
                 >
                   {b}
@@ -1931,30 +1958,30 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
               return (
                 <div
                   key={q.id}
-                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs space-y-4"
+                  className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5 space-y-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-xs font-extrabold">
+                      <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] text-zinc-800 dark:text-zinc-200 text-xs font-mono tabular-nums font-semibold">
                         PYQ #{idx + 1} • {q.subject} ({q.chapter})
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
                           q.difficultyBucket === 'Advanced Climb'
-                            ? 'bg-rose-100 text-rose-800'
+                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400'
                             : q.difficultyBucket === 'Beginner'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'
                         }`}
                       >
-                        {q.difficultyBucket || 'Must-Do'} Bucket
+                        {q.difficultyBucket || 'Must-Do'}
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-mono font-bold">
+                      <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-[#18181b] text-zinc-500 dark:text-zinc-400 text-[10px] font-mono">
                         {q.provenanceType || 'RECONSTRUCTED_WITH_SOURCE'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-500">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-mono tabular-nums font-medium text-zinc-500 dark:text-zinc-400">
                         {q.section === 'Section B'
                           ? q.examType === 'JEE Advanced'
                             ? '+4 / 0 (Numerical)'
@@ -1967,7 +1994,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                           setReportingQId((cur) => (cur === q.id ? null : q.id));
                           setReportText('');
                         }}
-                        className="text-[10px] font-bold text-slate-500 hover:text-indigo-600 underline cursor-pointer"
+                        className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 underline cursor-pointer"
                       >
                         Report Issue
                       </button>
@@ -1975,13 +2002,13 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                   </div>
 
                   {reportingQId === q.id && (
-                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-2 text-xs">
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] flex flex-wrap items-center gap-2 text-xs">
                       <input
                         type="text"
                         value={reportText}
                         onChange={(e) => setReportText(e.target.value)}
                         placeholder="Describe answer key discrepancy, LaTeX typo, or provenance issue..."
-                        className="flex-1 min-w-[200px] px-3 py-1.5 rounded-lg border border-slate-300 bg-white dark:bg-slate-900"
+                        className="flex-1 min-w-[200px] px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
                       />
                       <button
                         type="button"
@@ -2001,7 +2028,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                           setReportingQId(null);
                           setReportText('');
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg btn-terracotta font-semibold cursor-pointer"
                       >
                         Submit
                       </button>
@@ -2009,12 +2036,12 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                   )}
 
                   {reportFeedback[q.id] && (
-                    <div className="text-[11px] font-semibold text-indigo-700">
+                    <div className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
                       {reportFeedback[q.id]}
                     </div>
                   )}
 
-                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-relaxed">
+                  <div className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-relaxed">
                     <MathRichText content={q.stem} />
                   </div>
 
@@ -2023,15 +2050,18 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                       {q.options.map((opt, optIdx) => {
                         const selected = chosen === optIdx;
                         let cls =
-                          'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800';
+                          'border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b]/60 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-[#1f1f23]';
                         if (isRevealed) {
                           if (optIdx === resolvedCorrectIndex) {
-                            cls = 'border-emerald-500 bg-emerald-50/80 text-emerald-950';
+                            cls =
+                              'border-emerald-500/50 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200';
                           } else if (selected) {
-                            cls = 'border-rose-400 bg-rose-50/80 text-rose-950';
+                            cls =
+                              'border-rose-500/50 bg-rose-500/10 text-rose-800 dark:text-rose-200';
                           }
                         } else if (selected) {
-                          cls = 'border-indigo-600 bg-indigo-50/60 text-indigo-950';
+                          cls =
+                            'border-blue-500/50 bg-blue-500/10 text-blue-800 dark:text-blue-200';
                         }
                         return (
                           <button
@@ -2070,15 +2100,18 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                                 setVerifyingPyqId(null);
                               }
                             }}
-                            className={`p-3 rounded-xl border text-left text-xs sm:text-sm font-medium flex items-center justify-between cursor-pointer ${cls}`}
+                            className={`p-3 rounded-xl border text-left text-xs sm:text-sm font-medium flex items-center justify-between cursor-pointer transition-colors ${cls}`}
                           >
                             <span className="flex items-center gap-2">
-                              <strong>({String.fromCharCode(65 + optIdx)})</strong>
+                              <strong className="font-mono">
+                                ({String.fromCharCode(65 + optIdx)})
+                              </strong>
                               <MathRichText content={opt} inline />
                             </span>
                             {isRevealed && optIdx === resolvedCorrectIndex && (
-                              <span className="text-[11px] font-extrabold text-emerald-700">
-                                ✓ Correct
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                <Check className="w-3.5 h-3.5" />
+                                Correct
                               </span>
                             )}
                           </button>
@@ -2088,8 +2121,8 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                   )}
 
                   {verifyingPyqId === q.id && (
-                    <div className="text-xs font-bold text-indigo-600">
-                      Verifying answer against server key...
+                    <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      Verifying answer...
                     </div>
                   )}
 
@@ -2097,18 +2130,18 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                     <div
                       className={`p-4 rounded-xl border text-xs space-y-1.5 ${
                         isCorrect
-                          ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
-                          : 'bg-amber-50/70 border-amber-200 text-amber-950'
+                          ? 'bg-emerald-500/[0.07] border-emerald-500/25 text-emerald-950 dark:text-emerald-200'
+                          : 'bg-amber-500/[0.07] border-amber-500/25 text-amber-950 dark:text-amber-200'
                       }`}
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-2 font-extrabold">
+                      <div className="flex flex-wrap items-center justify-between gap-2 font-semibold">
                         <span>
                           {isCorrect
-                            ? 'Correct! Server-Verified Step-by-Step Derivation:'
-                            : 'Added to My Mistakes Notebook — Server-Verified Derivation:'}
+                            ? 'Correct — Step-by-Step Derivation:'
+                            : 'Logged to Mistakes Notebook — Derivation:'}
                         </span>
                         {verified.keyVersion && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/80 text-slate-600">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/80 dark:bg-[#111113] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/[0.08]">
                             {verified.keyVersion}
                           </span>
                         )}
@@ -2125,20 +2158,20 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
 
       {/* SUB-TAB 3: CUSTOM TEST BUILDER */}
       {activeSubTab === 'Custom Set' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 max-w-3xl mx-auto shadow-2xs space-y-6">
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-6 max-w-3xl mx-auto space-y-6">
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">
-              CUSTOM JEE PRACTICE BUILDER
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              Custom JEE Practice Builder
             </span>
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
-              Create a Targeted Subject &amp; Difficulty Bucket Drill
+            <h2 className="text-xl font-bold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50 mt-0.5">
+              Targeted Subject &amp; Bucket Drill
             </h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-2">
-                1. Select Subjects to Include
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+                1. Subjects
               </label>
               <div className="flex flex-wrap gap-2.5">
                 {(['Physics', 'Chemistry', 'Mathematics'] as const).map((subj) => {
@@ -2148,13 +2181,13 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                       key={subj}
                       type="button"
                       onClick={() => handleToggleCustomSubject(subj)}
-                      className={`px-4 py-2.5 rounded-xl border text-xs font-extrabold cursor-pointer ${
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
                         active
-                          ? 'border-indigo-600 bg-indigo-600 text-white'
-                          : 'border-slate-200 text-slate-700'
+                          ? 'border-[#1C1917] bg-[#1C1917] text-[#FAF8F5] dark:border-[#F5F0E6] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                          : 'border-zinc-200 dark:border-white/[0.1] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                       }`}
                     >
-                      {active ? '✓ ' : ''}
+                      {active && <Check className="w-3.5 h-3.5" />}
                       {subj}
                     </button>
                   );
@@ -2163,8 +2196,8 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-2">
-                2. Select Marks-Style Difficulty Bucket
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+                2. Difficulty Bucket
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {(['All', 'Beginner', 'Must-Do', 'Advanced Climb'] as const).map((b) => (
@@ -2172,10 +2205,10 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                     key={b}
                     type="button"
                     onClick={() => setCustomBucket(b)}
-                    className={`py-2.5 px-3 rounded-xl border text-xs font-extrabold cursor-pointer ${
+                    className={`py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
                       customBucket === b
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
-                        : 'border-slate-200 text-slate-700'
+                        ? 'border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500 dark:text-zinc-950'
+                        : 'border-zinc-200 dark:border-white/[0.1] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                     }`}
                   >
                     {b}
@@ -2185,19 +2218,19 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-2">
-                3. Number of Questions
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+                3. Question Count
               </label>
-              <div className="flex gap-2.5">
+              <div className="flex flex-wrap gap-2.5">
                 {[5, 10, 15, 25].map((cnt) => (
                   <button
                     key={cnt}
                     type="button"
                     onClick={() => setCustomCount(cnt)}
-                    className={`px-4 py-2 rounded-xl border text-xs font-extrabold cursor-pointer ${
+                    className={`px-4 py-2 rounded-lg border text-xs font-mono tabular-nums font-semibold cursor-pointer transition-colors ${
                       customCount === cnt
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                        : 'border-slate-200 text-slate-700'
+                        ? 'border-[#1C1917] bg-[#1C1917] text-[#FAF8F5] dark:border-[#F5F0E6] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                        : 'border-zinc-200 dark:border-white/[0.1] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                     }`}
                   >
                     {cnt} Questions
@@ -2210,7 +2243,7 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
           <button
             type="button"
             onClick={handleLaunchCustomSet}
-            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs cursor-pointer"
+            className="w-full py-2.5 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
           >
             Generate &amp; Start Custom Practice Set ({customCount} Qs) →
           </button>
@@ -2219,34 +2252,34 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
 
       {/* SUB-TAB 4: ANALYSIS & MY MISTAKES NOTEBOOK */}
       {activeSubTab === 'Analysis' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
-              My Mistakes Notebook &amp; Accuracy Breakdown
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base sm:text-lg font-bold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+              Mistakes Notebook &amp; Accuracy
             </h2>
-            <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-extrabold">
-              {mistakesNotebook.length} Recorded Mistakes
+            <span className="px-2.5 py-1 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-mono tabular-nums font-semibold">
+              {mistakesNotebook.length} Recorded
             </span>
           </div>
 
           {mistakesNotebook.length === 0 ? (
-            <p className="text-xs text-slate-500">
-              No mistakes recorded yet. Attempt any PYQ or CBT Mock to populate your personal error log.
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              No mistakes recorded yet. Attempt any PYQ or CBT Mock to log errors automatically.
             </p>
           ) : (
             <div className="space-y-3">
               {mistakesNotebook.map((m) => (
                 <div
                   key={m.id}
-                  className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2"
+                  className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-[#18181b]/70 space-y-2"
                 >
-                  <div className="text-xs font-extrabold text-indigo-600">
+                  <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                     {m.question.subject} • {m.question.chapter}
                   </div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white">
+                  <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                     <MathRichText content={m.question.stem} />
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-300">
+                  <div className="text-xs text-zinc-600 dark:text-zinc-300">
                     <MathRichText content={m.question.explanation} />
                   </div>
                 </div>
@@ -2279,69 +2312,71 @@ export const ProgressDashboardView: React.FC<ProgressViewProps> = ({
 }) => {
   return (
     <div className="w-full px-6 lg:px-10 xl:px-12 py-6 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 dark:border-white/[0.07] pb-4">
         <div>
-          <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            JEE Readiness &amp; Analytics Dashboard
+          <h1 className="text-xl font-bold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+            JEE Readiness &amp; Analytics
           </h1>
-          <p className="text-xs text-slate-500">
-            Real-time tracking of uploaded study materials, CBT mock scores, and weak-chapter drills
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Study materials, CBT scores, and weak-chapter drills.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => onStartCBTMock('JEE Main')}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs cursor-pointer"
+          className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
         >
           Attempt Full 75-Q CBT Mock →
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs">
-          <div className="text-xs font-bold text-slate-500">Latest CBT Mock Score</div>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5">
+          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Latest CBT Score</div>
+          <div className="text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50 mt-1">
             {lastMockScore !== null ? `${lastMockScore} / 300` : 'Not Attempted'}
           </div>
-          <div className="text-[11px] text-emerald-600 font-semibold mt-1">
-            {lastMockScore !== null ? 'Est. 98.4+ Percentile Trajectory' : 'Take your first 75-Q CBT'}
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+            {lastMockScore !== null ? 'Est. 98.4+ Percentile' : 'Take your first 75-Q CBT'}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs">
-          <div className="text-xs font-bold text-slate-500">Uploaded Study Materials</div>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5">
+          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Study Materials</div>
+          <div className="text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50 mt-1">
             {materialsCount}
           </div>
-          <div className="text-[11px] text-indigo-600 font-semibold mt-1">
-            100% User-Owned Library
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mt-1">
+            User-owned library
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs">
-          <div className="text-xs font-bold text-slate-500">Logged Mistake DNA Items</div>
-          <div className="text-2xl font-extrabold text-rose-600 mt-1">{mistakesCount}</div>
-          <div className="text-[11px] text-slate-500 font-semibold mt-1">
-            Auto-captured from PYQs &amp; CBT
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5">
+          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Mistake DNA</div>
+          <div className="text-2xl font-bold font-mono tabular-nums text-rose-600 dark:text-rose-400 mt-1">
+            {mistakesCount}
+          </div>
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mt-1">
+            From PYQs &amp; CBT
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs">
-          <div className="text-xs font-bold text-slate-500">Target Exam Countdown</div>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+        <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-5">
+          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Exam Countdown</div>
+          <div className="text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50 mt-1">
             69 Days
           </div>
-          <div className="text-[11px] text-amber-600 font-semibold mt-1">
-            High-Weightage Revision Window
+          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium mt-1">
+            High-weightage window
           </div>
         </div>
       </div>
 
       {/* Weak-Topic Remediation Drills */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-2xs space-y-4">
-        <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
-          Recommended High-Weightage JEE Remediation Drills
+      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-6 space-y-4">
+        <h2 className="text-base font-bold tracking-[-0.01em] text-zinc-900 dark:text-zinc-50">
+          Recommended High-Weightage Drills
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
@@ -2363,23 +2398,23 @@ export const ProgressDashboardView: React.FC<ProgressViewProps> = ({
           ].map((item) => (
             <div
               key={item.topic}
-              className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2.5 flex flex-col justify-between"
+              className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-[#18181b]/70 space-y-2.5 flex flex-col justify-between"
             >
               <div className="space-y-1">
-                <span className="text-[10px] font-extrabold uppercase text-indigo-600">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                   {item.subject}
                 </span>
-                <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                   {item.topic}
                 </div>
-                <div className="text-xs text-slate-600 dark:text-slate-300">
+                <div className="text-xs text-zinc-600 dark:text-zinc-400">
                   <MathRichText content={item.note} />
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => onPracticeWeakTopic(item.topic)}
-                className="w-full py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-extrabold cursor-pointer"
+                className="w-full py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-[#1f1f23] dark:hover:bg-[#27272a] dark:text-zinc-100 border border-transparent dark:border-white/[0.08] text-xs font-semibold cursor-pointer transition-colors"
               >
                 Start Adaptive Drill →
               </button>
@@ -2882,21 +2917,23 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 flex flex-col">
       {/* Top Official Multi-Exam Proctored CBT Bar */}
-      <header className="bg-[#243B82] text-white px-4 lg:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <header className="bg-zinc-950 dark:bg-[#111113] border-b border-zinc-800 dark:border-white/[0.07] text-white px-4 lg:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="px-2.5 py-1 rounded bg-white/15 text-[11px] font-extrabold uppercase tracking-wider">
+          <span className="px-2.5 py-1 rounded-md bg-white/[0.08] border border-white/[0.1] text-[11px] font-semibold uppercase tracking-wider text-zinc-200">
             PROCTORED CBT CONSOLE
           </span>
-          <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl flex-wrap">
+          <div className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] p-1 rounded-lg flex-wrap">
             {(['JEE Main', 'JEE Advanced', 'NEET UG', 'BITSAT'] as const).map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => handleSwitchExamMode(m)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer ${
-                  examMode === m ? 'bg-white text-[#243B82]' : 'text-indigo-100 hover:bg-white/10'
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer transition-colors ${
+                  examMode === m
+                    ? 'bg-[#fafafa] text-[#09090b]'
+                    : 'text-zinc-300 hover:bg-white/[0.08] hover:text-white'
                 }`}
               >
                 {m}
@@ -2905,19 +2942,19 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 text-xs font-bold">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold">
           <div
             title="Auto-saves your responses and timer every 15 seconds"
-            className="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-300/30 text-emerald-200 flex items-center gap-1.5"
+            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5 font-mono tabular-nums"
           >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             <span>Auto-Saved ({lastAutoSavedTime})</span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-amber-300" />
-            <span>Time Left:</span>
-            <span className="font-mono text-sm font-extrabold text-amber-300">
+          <div className="px-3 py-1.5 rounded-lg bg-white/[0.07] border border-white/[0.1] flex items-center gap-2">
+            <Clock className="w-4 h-4 text-amber-400" />
+            <span className="text-zinc-300">Time Left:</span>
+            <span className="font-mono tabular-nums text-sm font-bold text-amber-300">
               {formatCountdownTimer(secondsRemaining)}
             </span>
           </div>
@@ -2925,36 +2962,46 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
           <button
             type="button"
             onClick={handleToggleFullscreenLock}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-extrabold cursor-pointer transition-all ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
               isFullscreenLocked
-                ? 'bg-emerald-500/25 border-emerald-300/40 text-emerald-100'
-                : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200'
+                : 'bg-white/[0.07] border-white/[0.12] text-zinc-200 hover:bg-white/[0.14]'
             }`}
           >
-            {isFullscreenLocked ? '🔒 Fullscreen Locked' : '⛶ Lock Fullscreen'}
+            {isFullscreenLocked ? (
+              <>
+                <Lock className="w-3.5 h-3.5" />
+                <span>Fullscreen Locked</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Lock Fullscreen</span>
+              </>
+            )}
           </button>
 
           <div
-            className={`px-3 py-1.5 rounded-xl border ${
+            className={`px-3 py-1.5 rounded-lg border font-mono tabular-nums ${
               focusEvents >= 3
-                ? 'bg-rose-600/90 border-rose-300 text-white'
+                ? 'bg-rose-600/90 border-rose-400 text-white'
                 : focusEvents > 0
-                ? 'bg-amber-500/30 border-amber-300/50 text-amber-200'
-                : 'bg-white/10 border-white/15'
+                ? 'bg-amber-500/20 border-amber-400/40 text-amber-200'
+                : 'bg-white/[0.07] border-white/[0.1] text-zinc-300'
             }`}
           >
-            Proctor Warnings: <span className="font-extrabold">{focusEvents} / 3</span>
+            Proctor Warnings: <span className="font-bold">{focusEvents} / 3</span>
           </div>
 
           <select
             value={examLanguage}
             onChange={(e) => setExamLanguage(e.target.value as 'English' | 'Hindi')}
-            className="px-2.5 py-1.5 rounded-xl bg-white/15 text-white text-xs font-bold border border-white/20 cursor-pointer"
+            className="px-2.5 py-1.5 rounded-lg bg-white/[0.08] text-white text-xs font-semibold border border-white/[0.14] cursor-pointer"
           >
-            <option value="English" className="text-slate-900">
+            <option value="English" className="text-zinc-900">
               English
             </option>
-            <option value="Hindi" className="text-slate-900">
+            <option value="Hindi" className="text-zinc-900">
               हिन्दी (Hindi)
             </option>
           </select>
@@ -2962,7 +3009,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
           <button
             type="button"
             onClick={() => setShowInstructionsModal(true)}
-            className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-extrabold cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.1] text-xs font-semibold cursor-pointer transition-colors"
           >
             Instructions
           </button>
@@ -2970,7 +3017,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
           <button
             type="button"
             onClick={onExitMock}
-            className="px-3 py-1.5 rounded-xl bg-rose-500/80 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold cursor-pointer transition-colors"
           >
             Save &amp; Exit
           </button>
@@ -2980,10 +3027,10 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
       {/* 3-Strike Proctoring Warning Banner */}
       {focusEvents > 0 && (
         <div
-          className={`px-6 py-2 text-xs font-extrabold flex flex-wrap items-center justify-between gap-2 ${
+          className={`px-6 py-2 text-xs font-semibold flex flex-wrap items-center justify-between gap-2 ${
             focusEvents >= 3
               ? 'bg-rose-600 text-white'
-              : 'bg-amber-100 text-amber-950 border-b border-amber-300'
+              : 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-b border-amber-500/30'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -2998,7 +3045,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
             <button
               type="button"
               onClick={handleToggleFullscreenLock}
-              className="px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-extrabold cursor-pointer"
+              className="px-2.5 py-1 rounded-md btn-terracotta text-[11px] font-semibold cursor-pointer"
             >
               Re-enter Fullscreen
             </button>
@@ -3011,7 +3058,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
         {/* Left 9 Cols: Subject Tabs, Section Tabs & Question Canvas */}
         <div className="lg:col-span-9 flex flex-col gap-4">
           {/* Subject & Section Bar */}
-          <div className="bg-white rounded-xl border border-slate-200 p-3 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+          <div className="bg-white dark:bg-[#111113] rounded-xl border border-zinc-200 dark:border-white/[0.07] p-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {(['Physics', 'Chemistry', 'Mathematics'] as const).map((subj) => {
                 const active = activeSubject === subj;
@@ -3027,10 +3074,10 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                       setActiveSection(firstQ?.section || 'Section A');
                       if (firstQ) handleJumpToQuestion(firstQ.number);
                     }}
-                    className={`px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer ${
+                    className={`px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors font-mono tabular-nums ${
                       active
-                        ? 'bg-[#243B82] text-white shadow-2xs'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                        : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23]'
                     }`}
                   >
                     {subj} ({subjCount} Qs)
@@ -3056,10 +3103,10 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                         setActiveSection(sec);
                         if (firstSecQ) handleJumpToQuestion(firstSecQ.number);
                       }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer ${
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                         active
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23]'
                       }`}
                     >
                       {isCustomTest
@@ -3077,29 +3124,29 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
           </div>
 
           {/* Question Stem & Options Card */}
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs flex flex-col justify-between space-y-6">
+          <div className="flex-1 bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-base font-extrabold text-slate-900">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 dark:border-white/[0.07] pb-3.5">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="text-base font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
                     Question {currentQuestion.number} of {questionsList.length}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-xs font-extrabold">
+                  <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] text-zinc-800 dark:text-zinc-200 text-xs font-semibold">
                     {currentQuestion.subject} • {currentQuestion.chapter}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold uppercase">
+                  <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 text-xs font-mono font-semibold uppercase">
                     {currentQuestion.advancedFormat ||
                       (currentQuestion.section === 'Section B' ? 'NUMERICAL' : 'SINGLE MCQ')}
                   </span>
                   {customPaperTitle && (
-                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">
+                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold">
                       {customPaperTitle}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 text-xs font-extrabold">
-                  <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-mono tabular-nums font-semibold">
+                  <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">
                     +
                     {examMode === 'JEE Advanced' &&
                     (currentQuestion.advancedFormat === 'single' ||
@@ -3109,7 +3156,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                       : 4}{' '}
                     Correct
                   </span>
-                  <span className="text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg">
+                  <span className="text-rose-700 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-md">
                     {isNumericalQ && examMode !== 'JEE Advanced'
                       ? '-1 Negative'
                       : isNumericalQ
@@ -3119,7 +3166,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                       : '-1 Negative'}
                   </span>
                   {isMultipleQ && (
-                    <span className="text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">
+                    <span className="text-blue-700 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-md">
                       +3 / +2 / +1 Partial Marks
                     </span>
                   )}
@@ -3128,8 +3175,8 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
               {/* JEE Advanced Paragraph / Comprehension Context Box */}
               {currentQuestion.paragraphContext && (
-                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs sm:text-sm text-slate-800 space-y-1.5">
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-800">
+                <div className="p-4 rounded-xl bg-amber-500/[0.07] border border-amber-500/25 text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 space-y-1.5">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                     JEE Advanced Paragraph / Comprehension Stem
                   </div>
                   <MathRichText content={currentQuestion.paragraphContext} />
@@ -3138,26 +3185,32 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
               {/* JEE Advanced Matrix-Match List-I / List-II Table */}
               {currentQuestion.matrixListI && currentQuestion.matrixListII && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 rounded-xl bg-indigo-50/40 border border-indigo-200/80 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] text-xs">
                   <div>
-                    <div className="font-extrabold uppercase tracking-wider text-indigo-800 mb-2">
+                    <div className="font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-2">
                       List-I
                     </div>
                     <div className="space-y-1.5">
                       {currentQuestion.matrixListI.map((item, i) => (
-                        <div key={i} className="p-2 rounded-lg bg-white border border-slate-200">
+                        <div
+                          key={i}
+                          className="p-2 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]"
+                        >
                           <MathRichText content={item} inline />
                         </div>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <div className="font-extrabold uppercase tracking-wider text-indigo-800 mb-2">
+                    <div className="font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-2">
                       List-II
                     </div>
                     <div className="space-y-1.5">
                       {currentQuestion.matrixListII.map((item, i) => (
-                        <div key={i} className="p-2 rounded-lg bg-white border border-slate-200">
+                        <div
+                          key={i}
+                          className="p-2 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]"
+                        >
                           <MathRichText content={item} inline />
                         </div>
                       ))}
@@ -3167,7 +3220,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
               )}
 
               {/* Rendered Question Stem */}
-              <div className="text-base sm:text-lg font-bold text-slate-900 leading-relaxed">
+              <div className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50 leading-relaxed">
                 <MathRichText
                   content={
                     examLanguage === 'Hindi' && currentQuestion.stemHindi
@@ -3182,7 +3235,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                 {!isNumericalQ && (
                   <div className="lg:col-span-12 space-y-3">
                     {isMultipleQ && (
-                      <div className="text-xs font-extrabold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg inline-block">
+                      <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-lg inline-block">
                         JEE Advanced One-or-More-Than-One Correct: Select all correct options (+4 full, +1 partial per correct option)
                       </div>
                     )}
@@ -3210,27 +3263,27 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                               else handleSelectSingleOption(idx);
                             }
                           }}
-                          className={`flex items-center gap-3.5 p-3.5 rounded-xl border transition-all cursor-pointer max-w-2xl ${
+                          className={`flex items-center gap-3.5 p-3.5 rounded-xl border transition-colors cursor-pointer max-w-2xl ${
                             isChecked
-                              ? 'border-indigo-600 bg-indigo-50/60'
-                              : 'border-slate-200 hover:bg-slate-50'
+                              ? 'border-blue-500/60 bg-blue-500/10 text-zinc-900 dark:text-zinc-50'
+                              : 'border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b]/60 hover:bg-zinc-50 dark:hover:bg-[#1f1f23]'
                           }`}
                         >
                           <span
                             className={`w-5 h-5 ${
                               isMultipleQ ? 'rounded-md' : 'rounded-full'
-                            } border flex items-center justify-center ${
+                            } border flex items-center justify-center shrink-0 ${
                               isChecked
-                                ? 'border-indigo-600 bg-indigo-600 text-white'
-                                : 'border-slate-400'
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-zinc-400 dark:border-zinc-600'
                             }`}
                           >
-                            {isChecked && <span className="text-xs font-bold">✓</span>}
+                            {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                           </span>
-                          <span className="text-sm font-extrabold text-slate-800">
+                          <span className="text-sm font-mono font-bold text-zinc-800 dark:text-zinc-200">
                             ({letter})
                           </span>
-                          <div className="text-sm sm:text-base font-medium text-slate-900">
+                          <div className="text-sm sm:text-base font-medium text-zinc-900 dark:text-zinc-100">
                             <MathRichText content={opt} inline />
                           </div>
                         </div>
@@ -3240,8 +3293,8 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                 )}
 
                 {isNumericalQ && (
-                  <div className="lg:col-span-6 bg-slate-50 rounded-2xl border border-slate-200 p-5 max-w-sm">
-                    <div className="text-xs font-extrabold uppercase tracking-wider text-indigo-700 mb-2">
+                  <div className="lg:col-span-6 bg-zinc-50 dark:bg-[#18181b] rounded-2xl border border-zinc-200 dark:border-white/[0.08] p-5 max-w-sm">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-2">
                       Numerical Value Response (
                       {examMode === 'JEE Advanced' ? '0 Negative Marking' : '+4 / -1 NTA Marking'})
                     </div>
@@ -3252,7 +3305,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                       value={currentResponse.numericalValue || ''}
                       onChange={(e) => handleNumericalDirectChange(e.target.value)}
                       placeholder="Enter numerical value..."
-                      className="w-full px-3.5 py-2.5 rounded-xl border-2 border-indigo-300 focus:border-indigo-600 focus:outline-none bg-white font-mono text-base font-extrabold text-slate-900 mb-3"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 dark:border-white/[0.15] focus:border-zinc-900 dark:focus:border-zinc-300 focus:outline-none bg-white dark:bg-[#111113] font-mono tabular-nums text-base font-bold text-zinc-900 dark:text-zinc-50 mb-3"
                     />
                     <div className="grid grid-cols-3 gap-2">
                       {['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '-'].map(
@@ -3261,7 +3314,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                             key={digit}
                             type="button"
                             onClick={() => handleNumericalKeyPress(digit)}
-                            className="py-2.5 rounded-lg bg-white border border-slate-200 hover:bg-indigo-50 font-mono text-sm font-extrabold text-slate-800 cursor-pointer"
+                            className="py-2.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.08] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] font-mono text-sm font-semibold text-zinc-800 dark:text-zinc-100 cursor-pointer transition-colors"
                           >
                             {digit}
                           </button>
@@ -3272,14 +3325,14 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                       <button
                         type="button"
                         onClick={() => handleNumericalKeyPress('BACKSPACE')}
-                        className="py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-extrabold cursor-pointer"
+                        className="py-2 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-semibold cursor-pointer hover:bg-amber-500/20 transition-colors"
                       >
                         Backspace
                       </button>
                       <button
                         type="button"
                         onClick={() => handleNumericalKeyPress('CLEAR')}
-                        className="py-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-extrabold cursor-pointer"
+                        className="py-2 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-300 text-xs font-semibold cursor-pointer hover:bg-rose-500/20 transition-colors"
                       >
                         Clear All
                       </button>
@@ -3293,64 +3346,64 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
         {/* Right 3 Cols: Candidate Info & 5-State NTA Palette */}
         <div className="lg:col-span-3 flex flex-col gap-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3.5 shadow-2xs">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-              <User className="w-6 h-6" />
+          <div className="bg-white dark:bg-[#111113] rounded-xl border border-zinc-200 dark:border-white/[0.07] p-4 flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] flex items-center justify-center text-zinc-700 dark:text-zinc-200">
+              <User className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-sm font-extrabold text-slate-900">
+              <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                 {candidateName || 'Candidate'}
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs font-mono tabular-nums text-zinc-500 dark:text-zinc-400">
                 {examMode} • {questionsList.length} Questions
               </div>
             </div>
           </div>
 
-          {/* 5-State Legend */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-2 text-xs font-medium text-slate-700 shadow-2xs">
+          {/* 5-State Legend (NTA Palette Preserved) */}
+          <div className="bg-white dark:bg-[#111113] rounded-xl border border-zinc-200 dark:border-white/[0.07] p-4 space-y-2 text-xs font-medium text-zinc-700 dark:text-zinc-300">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded bg-slate-200 border border-slate-300 inline-block" />
+                <span className="w-4 h-4 rounded bg-slate-200 dark:bg-zinc-700 border border-slate-300 dark:border-zinc-600 inline-block" />
                 Not Visited
               </span>
-              <span className="font-extrabold">{livePaletteCounts.not_visited}</span>
+              <span className="font-mono tabular-nums font-bold">{livePaletteCounts.not_visited}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded bg-[#DC2626] inline-block" />
                 Not Answered
               </span>
-              <span className="font-extrabold">{livePaletteCounts.not_answered}</span>
+              <span className="font-mono tabular-nums font-bold">{livePaletteCounts.not_answered}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded bg-[#16A34A] inline-block" />
                 Answered
               </span>
-              <span className="font-extrabold">{livePaletteCounts.answered}</span>
+              <span className="font-mono tabular-nums font-bold">{livePaletteCounts.answered}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded bg-[#7C3AED] inline-block" />
                 Marked for Review
               </span>
-              <span className="font-extrabold">{livePaletteCounts.marked}</span>
+              <span className="font-mono tabular-nums font-bold">{livePaletteCounts.marked}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded bg-[#7C3AED] text-white text-[9px] inline-flex items-center justify-center">
-                  ✓
+                <span className="w-4 h-4 rounded bg-[#7C3AED] text-white inline-flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" />
                 </span>
                 Answered &amp; Marked
               </span>
-              <span className="font-extrabold">{livePaletteCounts.answered_marked}</span>
+              <span className="font-mono tabular-nums font-bold">{livePaletteCounts.answered_marked}</span>
             </div>
           </div>
 
           {/* Question Palette Grid */}
-          <div className="flex-1 bg-white rounded-xl border border-slate-200 p-4 shadow-2xs max-h-[380px] overflow-y-auto">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-3">
+          <div className="flex-1 bg-white dark:bg-[#111113] rounded-xl border border-zinc-200 dark:border-white/[0.07] p-4 max-h-[380px] overflow-y-auto">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-3">
               {activeSubject} • {examMode === 'JEE Main' ? activeSection : 'Paper 1'} Palette
             </h3>
             <div className="grid grid-cols-5 gap-2">
@@ -3358,7 +3411,8 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                 const st = responses[q.id]?.status || 'not_visited';
                 const isCurrent = currentQNumber === q.number;
 
-                let btnStyle = 'bg-slate-200 text-slate-800 border-slate-300';
+                let btnStyle =
+                  'bg-slate-200 dark:bg-[#18181b] text-slate-800 dark:text-zinc-200 border-slate-300 dark:border-white/[0.1]';
                 if (st === 'answered') {
                   btnStyle = 'bg-[#16A34A] text-white border-[#15803D]';
                 } else if (st === 'not_answered') {
@@ -3369,7 +3423,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
                 if (isCurrent) {
                   btnStyle =
-                    'bg-[#EEF2FF] text-[#1D3587] border-2 border-[#3B5BDB] ring-2 ring-indigo-500/20';
+                    'bg-blue-500/15 text-blue-700 dark:text-blue-200 border-blue-500 ring-2 ring-blue-500/30';
                 }
 
                 return (
@@ -3377,12 +3431,12 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                     key={q.id}
                     type="button"
                     onClick={() => handleJumpToQuestion(q.number)}
-                    className={`relative h-9 rounded-lg font-extrabold text-xs border transition-all flex items-center justify-center cursor-pointer ${btnStyle}`}
+                    className={`relative h-9 rounded-lg font-mono tabular-nums font-bold text-xs border transition-colors flex items-center justify-center cursor-pointer ${btnStyle}`}
                   >
                     {q.number}
                     {st === 'answered_marked' && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center">
-                        ✓
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                        <Check className="w-2 h-2 stroke-[3]" />
                       </span>
                     )}
                   </button>
@@ -3394,19 +3448,19 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
       </div>
 
       {/* Bottom Action Footer */}
-      <footer className="bg-white border-t border-slate-200 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <footer className="bg-white dark:bg-[#111113] border-t border-zinc-200 dark:border-white/[0.07] px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={handleMarkForReviewAndNext}
-            className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-extrabold text-slate-800 cursor-pointer"
+            className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-white/[0.1] bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#1f1f23] text-xs font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer transition-colors"
           >
             Mark for Review &amp; Next
           </button>
           <button
             type="button"
             onClick={handleClearResponse}
-            className="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-extrabold text-slate-800 cursor-pointer"
+            className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-white/[0.1] bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#1f1f23] text-xs font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer transition-colors"
           >
             Clear Response
           </button>
@@ -3414,12 +3468,14 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
         <div className="flex items-center gap-3">
           {submitCbtError && (
-            <span className="text-xs font-bold text-rose-600">{submitCbtError}</span>
+            <span className="text-xs font-medium text-rose-600 dark:text-rose-400">
+              {submitCbtError}
+            </span>
           )}
           <button
             type="button"
             onClick={handleSaveAndNext}
-            className="px-6 py-2.5 rounded-xl bg-[#2B3A99] hover:bg-[#1E2A78] text-white text-xs font-extrabold cursor-pointer"
+            className="px-5 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
           >
             Save &amp; Next
           </button>
@@ -3427,7 +3483,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
             type="button"
             disabled={submittingCbt}
             onClick={handleTriggerSubmit}
-            className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-xs font-extrabold cursor-pointer"
+            className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white text-xs font-semibold cursor-pointer transition-colors"
           >
             {submittingCbt ? 'Grading on Server...' : 'Submit Exam'}
           </button>
@@ -3436,20 +3492,20 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
       {/* Instructions Modal */}
       {showInstructionsModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-xl space-y-4">
-            <h3 className="text-lg font-extrabold text-slate-900">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111113] rounded-2xl max-w-lg w-full p-6 border border-zinc-200 dark:border-white/[0.08] space-y-4">
+            <h3 className="text-lg font-bold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
               {examMode} Official Marking &amp; Evaluation Rules
             </h3>
-            <ul className="space-y-2 text-xs text-slate-600 list-disc pl-5 leading-relaxed">
+            <ul className="space-y-2 text-xs text-zinc-600 dark:text-zinc-400 list-disc pl-5 leading-relaxed">
               <li>
-                <strong>JEE Main Section A (MCQs):</strong> +4 for correct, -1 negative marking.
+                <strong className="text-zinc-900 dark:text-zinc-200">JEE Main Section A (MCQs):</strong> +4 for correct, -1 negative marking.
               </li>
               <li>
-                <strong>JEE Main Section B (5 Compulsory Numericals per subject):</strong> +4 for correct, <strong>-1 negative marking</strong> per official NTA JEE Main 2027 Paper 1 rules.
+                <strong className="text-zinc-900 dark:text-zinc-200">JEE Main Section B (5 Compulsory Numericals per subject):</strong> +4 for correct, <strong className="text-zinc-900 dark:text-zinc-200">-1 negative marking</strong> per official NTA JEE Main 2027 Paper 1 rules.
               </li>
               <li>
-                <strong>JEE Advanced Multiple-Choice:</strong> +4 if all correct options chosen, +1 partial mark per correct option if no wrong option is chosen, -2 if any wrong option is chosen.
+                <strong className="text-zinc-900 dark:text-zinc-200">JEE Advanced Multiple-Choice:</strong> +4 if all correct options chosen, +1 partial mark per correct option if no wrong option is chosen, -2 if any wrong option is chosen.
               </li>
               <li>
                 Questions Marked for Review WITH a saved answer are evaluated for marks per NTA rules.
@@ -3459,7 +3515,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
               <button
                 type="button"
                 onClick={() => setShowInstructionsModal(false)}
-                className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-extrabold cursor-pointer"
+                className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer"
               >
                 Resume Exam
               </button>
@@ -3470,25 +3526,25 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
 
       {/* Post-Submit Question-by-Question Time-Spent & Marks Accuracy Report Modal */}
       {submittedSummary && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-slate-200 shadow-2xl overflow-hidden">
-            <div className="px-6 py-5 bg-[#243B82] text-white flex flex-wrap items-center justify-between gap-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111113] rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-zinc-200 dark:border-white/[0.08] overflow-hidden">
+            <div className="px-6 py-5 bg-zinc-950 dark:bg-[#141417] border-b border-white/[0.08] text-white flex flex-wrap items-center justify-between gap-4">
               <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-200">
-                  {examMode} QUESTION-BY-QUESTION TIME &amp; ACCURACY REPORT
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  {examMode} Question-by-Question Report
                 </span>
-                <h3 className="text-2xl font-extrabold">
+                <h3 className="text-2xl font-bold font-mono tabular-nums text-zinc-50 mt-0.5">
                   Score: {submittedSummary.totalScore} / {submittedSummary.maxScore}
                 </h3>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-                <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-300/30">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-mono tabular-nums font-semibold">
+                <span className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
                   Correct: {submittedSummary.correctCount}
                 </span>
-                <span className="px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-300/30">
+                <span className="px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300">
                   Incorrect: {submittedSummary.incorrectCount}
                 </span>
-                <span className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20">
+                <span className="px-3 py-1.5 rounded-lg bg-white/[0.08] border border-white/[0.12] text-zinc-200">
                   Accuracy: {submittedSummary.accuracyPct}%
                 </span>
               </div>
@@ -3504,22 +3560,21 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                 return (
                   <div
                     key={q.id}
-                    className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2"
+                    className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-[#18181b]/70 space-y-2"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-xs font-extrabold text-indigo-700">
-                        Q{q.number} • {q.subject} ({q.chapter}) • Time Spent:{' '}
-                        {detail?.timeSpentSec || 0}s
+                      <span className="text-xs font-mono tabular-nums font-semibold text-blue-600 dark:text-blue-400">
+                        Q{q.number} • {q.subject} ({q.chapter}) • {detail?.timeSpentSec || 0}s
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-mono tabular-nums font-semibold border ${
                           detail?.isCorrect
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
                             : isPartial
-                            ? 'bg-amber-100 text-amber-800'
+                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'
                             : detail?.isAttempted
-                            ? 'bg-rose-100 text-rose-800'
-                            : 'bg-slate-200 text-slate-700'
+                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400'
+                            : 'bg-zinc-100 dark:bg-[#1f1f23] border-zinc-200 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400'
                         }`}
                       >
                         {detail && detail.isAttempted
@@ -3530,12 +3585,12 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                       </span>
                     </div>
 
-                    <div className="text-sm font-bold text-slate-900">
+                    <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                       <MathRichText content={q.stem} />
                     </div>
 
-                    <div className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
-                      <strong className="text-slate-900 block mb-1">
+                    <div className="text-xs text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#111113] p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07]">
+                      <strong className="text-zinc-900 dark:text-zinc-100 block mb-1">
                         Server-Verified Step-by-Step Solution:
                       </strong>
                       <MathRichText
@@ -3547,14 +3602,14 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
               })}
             </div>
 
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
+            <div className="px-6 py-4 bg-zinc-50 dark:bg-[#141417] border-t border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                 Incorrect questions have been automatically logged to your Mistakes Notebook.
               </span>
               <button
                 type="button"
                 onClick={() => onSubmitMock(submittedSummary, focusEvents, questionsList, responses)}
-                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold cursor-pointer"
+                className="px-5 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
               >
                 Finish &amp; Go to Progress Dashboard →
               </button>

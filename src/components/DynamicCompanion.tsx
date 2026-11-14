@@ -9,8 +9,6 @@ import {
   CheckCircle2,
   ChevronRight,
   Globe,
-  Minimize2,
-  Maximize2,
 } from 'lucide-react';
 import { EXPANDED_NTA_58_CHAPTERS, MicroShardTask } from '../data/expandedNta58Chapters';
 import { apiFetchWithAuth } from '../services/workspaceService';
@@ -20,15 +18,18 @@ export interface DynamicCompanionProps {
   activeChapterName?: string;
   activeMaterialId?: string;
   onEarnXp?: (xp: number, reason?: string) => void;
+  sidebarCollapsed?: boolean;
+  variant?: 'sidebar' | 'mobile-icon';
 }
 
 export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
   activeChapterName = 'Rotational Motion',
   activeMaterialId,
   onEarnXp,
+  sidebarCollapsed = false,
+  variant = 'sidebar',
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [modeTab, setModeTab] = useState<'socratic' | 'shardz' | 'ocr'>('socratic');
   const [language, setLanguage] = useState<'English' | 'Hinglish' | 'Hindi'>('Hinglish');
   const [clueCoins, setClueCoins] = useState<number>(3);
@@ -55,9 +56,6 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
       questionInput.trim() ||
       `Give me a step-by-step ${hintLevel ? `Hint #${hintLevel}` : 'concept breakdown'} on ${matchedChapter.chapterName}.`;
     if (hintLevel && clueCoins <= 0) return;
-    if (hintLevel) {
-      setClueCoins((c) => Math.max(0, c - 1));
-    }
     setLoading(true);
     setAiCitations([]);
     try {
@@ -77,15 +75,16 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
         imageMimeType: ocrPreviewDataUrl ? 'image/png' : undefined,
       });
       if (!res.ok) {
-        setAiReply(
-          `[${res.error.errorCode}] ${res.error.message}`
-        );
+        setAiReply(`[${res.error.errorCode}] ${res.error.message}`);
       } else {
-        setAiReply(res.data.answer || res.data.text || 'Completed analysis.');
+        if (hintLevel) {
+          setClueCoins((c) => Math.max(0, c - 1));
+        }
+        setAiReply(res.data.answer || res.data.text || 'Done.');
         if (Array.isArray(res.data.citations)) {
           setAiCitations(res.data.citations);
         }
-        onEarnXp?.(15, 'Socratic AI Doubt Solved (+15 XP)');
+        onEarnXp?.(15, '+15 XP');
       }
     } catch (err: any) {
       setAiReply(err?.message || 'Unable to reach AI Tutor endpoint.');
@@ -109,291 +108,287 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
 
   return (
     <>
-      {/* Floating Companion Trigger Pill */}
-      <div
-        data-testid="companion-floating-dock"
-        className="fixed bottom-16 right-3 lg:bottom-10 lg:right-4 z-40"
-      >
-        {!isOpen ? (
-          isMinimized ? (
-            <button
-              type="button"
-              onClick={() => setIsMinimized(false)}
-              className="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg border border-indigo-400/40 flex items-center justify-center cursor-pointer transition-all"
-              title="Expand AI Companion"
-              aria-label="Expand AI Companion"
-            >
-              <Maximize2 className="w-4 h-4 text-amber-300" />
-            </button>
-          ) : (
-            <div className="inline-flex items-center rounded-2xl bg-indigo-600 text-white shadow-lg border border-indigo-400/40 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setIsOpen(true)}
-                className="flex items-center gap-1.5 pl-3 pr-2 py-2 hover:bg-indigo-700 text-[11px] font-extrabold cursor-pointer transition-colors whitespace-nowrap"
-                title="Open Socratic AI Study Companion & 15-Min ShardZ"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span>Companion • {clueCoins} Clue Coins</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsMinimized(true)}
-                className="px-2 py-2 border-l border-indigo-400/30 hover:bg-indigo-700 text-indigo-100 hover:text-white cursor-pointer transition-colors"
-                title="Minimize Companion pill"
-                aria-label="Minimize Companion pill"
-              >
-                <Minimize2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )
-        ) : (
-          <div className="w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-slate-900 dark:text-white">
-            {/* Header */}
-            <div className="px-4 py-3 bg-slate-900 text-white flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <div>
-                  <div className="text-xs font-extrabold">Dynamic JEE Study Companion</div>
-                  <div className="text-[10px] text-slate-300 truncate max-w-[200px]">
-                    {matchedChapter.subject} • {matchedChapter.chapterName}
-                  </div>
+      {variant === 'mobile-icon' ? (
+        <button
+          type="button"
+          data-testid="companion-mobile-trigger"
+          onClick={() => setIsOpen((v) => !v)}
+          title="Study Companion"
+          aria-label="Open Companion"
+          className="lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#1C1917] dark:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348] shrink-0" />
+          <span className="font-mono tabular-nums text-[11px]">{clueCoins}</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          data-testid="companion-sidebar-trigger"
+          onClick={() => setIsOpen((v) => !v)}
+          title={`Companion · ${clueCoins} Clue Coins`}
+          className={`w-full flex items-center ${
+            sidebarCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-2'
+          } rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#F3EFEA] dark:bg-[#1A1A1D] hover:bg-[#EAE4DC] dark:hover:bg-[#222226] text-[#1C1917] dark:text-[#F5F0E6] text-xs font-medium transition-colors duration-150 cursor-pointer`}
+        >
+          <span className="inline-flex items-center gap-2 min-w-0">
+            <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348] shrink-0" />
+            {!sidebarCollapsed && <span className="truncate">Companion</span>}
+          </span>
+          {!sidebarCollapsed && (
+            <span className="font-mono tabular-nums text-[11px] text-[#57534E] dark:text-[#A1A1AA] shrink-0">
+              {clueCoins} coins
+            </span>
+          )}
+        </button>
+      )}
+
+      {isOpen && (
+        <div
+          data-testid="companion-popover"
+          className={`fixed bottom-16 left-4 lg:bottom-12 ${
+            sidebarCollapsed ? 'lg:left-20' : 'lg:left-[16.75rem]'
+          } z-50 w-96 max-w-[calc(100vw-2rem)] bg-[#FFFFFF] dark:bg-[#121214] rounded-2xl border border-[#E7E2DA] dark:border-white/[0.08] shadow-2xl overflow-hidden text-[#1C1917] dark:text-[#F5F0E6]`}
+        >
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-[#E7E2DA] dark:border-white/[0.08] bg-[#F3EFEA] dark:bg-[#1A1A1D] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Sparkles className="w-4 h-4 text-[#D4653B] dark:text-[#E07348] shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs font-semibold truncate">Study Companion</div>
+                <div className="text-[11px] text-[#57534E] dark:text-[#A1A1AA] truncate">
+                  {matchedChapter.subject} · {matchedChapter.chapterName}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-400/30">
-                  <Coins className="w-3 h-3" />
-                  {clueCoins}/3 Hints
-                </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="inline-flex items-center gap-1 font-mono tabular-nums text-[11px] text-[#D4653B] dark:text-[#E07348]">
+                <Coins className="w-3 h-3" />
+                {clueCoins}/3
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-lg text-[#57534E] hover:text-[#1C1917] dark:text-[#A1A1AA] dark:hover:text-[#F5F0E6] cursor-pointer transition-colors duration-150"
+                aria-label="Close Companion"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Language Selector & Mode Tabs */}
+          <div className="px-3 py-2 border-b border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] flex items-center justify-between gap-2">
+            <div className="inline-flex rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] p-0.5 text-[11px] font-medium">
+              {(
+                [
+                  { id: 'socratic', label: '3-Hint' },
+                  { id: 'shardz', label: '15m Sprints' },
+                  { id: 'ocr', label: 'Scan' },
+                ] as const
+              ).map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setModeTab(t.id)}
+                  className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors duration-150 ${
+                    modeTab === t.id
+                      ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.15] text-[#D4653B] dark:text-[#E07348] font-semibold'
+                      : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="inline-flex items-center gap-1 text-[11px] font-medium">
+              <Globe className="w-3 h-3 text-zinc-400" />
+              <select
+                aria-label="Select AI Tutor Language"
+                value={language}
+                onChange={(e) =>
+                  setLanguage(e.target.value as 'English' | 'Hinglish' | 'Hindi')
+                }
+                className="bg-transparent text-zinc-700 dark:text-zinc-200 font-medium focus:outline-none cursor-pointer"
+              >
+                <option value="English">English</option>
+                <option value="Hinglish">Hinglish</option>
+                <option value="Hindi">Hindi</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="p-3.5 max-h-80 overflow-y-auto space-y-3 text-xs">
+            {modeTab === 'socratic' && (
+              <div className="space-y-2.5">
+                <label className="flex items-center justify-between bg-zinc-50 dark:bg-[#18181b] px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] cursor-pointer">
+                  <span className="font-medium text-zinc-700 dark:text-zinc-300 text-[11px]">
+                    Guide with hints first
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={socraticMode}
+                    onChange={(e) => setSocraticMode(e.target.checked)}
+                    className="accent-zinc-900 dark:accent-[#fafafa] cursor-pointer"
+                  />
+                </label>
+
+                <textarea
+                  rows={2}
+                  value={questionInput}
+                  onChange={(e) => setQuestionInput(e.target.value)}
+                  placeholder={`Ask about ${matchedChapter.chapterName}...`}
+                  className="w-full rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#18181b] p-2.5 text-xs text-zinc-900 dark:text-[#fafafa] placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
+                />
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={loading || clueCoins < 1}
+                    onClick={() => handleAskSocratic(1)}
+                    className="flex-1 py-1.5 px-2 rounded-lg bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 border border-zinc-200 dark:border-white/[0.07] font-medium text-[11px] cursor-pointer disabled:opacity-50 transition-colors duration-150"
+                  >
+                    Hint 1
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loading || clueCoins < 1}
+                    onClick={() => handleAskSocratic(2)}
+                    className="flex-1 py-1.5 px-2 rounded-lg bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 border border-zinc-200 dark:border-white/[0.07] font-medium text-[11px] cursor-pointer disabled:opacity-50 transition-colors duration-150"
+                  >
+                    Hint 2
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleAskSocratic(undefined)}
+                    className="btn-terracotta py-1.5 px-3 rounded-lg font-semibold text-[11px] inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    <Send className="w-3 h-3" />
+                    Ask
+                  </button>
+                </div>
+
+                {aiReply && (
+                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-[11px] leading-relaxed space-y-2">
+                    <MathRichText content={aiReply} />
+                    {aiCitations.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1.5 border-t border-zinc-200 dark:border-white/[0.07] text-[10px] font-mono text-zinc-500">
+                        {aiCitations.map((cit) => (
+                          <span key={cit.chunkId} title={cit.snippet}>
+                            p.{cit.pageNumber}
+                            {cit.timestampLabel ? ` · ${cit.timestampLabel}` : ''}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {modeTab === 'shardz' && (
+              <div className="space-y-2">
+                <div className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                  15m Sprints · {matchedChapter.chapterName}
+                </div>
+                {shards.map((shard) => {
+                  const done = !!completedShards[shard.id];
+                  return (
+                    <div
+                      key={shard.id}
+                      className="p-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-zinc-900 dark:text-[#fafafa] flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          {shard.title}
+                        </span>
+                        <span className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
+                          {shard.durationMinutes}m
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                        {shard.activeRecallPrompt}
+                      </p>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 truncate max-w-[180px]">
+                          {matchedChapter.keyFormulasLatex[0] || matchedChapter.unitName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCompletedShards((prev) => ({ ...prev, [shard.id]: !done }));
+                            if (!done) onEarnXp?.(20, `+20 XP`);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors duration-150 ${
+                            done
+                              ? 'bg-emerald-600 text-white'
+                              : 'btn-terracotta'
+                          }`}
+                        >
+                          {done ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3" /> Done
+                            </>
+                          ) : (
+                            <>
+                              Done <ChevronRight className="w-3 h-3" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {modeTab === 'ocr' && (
+              <div className="space-y-2.5">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
-                  aria-label="Close Dynamic Companion"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-3 px-3 rounded-xl border border-dashed border-zinc-300 dark:border-white/[0.14] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-[#fafafa] font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors duration-150"
                 >
-                  <X className="w-4 h-4" />
+                  <Camera className="w-4 h-4 text-zinc-400" />
+                  <span>Upload Question Image</span>
                 </button>
-              </div>
-            </div>
-
-            {/* Language Selector & Mode Tabs */}
-            <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-              <div className="inline-flex rounded-xl bg-white dark:bg-slate-900 p-0.5 border border-slate-200 dark:border-slate-700 text-[11px] font-bold">
-                {(
-                  [
-                    { id: 'socratic', label: '3-Hint Tutor' },
-                    { id: 'shardz', label: '15m ShardZ' },
-                    { id: 'ocr', label: 'Camera OCR' },
-                  ] as const
-                ).map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setModeTab(t.id)}
-                    className={`px-2.5 py-1 rounded-lg cursor-pointer ${
-                      modeTab === t.id
-                        ? 'bg-indigo-600 text-white font-extrabold'
-                        : 'text-slate-600 dark:text-slate-300'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="inline-flex items-center gap-1 text-[10px] font-extrabold">
-                <Globe className="w-3 h-3 text-indigo-600" />
-                <select
-                  aria-label="Select AI Tutor Language"
-                  value={language}
-                  onChange={(e) =>
-                    setLanguage(e.target.value as 'English' | 'Hinglish' | 'Hindi')
-                  }
-                  className="bg-transparent text-slate-700 dark:text-slate-200 font-extrabold focus:outline-none cursor-pointer"
-                >
-                  <option value="English">English</option>
-                  <option value="Hinglish">Hinglish</option>
-                  <option value="Hindi">Hindi</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Body */}
-            <div className="p-3.5 max-h-80 overflow-y-auto space-y-3 text-xs">
-              {modeTab === 'socratic' && (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between bg-indigo-50/70 dark:bg-indigo-950/40 px-3 py-2 rounded-xl border border-indigo-100 dark:border-indigo-900">
-                    <span className="font-bold text-indigo-950 dark:text-indigo-200 text-[11px]">
-                      Socratic 3-Hint Mode (Guide Before Full Answer)
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={socraticMode}
-                      onChange={(e) => setSocraticMode(e.target.checked)}
-                      className="accent-indigo-600 cursor-pointer"
+                {ocrPreviewDataUrl && (
+                  <div className="space-y-2">
+                    <img
+                      src={ocrPreviewDataUrl}
+                      alt="Uploaded Doubt OCR Preview"
+                      className="max-h-32 rounded-lg border border-zinc-200 dark:border-white/[0.07] mx-auto object-contain"
                     />
-                  </div>
-
-                  <textarea
-                    rows={2}
-                    value={questionInput}
-                    onChange={(e) => setQuestionInput(e.target.value)}
-                    placeholder={`Ask a JEE doubt on ${matchedChapter.chapterName} in ${language}...`}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs focus:outline-none focus:border-indigo-500"
-                  />
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={loading || clueCoins < 1}
-                      onClick={() => handleAskSocratic(1)}
-                      className="flex-1 py-1.5 px-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[11px] cursor-pointer disabled:opacity-50"
-                    >
-                      Use Coin: Hint 1
-                    </button>
-                    <button
-                      type="button"
-                      disabled={loading || clueCoins < 1}
-                      onClick={() => handleAskSocratic(2)}
-                      className="flex-1 py-1.5 px-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[11px] cursor-pointer disabled:opacity-50"
-                    >
-                      Hint 2 (Formula)
-                    </button>
                     <button
                       type="button"
                       disabled={loading}
                       onClick={() => handleAskSocratic(undefined)}
-                      className="py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      className="w-full py-2 rounded-lg btn-terracotta font-semibold cursor-pointer transition-colors duration-150"
                     >
-                      <Send className="w-3 h-3" />
-                      Ask
+                      {loading ? 'Scanning...' : `Solve in ${language}`}
                     </button>
                   </div>
-
-                  {aiReply && (
-                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-[11px] leading-relaxed space-y-2">
-                      <MathRichText content={aiReply} />
-                      {aiCitations.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-1.5 border-t border-slate-200/80 dark:border-slate-700">
-                          {aiCitations.map((cit) => (
-                            <span
-                              key={cit.chunkId}
-                              title={cit.snippet}
-                              className="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-[10px]"
-                            >
-                              Page {cit.pageNumber}
-                              {cit.timestampLabel ? ` • ${cit.timestampLabel}` : ''}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {modeTab === 'shardz' && (
-                <div className="space-y-2">
-                  <div className="text-[11px] font-bold text-slate-500">
-                    15-Minute Active-Recall Micro-Shards for {matchedChapter.chapterName}:
+                )}
+                {aiReply && (
+                  <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-[11px]">
+                    <MathRichText content={aiReply} />
                   </div>
-                  {shards.map((shard) => {
-                    const done = !!completedShards[shard.id];
-                    return (
-                      <div
-                        key={shard.id}
-                        className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 space-y-1.5"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <Zap className="w-3.5 h-3.5 text-amber-500" />
-                            {shard.title}
-                          </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">
-                            {shard.durationMinutes} min
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                          {shard.activeRecallPrompt}
-                        </p>
-                        <div className="flex items-center justify-between pt-1">
-                          <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
-                            Clue: {matchedChapter.keyFormulasLatex[0] || matchedChapter.unitName}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCompletedShards((prev) => ({ ...prev, [shard.id]: !done }));
-                              if (!done) onEarnXp?.(20, `Completed 15m Shard: ${shard.title}`);
-                            }}
-                            className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold inline-flex items-center gap-1 cursor-pointer ${
-                              done
-                                ? 'bg-emerald-600 text-white'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                            }`}
-                          >
-                            {done ? (
-                              <>
-                                <CheckCircle2 className="w-3 h-3" /> Done
-                              </>
-                            ) : (
-                              <>
-                                Complete <ChevronRight className="w-3 h-3" />
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {modeTab === 'ocr' && (
-                <div className="space-y-2.5">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full py-3 px-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50/40 dark:bg-indigo-950/30 hover:bg-indigo-50 text-indigo-700 dark:text-indigo-300 font-extrabold flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>Upload Question Screenshot / Handwritten Doubt</span>
-                  </button>
-                  {ocrPreviewDataUrl && (
-                    <div className="space-y-2">
-                      <img
-                        src={ocrPreviewDataUrl}
-                        alt="Uploaded Doubt OCR Preview"
-                        className="max-h-32 rounded-lg border border-slate-200 mx-auto object-contain"
-                      />
-                      <button
-                        type="button"
-                        disabled={loading}
-                        onClick={() => handleAskSocratic(undefined)}
-                        className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold cursor-pointer"
-                      >
-                        {loading ? 'Scanning Equation...' : `Solve Uploaded Image in ${language}`}
-                      </button>
-                    </div>
-                  )}
-                  {aiReply && (
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px]">
-                      <MathRichText content={aiReply} />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 };

@@ -36,6 +36,10 @@ import {
   StickyNote,
   Save,
   Eye,
+  Atom,
+  FlaskConical,
+  Sigma,
+  X,
 } from 'lucide-react';
 import {
   DIAGRAM_SVG_PRESETS,
@@ -290,10 +294,10 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           {workspaceMode === 'daily' ? (
             <>
-              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
+              <h1 className="font-display font-bold text-2xl sm:text-3xl text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
                 Welcome, {userName}
               </h1>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] text-xs font-medium text-[#57534E] dark:text-zinc-400">
                 <span>Target:</span>
                 <select
                   aria-label="Target Exam"
@@ -308,7 +312,7 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                         | 'JEE Main 2028'
                     )
                   }
-                  className="font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none cursor-pointer"
+                  className="font-semibold text-[#1C1917] dark:text-[#F5F0E6] bg-transparent focus:outline-none cursor-pointer"
                 >
                   <option value="JEE Main 2027">JEE Main 2027</option>
                   <option value="JEE Advanced 2027">JEE Advanced 2027</option>
@@ -320,22 +324,22 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
             </>
           ) : (
             <div>
-              <div className="text-xs font-semibold text-[#4F46E5]">Home</div>
-              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
+              <div className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Home</div>
+              <h1 className="font-display font-bold text-2xl sm:text-3xl text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
                 JEE Study Workspace
               </h1>
             </div>
           )}
         </div>
 
-        <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-1 text-xs font-semibold">
+        <div className="inline-flex items-center rounded-xl bg-[#F3EFEA] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] p-1 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setWorkspaceMode('daily')}
-            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-colors duration-150 cursor-pointer ${
               workspaceMode === 'daily'
-                ? 'bg-white dark:bg-slate-900 text-[#4F46E5] shadow-2xs'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-white dark:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6] shadow-2xs'
+                : 'text-[#57534E] dark:text-zinc-400 hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
             }`}
           >
             Daily Dashboard
@@ -343,10 +347,10 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
           <button
             type="button"
             onClick={() => setWorkspaceMode('subjects')}
-            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-colors duration-150 cursor-pointer ${
               workspaceMode === 'subjects'
-                ? 'bg-white dark:bg-slate-900 text-[#4F46E5] shadow-2xs'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-white dark:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6] shadow-2xs'
+                : 'text-[#57534E] dark:text-zinc-400 hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
             }`}
           >
             JEE Study Workspace
@@ -355,108 +359,114 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
       </div>
 
       {workspaceMode === 'subjects' ? (
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 subject: 'Physics',
                 count: physCount,
                 pct: Math.min(100, physCount * 25),
-                color: 'text-blue-600 bg-blue-50',
-                symbol: '⚗',
+                color: 'text-blue-600 dark:text-blue-400 bg-zinc-100 dark:bg-[#18181b]',
+                barColor: 'bg-blue-500',
+                Icon: Atom,
               },
               {
                 subject: 'Chemistry',
                 count: chemCount,
                 pct: Math.min(100, chemCount * 25),
-                color: 'text-emerald-600 bg-emerald-50',
-                symbol: '🧪',
+                color: 'text-emerald-600 dark:text-emerald-400 bg-zinc-100 dark:bg-[#18181b]',
+                barColor: 'bg-emerald-500',
+                Icon: FlaskConical,
               },
               {
                 subject: 'Mathematics',
                 count: mathCount,
                 pct: Math.min(100, mathCount * 25),
-                color: 'text-amber-600 bg-amber-50',
-                symbol: '∑',
+                color: 'text-amber-600 dark:text-amber-400 bg-zinc-100 dark:bg-[#18181b]',
+                barColor: 'bg-amber-500',
+                Icon: Sigma,
               },
-            ].map((card) => (
+            ].map((card) => {
+              const SubjectIcon = card.Icon;
+              return (
               <div
                 key={card.subject}
                 onClick={() => onOpenStudyWorkbench()}
-                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:border-[#4F46E5] transition-all cursor-pointer space-y-4"
+                className="p-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-50/70 dark:hover:bg-[#18181b] transition-colors duration-150 cursor-pointer space-y-4"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm ${card.color}`}
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-sm border border-zinc-200/70 dark:border-white/[0.07] ${card.color}`}
                     >
-                      {card.symbol}
+                      <SubjectIcon className="w-4 h-4" />
                     </div>
                     <div>
-                      <span className="font-display font-bold text-base text-slate-900 dark:text-white block">
+                      <span className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] block">
                         {card.subject}
                       </span>
-                      <span className="text-[11px] text-slate-500">
-                        {card.count} uploaded {card.count === 1 ? 'material' : 'materials'}
+                      <span className="text-[11px] text-zinc-500 font-mono tabular-nums">
+                        {card.count} {card.count === 1 ? 'material' : 'materials'}
                       </span>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="flex-1 h-1.5 rounded-full bg-zinc-100 dark:bg-[#18181b] overflow-hidden">
                     <div
-                      className="h-full bg-[#4F46E5] rounded-full"
+                      className={`h-full ${card.barColor} rounded-full`}
                       style={{ width: `${card.pct}%` }}
                     />
                   </div>
-                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tabular-nums">
+                  <span className="text-xs font-mono font-semibold text-zinc-600 dark:text-zinc-400 tabular-nums">
                     {card.pct}%
                   </span>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="space-y-3">
-            <h2 className="font-display font-bold text-lg text-slate-900 dark:text-white">
-              Shortcuts
+            <h2 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+              Quick Actions
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <button
                 type="button"
                 onClick={onOpenStudyTools}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3 hover:border-[#4F46E5] transition-colors text-left cursor-pointer"
+                className="p-4 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-50 dark:hover:bg-[#18181b] flex items-center gap-3 transition-colors duration-150 text-left cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center">
-                  <FileText className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-200 flex items-center justify-center">
+                  <FileText className="w-4 h-4" />
                 </div>
-                <span className="font-display font-bold text-sm text-slate-900 dark:text-white">
-                  Desmos Graph &amp; Study Tools
+                <span className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                  Graphing &amp; Study Tools
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => onOpenAddMaterial('pdf')}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3 hover:border-[#4F46E5] transition-colors text-left cursor-pointer"
+                className="p-4 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-50 dark:hover:bg-[#18181b] flex items-center gap-3 transition-colors duration-150 text-left cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center">
-                  <Upload className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-200 flex items-center justify-center">
+                  <Upload className="w-4 h-4" />
                 </div>
-                <span className="font-display font-bold text-sm text-slate-900 dark:text-white">
-                  Upload Material (PDF / OCR / 12h YT)
+                <span className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                  Upload Material
                 </span>
               </button>
               <button
                 type="button"
                 onClick={onOpenSyllabus}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3 hover:border-[#4F46E5] transition-colors text-left cursor-pointer"
+                className="p-4 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-50 dark:hover:bg-[#18181b] flex items-center gap-3 transition-colors duration-150 text-left cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center">
-                  <Layers className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-200 flex items-center justify-center">
+                  <Layers className="w-4 h-4" />
                 </div>
-                <span className="font-display font-bold text-sm text-slate-900 dark:text-white">
-                  JEE Syllabus Tracker
+                <span className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                  Syllabus Tracker
                 </span>
               </button>
             </div>
@@ -464,64 +474,63 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="font-display font-bold text-lg text-slate-900 dark:text-white">
-                Your Uploaded Material ({materials.length})
+              <h2 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                Materials ({materials.length})
               </h2>
               {materials.length > 0 && (
                 <button
                   type="button"
                   onClick={onOpenMyMaterials}
-                  className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                  className="text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white cursor-pointer"
                 >
-                  Manage All Materials →
+                  View all →
                 </button>
               )}
             </div>
             {materials.length === 0 ? (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center space-y-3">
-                <Upload className="w-8 h-8 text-[#4F46E5] mx-auto" />
-                <div className="font-display font-bold text-base text-slate-900 dark:text-white">
-                  No materials uploaded yet — your workspace is 100% clean
+              <div className="rounded-2xl bg-white dark:bg-[#111113] border border-dashed border-zinc-300 dark:border-white/[0.1] p-8 text-center space-y-3">
+                <Upload className="w-6 h-6 text-zinc-400 mx-auto" />
+                <div className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                  No materials yet
                 </div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Upload a chapter PDF, a photo of your handwritten notes, or an up-to-12-hour
-                  YouTube lecture to auto-generate full detailed notes, formula sheets, flashcards, and mind maps.
+                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                  Upload a chapter PDF, handwritten scan, or YouTube lecture to start.
                 </p>
                 <button
                   type="button"
                   onClick={() => onOpenAddMaterial('pdf')}
-                  className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors duration-150 cursor-pointer"
                 >
-                  + Upload Your First Material
+                  Upload Material
                 </button>
               </div>
             ) : (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] overflow-hidden">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800 text-xs text-slate-500">
-                      <th className="py-3.5 px-5 font-semibold">Material</th>
-                      <th className="py-3.5 px-5 font-semibold">Subject</th>
-                      <th className="py-3.5 px-5 font-semibold text-right">Added</th>
+                    <tr className="border-b border-zinc-100 dark:border-white/[0.07] text-xs text-zinc-500">
+                      <th className="py-3.5 px-5 font-medium">Material</th>
+                      <th className="py-3.5 px-5 font-medium">Subject</th>
+                      <th className="py-3.5 px-5 font-medium text-right">Added</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-white/[0.07]">
                     {materials.map((m) => (
                       <tr
                         key={m.id}
                         onClick={() => onOpenStudyWorkbench(m)}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+                        className="hover:bg-zinc-50 dark:hover:bg-[#18181b] transition-colors cursor-pointer"
                       >
-                        <td className="py-3.5 px-5 flex items-center gap-3 font-medium text-slate-900 dark:text-white">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 uppercase">
-                            {m.sourceType}
+                        <td className="py-3.5 px-5 flex items-center gap-3 font-medium text-zinc-900 dark:text-[#fafafa]">
+                          <span className="text-[11px] font-mono uppercase text-zinc-500">
+                            {m.sourceType} ·
                           </span>
                           <span>{m.title}</span>
                         </td>
-                        <td className="py-3.5 px-5 text-xs text-slate-600 dark:text-slate-300">
+                        <td className="py-3.5 px-5 text-xs text-zinc-600 dark:text-zinc-400">
                           {m.subject}
                         </td>
-                        <td className="py-3.5 px-5 text-right text-xs text-slate-500">
+                        <td className="py-3.5 px-5 text-right text-xs text-zinc-500">
                           {m.addedLabel || 'Just now'}
                         </td>
                       </tr>
@@ -533,31 +542,31 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
           </div>
         </div>
       ) : (
-        /* Main 2-Column Daily Study Dashboard (Clean Zero-State until Student Adds Tasks/Materials) */
+        /* Main 2-Column Daily Study Dashboard */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left 7-Column Stack */}
-          <div className="lg:col-span-7 space-y-5">
-            {/* 1. My Tasks Card (Clean Zero-State by Default) */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+          <div className="lg:col-span-7 space-y-6">
+            {/* 1. My Tasks Card */}
+            <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                  My Study Tasks ({tasks.length})
+                <h2 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                  Study Tasks ({tasks.length})
                 </h2>
                 <div className="flex items-center gap-3">
                   {tasks.length > 0 && (
                     <button
                       type="button"
                       onClick={onSyncWorkspaceTasks}
-                      className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[#4F46E5] inline-flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white inline-flex items-center gap-1 cursor-pointer"
                     >
-                      <Calendar className="w-3.5 h-3.5 text-[#4F46E5]" />
-                      <span>Sync Calendar &amp; Tasks</span>
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Sync Calendar</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => setShowNewTaskInput((v) => !v)}
-                    className="text-xs font-bold text-[#4F46E5] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-semibold text-zinc-900 dark:text-[#fafafa] hover:underline inline-flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Task</span>
@@ -572,7 +581,7 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                     placeholder="e.g., Solve 20 Rotational Motion PYQs"
-                    className="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs"
+                    className="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-[#fafafa] focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
                   />
                   <input
                     type="number"
@@ -580,7 +589,7 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                     max={240}
                     value={newTaskDuration}
                     onChange={(e) => setNewTaskDuration(Number(e.target.value))}
-                    className="w-20 px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-center"
+                    className="w-20 px-2.5 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-mono tabular-nums text-center text-zinc-900 dark:text-[#fafafa]"
                     title="Duration (minutes)"
                   />
                   <button
@@ -592,31 +601,28 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                         setShowNewTaskInput(false);
                       }
                     }}
-                    className="px-3.5 py-2 rounded-xl bg-[#4F46E5] text-white text-xs font-semibold cursor-pointer"
+                    className="px-3.5 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer"
                   >
-                    Save Task
+                    Save
                   </button>
                 </div>
               )}
 
               {tasks.length === 0 ? (
-                <div className="p-6 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-2">
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Your study task list is empty
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    Add your own daily JEE chapter targets or PYQ goals above.
+                <div className="p-6 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-dashed border-zinc-200 dark:border-white/[0.07] text-center space-y-2.5">
+                  <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                    No tasks yet
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowNewTaskInput(true)}
-                    className="px-3 py-1.5 rounded-lg bg-[#EEF2FF] text-[#4F46E5] text-xs font-semibold cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg btn-terracotta text-xs font-semibold transition-colors duration-150 cursor-pointer"
                   >
-                    + Create First Study Task
+                    + Add Task
                   </button>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="divide-y divide-zinc-100 dark:divide-white/[0.07]">
                   {tasks.map((task) => (
                     <div
                       key={task.id}
@@ -627,21 +633,21 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                           type="checkbox"
                           checked={task.completed}
                           onChange={() => onToggleTask(task.id)}
-                          className="w-4 h-4 rounded border-slate-300 text-[#4F46E5] focus:ring-[#4F46E5]"
+                          className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 accent-[#D4653B]"
                         />
                         <span
                           className={`text-sm font-medium ${
                             task.completed
-                              ? 'line-through text-slate-400'
-                              : 'text-slate-800 dark:text-slate-200'
+                              ? 'line-through text-zinc-400'
+                              : 'text-zinc-800 dark:text-zinc-200'
                           }`}
                         >
                           {task.title}
                         </span>
                       </label>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium tabular-nums">
-                          {task.durationMin} min
+                        <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 text-xs font-mono tabular-nums">
+                          {task.durationMin}m
                         </span>
                         <button
                           type="button"
@@ -650,7 +656,7 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                               ? onOpenPractice()
                               : onOpenStudyWorkbench()
                           }
-                          className="px-3 py-1 rounded-lg bg-[#EEF2FF] text-[#4F46E5] font-semibold text-xs hover:bg-indigo-100 transition-colors cursor-pointer"
+                          className="px-3 py-1 rounded-lg bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-zinc-900 dark:text-[#fafafa] font-semibold text-xs transition-colors cursor-pointer"
                         >
                           Start
                         </button>
@@ -659,7 +665,7 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                             type="button"
                             onClick={() => onDeleteTask(task.id)}
                             aria-label="Delete task"
-                            className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                            className="p-1 text-zinc-400 hover:text-rose-500 cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -671,23 +677,23 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
               )}
             </div>
 
-            {/* 2. Continue Study (when materials exist) OR Single Consolidated Upload Card */}
+            {/* 2. Continue Study OR Single Consolidated Upload Card */}
             {materials.length > 0 ? (
               <>
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+                <div className="rounded-2xl bg-white dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] p-6 space-y-4 obsidian-sheen">
                   <div>
-                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                      Continue with: {materials[0].title}
+                    <h2 className="font-display font-semibold text-base text-[#1C1917] dark:text-[#F5F0E6] tracking-[-0.02em]">
+                      Continue: {materials[0].title}
                     </h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {materials[0].subject} • {materials[0].chapter}
+                    <p className="text-xs text-[#57534E] dark:text-zinc-400 mt-0.5">
+                      {materials[0].subject} · {materials[0].chapter}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={() => onOpenStudyWorkbench(materials[0])}
-                      className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                      className="px-4 py-2 rounded-lg btn-terracotta font-semibold text-xs flex items-center gap-1.5 transition-colors duration-150 cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Resume Study</span>
@@ -695,42 +701,42 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                     <button
                       type="button"
                       onClick={onOpenRevise}
-                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-lg bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-200 font-semibold text-xs hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors duration-150 cursor-pointer"
                     >
-                      Quick Revise &amp; Handwritten View
+                      Quick Revise
                     </button>
                     <button
                       type="button"
                       onClick={onOpenPractice}
-                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-lg bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-200 font-semibold text-xs hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors duration-150 cursor-pointer"
                     >
                       Practice PYQs
                     </button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+                <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                      My Materials ({materials.length})
+                    <h2 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                      Materials ({materials.length})
                     </h2>
                     <button
                       type="button"
                       onClick={onOpenMyMaterials}
-                      className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+                      className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white cursor-pointer"
                     >
-                      View All
+                      View all
                     </button>
                   </div>
 
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <div className="divide-y divide-zinc-100 dark:divide-white/[0.07]">
                     {materials.map((mat) => (
                       <div
                         key={mat.id}
                         className="py-3 first:pt-0 flex items-center justify-between gap-3"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-300 flex items-center justify-center shrink-0">
                             {mat.sourceType === 'youtube' ? (
                               <Video className="w-4 h-4" />
                             ) : (
@@ -738,18 +744,18 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                             )}
                           </div>
                           <div>
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                            <div className="text-sm font-medium text-zinc-900 dark:text-[#fafafa]">
                               {mat.title}
                             </div>
-                            <div className="text-xs text-slate-500">
-                              {mat.subject} • {mat.chapter}
+                            <div className="text-xs text-zinc-500">
+                              {mat.subject} · {mat.chapter}
                             </div>
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={() => onOpenStudyWorkbench(mat)}
-                          className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer"
                         >
                           Open
                         </button>
@@ -761,97 +767,95 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenAddMaterial('pdf')}
-                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Upload PDF</span>
+                      <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>PDF</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => onOpenAddMaterial('photo')}
-                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Handwritten Photo (OCR)</span>
+                      <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Photo OCR</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => onOpenAddMaterial('youtube')}
-                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5 text-slate-400" />
-                      <span>YouTube (Up to 12h)</span>
+                      <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>YouTube (12h)</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => onOpenAddMaterial('text')}
-                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5 text-slate-400" />
+                      <Plus className="w-3.5 h-3.5 text-zinc-400" />
                       <span>Paste Text</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => onOpenAddMaterial('drive')}
-                      className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/50 text-xs font-semibold text-[#4F46E5] hover:bg-indigo-100 inline-flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <FolderOpen className="w-3.5 h-3.5" />
+                      <FolderOpen className="w-3.5 h-3.5 text-zinc-400" />
                       <span>Google Drive</span>
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                      Upload Your First JEE Study Material
-                    </h2>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Upload a chapter PDF, handwritten note photo, or up-to-12-hour YouTube lecture to unlock full notes, formula sheets, mind maps, and SM-2 flashcards.
-                    </p>
-                  </div>
+              <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 space-y-4">
+                <div>
+                  <h2 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                    No materials yet
+                  </h2>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Import a PDF, handwritten scan, or YouTube lecture to generate notes and flashcards.
+                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('pdf')}
-                    className="px-4 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 rounded-lg btn-terracotta font-semibold text-xs inline-flex items-center gap-1.5 transition-colors duration-150 cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload PDF</span>
+                    <span>Upload Material</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('photo')}
-                    className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-xs font-medium text-zinc-700 dark:text-zinc-300 inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Camera className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Handwritten Photo (OCR)</span>
+                    <Camera className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Photo OCR</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('youtube')}
-                    className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-xs font-medium text-zinc-700 dark:text-zinc-300 inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Youtube className="w-3.5 h-3.5 text-rose-600" />
+                    <Youtube className="w-3.5 h-3.5 text-rose-500" />
                     <span>YouTube (12h)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('text')}
-                    className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-xs font-medium text-zinc-700 dark:text-zinc-300 inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5 text-slate-400" />
+                    <Plus className="w-3.5 h-3.5 text-zinc-400" />
                     <span>Paste Text</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAddMaterial('drive')}
-                    className="px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50/50 text-xs font-semibold text-[#4F46E5] hover:bg-indigo-100 inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-xs font-medium text-zinc-700 dark:text-zinc-300 inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <FolderOpen className="w-3.5 h-3.5" />
+                    <FolderOpen className="w-3.5 h-3.5 text-zinc-400" />
                     <span>Google Drive</span>
                   </button>
                 </div>
@@ -860,55 +864,52 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
           </div>
 
           {/* Right 5-Column Stack */}
-          <div className="lg:col-span-5 space-y-5">
-            {/* Gamification Bar & Daily Challenge */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
-              <div className="flex items-center justify-between text-xs font-bold border-b border-slate-100 dark:border-slate-800 pb-3.5">
-                <div className="flex items-center gap-1.5 text-slate-900 dark:text-white">
-                  <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span>{streakDays}-day Streak</span>
+          <div className="lg:col-span-5 space-y-6">
+            {/* Compact Stats & Daily Challenge */}
+            <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 space-y-4">
+              <div className="flex items-center justify-between text-xs font-semibold border-b border-zinc-100 dark:border-white/[0.07] pb-3.5 font-mono tabular-nums">
+                <div className="flex items-center gap-1.5 text-zinc-900 dark:text-[#fafafa]">
+                  <Flame className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{streakDays}d Streak</span>
                 </div>
-                <span className="text-slate-200">|</span>
-                <div className="flex items-center gap-1.5 text-slate-900 dark:text-white">
-                  <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span>XP {xp}</span>
+                <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                <div className="flex items-center gap-1.5 text-zinc-900 dark:text-[#fafafa]">
+                  <Zap className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{xp} XP</span>
                 </div>
-                <span className="text-slate-200">|</span>
-                <div className="flex items-center gap-1.5 text-slate-900 dark:text-white">
-                  <Award className="w-4 h-4 text-[#4F46E5]" />
-                  <span>Level {level}</span>
+                <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                <div className="flex items-center gap-1.5 text-zinc-900 dark:text-[#fafafa]">
+                  <Award className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Lv {level}</span>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-900 dark:text-white">
-                    Official PYQ &amp; Mock Practice
+                  <span className="font-semibold text-zinc-900 dark:text-[#fafafa]">
+                    PYQ &amp; CBT Mocks
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold">
+                  <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                     +50 XP
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Solve official JEE Main &amp; Advanced PYQs or take a 75-question NTA CBT Mock.
-                </p>
                 <button
                   type="button"
                   onClick={onOpenPractice}
-                  className="w-full py-2 rounded-xl bg-[#EEF2FF] text-[#4F46E5] font-semibold text-xs hover:bg-indigo-100 cursor-pointer"
+                  className="w-full py-2 rounded-lg btn-terracotta font-semibold text-xs transition-colors duration-150 cursor-pointer"
                 >
-                  Open PYQ Bank &amp; CBT Mocks →
+                  Open Practice &amp; CBT Mocks →
                 </button>
               </div>
             </div>
 
             {/* Ask a Doubt Card */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-3.5 shadow-2xs">
+            <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 space-y-3.5">
               <div className="flex items-center justify-between">
-                <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                  Ask a Doubt
+                <h2 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                  Quick Doubt Solver
                 </h2>
-                <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-xs font-semibold">
+                <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] p-0.5 text-xs font-medium">
                   {(['English', 'Hinglish'] as const).map((lang) => (
                     <button
                       key={lang}
@@ -916,8 +917,8 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                       onClick={() => setDoubtLang(lang)}
                       className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
                         doubtLang === lang
-                          ? 'bg-[#EEF2FF] text-[#4F46E5]'
-                          : 'text-slate-600 dark:text-slate-400'
+                          ? 'bg-white dark:bg-[#1f1f23] text-zinc-900 dark:text-[#fafafa]'
+                          : 'text-zinc-500 dark:text-zinc-400'
                       }`}
                     >
                       {lang}
@@ -942,23 +943,23 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                     }
                   }}
                   placeholder="Ask a JEE concept, derivation, or numerical..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#4F46E5] resize-none leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-[#fafafa] placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 resize-none leading-relaxed"
                 />
                 <div className="flex items-center justify-between gap-2 mt-3">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={handleToggleMic}
-                      className={`px-3 py-1.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
                         recordingMic
-                          ? 'border-red-300 bg-red-50 text-red-700'
-                          : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50'
+                          ? 'border-rose-500/40 bg-rose-500/10 text-rose-500'
+                          : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                       }`}
                     >
                       <Mic className="w-3.5 h-3.5" />
-                      <span>{recordingMic ? 'Stop Mic' : 'Mic'}</span>
+                      <span>{recordingMic ? 'Stop' : 'Mic'}</span>
                     </button>
-                    <label className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer">
+                    <label className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer transition-colors">
                       <Camera className="w-3.5 h-3.5" />
                       <span>Photo OCR</span>
                       <input
@@ -972,7 +973,7 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
                   <button
                     type="submit"
                     disabled={doubtLoading}
-                    className="px-4 py-1.5 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-[#D4653B] hover:bg-[#C2562E] text-[#FAF8F5] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{doubtLoading ? 'Thinking...' : 'Ask'}</span>
@@ -981,31 +982,28 @@ export const HomeDashboardView: React.FC<HomeDashboardProps> = ({
               </form>
 
               {doubtResponse && (
-                <div className="p-3.5 rounded-xl bg-[#EEF2FF]/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs text-slate-800 dark:text-slate-200 leading-relaxed max-h-64 overflow-y-auto">
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed max-h-64 overflow-y-auto">
                   <MathRichText content={doubtResponse} />
                 </div>
               )}
             </div>
 
             {/* Last Mock Card */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex items-center justify-between shadow-2xs">
+            <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="font-display font-bold text-sm text-slate-900 dark:text-white">
+                <h2 className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
                   CBT Mock Status
                 </h2>
-                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-1">
+                <div className="text-sm font-mono font-semibold text-zinc-800 dark:text-zinc-200 tabular-nums mt-1">
                   {lastMockScore !== null
-                    ? `Last Score: ${lastMockScore} / 300`
-                    : 'No CBT Mock Attempted Yet'}
-                </div>
-                <div className="text-xs text-slate-500">
-                  Full 75-Q JEE Main &amp; JEE Advanced Paper 1/2 Ready
+                    ? `${lastMockScore} / 300`
+                    : 'No mock yet'}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={lastMockScore !== null ? onOpenProgress : onOpenPractice}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer"
               >
                 {lastMockScore !== null ? 'View Analysis' : 'Start Mock'}
               </button>
@@ -1113,7 +1111,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
   const [annotationTool, setAnnotationTool] = useState<
     'pen' | 'highlighter' | 'eraser' | 'callout' | 'edit-text'
   >('pen');
-  const [penColor, setPenColor] = useState('#4F46E5');
+  const [penColor, setPenColor] = useState('#D4653B');
   const [callouts, setCallouts] = useState<{ id: string; text: string; color: string }[]>([]);
   const [newCalloutText, setNewCalloutText] = useState('');
   const [editingPageText, setEditingPageText] = useState('');
@@ -1588,28 +1586,30 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
       <nav
         aria-label="Study workspace sections"
         data-testid="study-subnav"
-        className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-6 py-2 flex items-center lg:flex-wrap gap-2.5 text-xs overflow-x-auto whitespace-nowrap"
+        className="bg-white dark:bg-[#111113] border-b border-zinc-200 dark:border-white/[0.07] px-3 sm:px-6 py-2 flex items-center lg:flex-wrap gap-2.5 text-xs overflow-x-auto whitespace-nowrap"
       >
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setSubTab('Syllabus')}
-            className={`px-2.5 py-1.5 rounded-lg font-semibold cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
               subTab === 'Syllabus'
-                ? 'text-[#4F46E5] bg-[#EEF2FF]'
-                : 'text-slate-600 dark:text-slate-300'
+                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             }`}
           >
             Syllabus
           </button>
-          <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-[11px]">
+          <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] p-0.5 text-[11px]">
             {(['Main', 'Advanced'] as const).map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setSyllabusExam(m)}
-                className={`px-2 py-0.5 rounded font-semibold cursor-pointer ${
-                  syllabusExam === m ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-slate-500'
+                className={`px-2 py-0.5 rounded font-semibold transition-colors cursor-pointer ${
+                  syllabusExam === m
+                    ? 'bg-white dark:bg-[#1f1f23] text-zinc-900 dark:text-[#fafafa]'
+                    : 'text-zinc-500'
                 }`}
               >
                 {m}
@@ -1618,27 +1618,27 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
           </div>
         </div>
 
-        <span className="text-slate-200 dark:text-slate-700">|</span>
+        <span className="text-zinc-200 dark:text-white/[0.07]">|</span>
 
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setSubTab('Chapter Notes')}
-            className={`px-2.5 py-1.5 rounded-lg font-semibold cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
               subTab === 'Chapter Notes'
-                ? 'text-[#4F46E5] bg-[#EEF2FF]'
-                : 'text-slate-600 dark:text-slate-300'
+                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             }`}
           >
             Chapter Notes
           </button>
-          <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-[11px]">
+          <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] p-0.5 text-[11px]">
             {(
               [
-                { id: 'Full', label: 'Full Detailed' },
+                { id: 'Full', label: 'Full' },
                 { id: 'Quick', label: 'Quick' },
-                { id: 'Original', label: 'Original File' },
-                { id: 'Split', label: 'Split Screen' },
+                { id: 'Original', label: 'Original' },
+                { id: 'Split', label: 'Split' },
               ] as const
             ).map((d) => (
               <button
@@ -1648,8 +1648,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                   setNotesDensity(d.id);
                   setSubTab('Chapter Notes');
                 }}
-                className={`px-2 py-0.5 rounded font-semibold cursor-pointer ${
-                  notesDensity === d.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-slate-500'
+                className={`px-2 py-0.5 rounded font-semibold transition-colors cursor-pointer ${
+                  notesDensity === d.id
+                    ? 'bg-white dark:bg-[#1f1f23] text-zinc-900 dark:text-[#fafafa]'
+                    : 'text-zinc-500'
                 }`}
               >
                 {d.label}
@@ -1665,8 +1667,8 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
             onClick={() => setSubTab(tab)}
             className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
               subTab === tab
-                ? 'bg-[#EEF2FF] text-[#4F46E5]'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             }`}
           >
             {tab}
@@ -1676,15 +1678,15 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
 
       {/* 1. 3-in-1 Syllabus Hub */}
       {subTab === 'Syllabus' && (
-        <div className="w-full px-6 lg:px-10 xl:px-12 py-5 space-y-5 flex-1">
-          <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
+        <div className="w-full px-6 lg:px-10 xl:px-12 py-6 space-y-6 flex-1">
+          <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <div className="text-[11px] font-bold tracking-wider uppercase text-[#4F46E5]">
-                  OFFICIAL NTA {syllabusExam.toUpperCase()} SYLLABUS &amp; TRACKER
+                <div className="text-[11px] font-medium tracking-wider uppercase text-zinc-500">
+                  NTA JEE {syllabusExam} 2027
                 </div>
-                <h1 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white mt-0.5">
-                  JEE {syllabusExam} 2027 Syllabus Hub
+                <h1 className="font-display font-bold text-xl sm:text-2xl text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em] mt-0.5">
+                  Syllabus Tracker
                 </h1>
               </div>
 
@@ -1692,12 +1694,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAiPlannerDrawer((v) => !v)}
-                  className="px-3.5 py-2 rounded-xl bg-[#EEF2FF] text-[#4F46E5] border border-indigo-200 font-semibold inline-flex items-center gap-1.5 hover:bg-indigo-100 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg bg-zinc-50 dark:bg-[#18181b] text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/[0.07] font-semibold inline-flex items-center gap-1.5 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>
-                    {showAiPlannerDrawer ? 'Hide 69-Day AI Planner' : 'AI 69-Day Syllabus Planner'}
-                  </span>
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4653B]" />
+                  <span>{showAiPlannerDrawer ? 'Hide 69d Plan' : '69-Day Study Plan'}</span>
                 </button>
                 <button
                   type="button"
@@ -1714,10 +1714,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="px-4 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  className="px-4 py-2 rounded-lg btn-terracotta font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Download NTA Syllabus</span>
+                  <span>Download Syllabus</span>
                 </button>
               </div>
             </div>
@@ -1732,21 +1732,21 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                     key={subj}
                     type="button"
                     onClick={() => setSyllabusSubject(subj)}
-                    className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    className={`p-4 rounded-xl border text-left transition-colors duration-150 cursor-pointer ${
                       syllabusSubject === subj
-                        ? 'border-[#4F46E5] bg-[#EEF2FF]/40 dark:bg-indigo-950/30'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-200'
+                        ? 'border-zinc-900 dark:border-zinc-400 bg-zinc-50 dark:bg-[#18181b]'
+                        : 'border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-50 dark:hover:bg-[#18181b]'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white mb-1.5">
+                    <div className="flex items-center justify-between text-xs font-semibold text-zinc-900 dark:text-[#fafafa] mb-2">
                       <span>{subj}</span>
-                      <span className="text-[#4F46E5] tabular-nums">
-                        {doneCount} / {subjRows.length} Units ({pct}%)
+                      <span className="text-zinc-500 font-mono tabular-nums">
+                        {doneCount}/{subjRows.length} · {pct}%
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-[#27272a] overflow-hidden">
                       <div
-                        className="h-full bg-[#4F46E5] rounded-full transition-all"
+                        className="h-full bg-emerald-500 rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -1756,41 +1756,36 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
             </div>
 
             {showAiPlannerDrawer && (
-              <div className="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-3 text-xs">
+              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-3 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-display font-bold text-sm text-[#4F46E5]">
-                    AI 69-Day Smart Pacing Plan (Target: JEE {syllabusExam} Session 1)
+                  <span className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                    69-Day JEE {syllabusExam} Roadmap
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white text-slate-700 font-semibold border border-indigo-100">
-                    High-Weightage First Strategy
-                  </span>
+                  <span className="text-zinc-500 font-medium">High-weightage first</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 space-y-1">
-                    <div className="font-bold text-slate-900 dark:text-white">
-                      Days 1 – 25 · Core High-Weightage
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-1">
+                    <div className="font-semibold text-zinc-900 dark:text-[#fafafa]">
+                      Days 1–25 · Core High-Weightage
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      Complete Rotational Motion, Electrostatics, Current Electricity, Coordination
-                      Compounds &amp; Definite Integration (3 Qs/shift chapters).
+                    <p className="text-zinc-600 dark:text-zinc-400">
+                      Rotational Motion, Electrostatics, Current Electricity, Coordination Compounds &amp; Definite Integration.
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 space-y-1">
-                    <div className="font-bold text-slate-900 dark:text-white">
-                      Days 26 – 50 · Class 11 &amp; 12 Consolidation
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-1">
+                    <div className="font-semibold text-zinc-900 dark:text-[#fafafa]">
+                      Days 26–50 · Consolidation
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      Finish Ray &amp; Wave Optics, Chemical Thermodynamics, Vector &amp; 3D
-                      Geometry + solve 2024 Shift 1 &amp; 2 PYQs.
+                    <p className="text-zinc-600 dark:text-zinc-400">
+                      Ray &amp; Wave Optics, Thermodynamics, Vector &amp; 3D + 2024 Shift 1 &amp; 2 PYQs.
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 space-y-1">
-                    <div className="font-bold text-slate-900 dark:text-white">
-                      Days 51 – 69 · Full NTA CBT Mocks &amp; Mistake DNA
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-1">
+                    <div className="font-semibold text-zinc-900 dark:text-[#fafafa]">
+                      Days 51–69 · Mocks &amp; Mistake DNA
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      Alternate-day 180-min 75-Q CBT Mocks + daily 30-min Spaced Repetition
-                      Flashcards and Formula Book drills.
+                    <p className="text-zinc-600 dark:text-zinc-400">
+                      Alternate-day 75-Q CBT Mocks + daily SM-2 recall and formula drills.
                     </p>
                   </div>
                 </div>
@@ -1798,11 +1793,11 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-4 space-y-4">
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-2xs">
-                <h2 className="font-display font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-[#4F46E5]" />
+              <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-5 space-y-3">
+                <h2 className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa] flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-zinc-400" />
                   <span>Filter Chapters</span>
                 </h2>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1811,10 +1806,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       key={f}
                       type="button"
                       onClick={() => setSyllabusFilter(f)}
-                      className={`px-3 py-2 rounded-xl font-semibold border text-left cursor-pointer ${
+                      className={`px-3 py-2 rounded-lg font-medium border text-left transition-colors cursor-pointer ${
                         syllabusFilter === f
-                          ? 'bg-[#EEF2FF] text-[#4F46E5] border-indigo-300'
-                          : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                          ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B] border-transparent'
+                          : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-300'
                       }`}
                     >
                       {f}
@@ -1824,18 +1819,18 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
               </div>
             </div>
 
-            <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
+            <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] overflow-hidden">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-500 bg-slate-50/60 dark:bg-slate-800/40">
-                    <th className="py-3.5 px-4 font-semibold">Done</th>
-                    <th className="py-3.5 px-4 font-semibold">Chapter &amp; Official NTA Topics</th>
-                    <th className="py-3.5 px-4 font-semibold">Class</th>
-                    <th className="py-3.5 px-4 font-semibold">JEE Weightage</th>
-                    <th className="py-3.5 px-4 font-semibold text-right">Action</th>
+                  <tr className="border-b border-zinc-100 dark:border-white/[0.07] text-zinc-500 bg-zinc-50/70 dark:bg-[#18181b]">
+                    <th className="py-3.5 px-4 font-medium">Done</th>
+                    <th className="py-3.5 px-4 font-medium">Chapter &amp; Topics</th>
+                    <th className="py-3.5 px-4 font-medium">Class</th>
+                    <th className="py-3.5 px-4 font-medium">Weightage</th>
+                    <th className="py-3.5 px-4 font-medium text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-zinc-100 dark:divide-white/[0.07]">
                   {JEE_SYLLABUS_DATA.filter((item) => {
                     if (item.subject !== syllabusSubject) return false;
                     if (syllabusFilter === 'High Weightage' && item.weightage !== 'High')
@@ -1846,7 +1841,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                   }).map((item) => {
                     const isDone = Boolean(completedChapters[item.id]);
                     return (
-                      <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                      <tr key={item.id} className="hover:bg-zinc-50 dark:hover:bg-[#18181b] transition-colors">
                         <td className="py-3.5 px-4 align-top">
                           <input
                             type="checkbox"
@@ -1858,32 +1853,32 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                               }))
                             }
                             aria-label={`Mark ${item.chapter} completed`}
-                            className="w-4 h-4 rounded border-slate-300 text-[#4F46E5] focus:ring-[#4F46E5] cursor-pointer mt-0.5"
+                            className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 accent-zinc-900 dark:accent-white cursor-pointer mt-0.5"
                           />
                         </td>
                         <td className="py-3.5 px-4 space-y-1">
                           <div
-                            className={`font-display font-bold text-sm ${
+                            className={`font-display font-semibold text-sm ${
                               isDone
-                                ? 'line-through text-slate-400'
-                                : 'text-slate-900 dark:text-white'
+                                ? 'line-through text-zinc-400'
+                                : 'text-zinc-900 dark:text-[#fafafa]'
                             }`}
                           >
                             {item.chapter}
                           </div>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">
+                          <p className="text-[11px] text-zinc-500 leading-relaxed">
                             {item.unitSummary}
                           </p>
                         </td>
-                        <td className="py-3.5 px-4 align-top font-semibold text-slate-600 dark:text-slate-300">
+                        <td className="py-3.5 px-4 align-top font-mono text-zinc-600 dark:text-zinc-400">
                           {item.classLevel}
                         </td>
                         <td className="py-3.5 px-4 align-top">
                           <span
-                            className={`inline-block px-2.5 py-0.5 rounded-md font-bold text-[11px] whitespace-nowrap ${
+                            className={`inline-block font-mono font-semibold text-[11px] whitespace-nowrap ${
                               item.weightage === 'High'
-                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                                : 'bg-slate-100 text-slate-700'
+                                ? 'text-amber-600 dark:text-amber-400'
+                                : 'text-zinc-500'
                             }`}
                           >
                             {item.weightage} · {item.expectedQs}
@@ -1893,9 +1888,9 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                           <button
                             type="button"
                             onClick={() => onOpenAddMaterial('pdf')}
-                            className="px-3 py-1.5 rounded-lg bg-[#EEF2FF] text-[#4F46E5] font-semibold hover:bg-indigo-100 transition-colors cursor-pointer whitespace-nowrap"
+                            className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-[#18181b] text-zinc-900 dark:text-[#fafafa] font-medium hover:bg-zinc-200 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer whitespace-nowrap"
                           >
-                            + Upload Notes
+                            + Add Notes
                           </button>
                         </td>
                       </tr>
@@ -1910,36 +1905,36 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
 
       {/* 2. Searchable Student Material Library (Sub-Tab: My Materials) */}
       {subTab === 'My Materials' && (
-        <div className="w-full px-6 lg:px-10 xl:px-12 py-5 space-y-5 flex-1">
+        <div className="w-full px-6 lg:px-10 xl:px-12 py-6 space-y-6 flex-1">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] font-bold tracking-wider uppercase text-[#4F46E5]">
-                STUDY / MY MATERIALS
+              <div className="text-[11px] font-medium tracking-wider uppercase text-zinc-500">
+                Study / Library
               </div>
-              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
-                My Uploaded &amp; Imported Materials ({materials.length})
+              <h1 className="font-display font-bold text-2xl sm:text-3xl text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                My Materials ({materials.length})
               </h1>
             </div>
 
             <button
               type="button"
               onClick={() => onOpenAddMaterial('pdf')}
-              className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold inline-flex items-center gap-2 shadow-sm cursor-pointer"
+              className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Upload className="w-4 h-4" />
-              <span>+ Upload Material</span>
+              <span>Upload Material</span>
             </button>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+          <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-4 flex flex-wrap items-center justify-between gap-3">
             <div className="relative flex-1 min-w-[240px]">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-2.5" />
               <input
                 type="text"
                 value={materialSearchQuery}
                 onChange={(e) => setMaterialSearchQuery(e.target.value)}
-                placeholder="Search your uploaded PDFs, handwritten notes, YouTube lectures..."
-                className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-xs focus:outline-none focus:border-[#4F46E5]"
+                placeholder="Search PDFs, handwritten notes, lectures..."
+                className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-[#fafafa] placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
               />
             </div>
 
@@ -1949,10 +1944,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                   key={subj}
                   type="button"
                   onClick={() => setMaterialSubjFilter(subj)}
-                  className={`px-3.5 py-1.5 rounded-xl font-semibold cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
                     materialSubjFilter === subj
-                      ? 'bg-[#EEF2FF] text-[#4F46E5] border border-indigo-200'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                      ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                      : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                   }`}
                 >
                   {subj}
@@ -1962,25 +1957,24 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
           </div>
 
           {materials.length === 0 ? (
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-3">
-              <Upload className="w-9 h-9 text-[#4F46E5] mx-auto" />
-              <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">
-                No materials uploaded yet
+            <div className="rounded-2xl bg-white dark:bg-[#111113] border border-dashed border-zinc-300 dark:border-white/[0.1] p-12 text-center space-y-3">
+              <Upload className="w-7 h-7 text-zinc-400 mx-auto" />
+              <h3 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa]">
+                No materials yet
               </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Upload a PDF, handwritten notes photo (OCR), or up-to-12-hour YouTube lecture to
-                populate your personal library.
+              <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                Upload a PDF, handwritten photo (OCR), or YouTube lecture to build your library.
               </p>
               <button
                 type="button"
                 onClick={() => onOpenAddMaterial('pdf')}
-                className="px-5 py-2.5 rounded-xl bg-[#4F46E5] text-white text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
               >
-                + Upload Material Now
+                Upload Material
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {materials
                 .filter((mat) => {
                   if (materialSubjFilter !== 'All' && mat.subject !== materialSubjFilter)
@@ -1998,42 +1992,42 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                 .map((mat) => (
                   <div
                     key={mat.id}
-                    className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-2xs hover:border-indigo-300 transition-colors"
+                    className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-6 flex flex-col justify-between space-y-4 hover:border-zinc-300 dark:hover:border-white/[0.15] transition-colors"
                   >
                     <div className="space-y-2.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="px-2.5 py-0.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold uppercase">
+                      <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-zinc-500">
+                        <span className="uppercase">
                           {mat.sourceType} · {mat.subject}
                         </span>
-                        <span className="text-[11px] text-slate-400">
-                          {mat.addedLabel || `${mat.pageCount} pages`}
+                        <span>
+                          {mat.addedLabel || `${mat.pageCount}p`}
                         </span>
                       </div>
-                      <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">
+                      <h3 className="font-display font-semibold text-base text-zinc-900 dark:text-[#fafafa]">
                         {mat.title}
                       </h3>
-                      <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
+                      <div className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">
                         <MathRichText content={mat.contentSummary} />
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+                    <div className="flex items-center justify-between gap-2 pt-3 border-t border-zinc-100 dark:border-white/[0.07] text-xs">
                       <button
                         type="button"
                         onClick={() => {
                           onSelectMaterial(mat);
                           setSubTab('Chapter Notes');
                         }}
-                        className="flex-1 py-2 px-3 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-center cursor-pointer"
+                        className="flex-1 py-2 px-3 rounded-lg btn-terracotta font-semibold text-center transition-colors cursor-pointer"
                       >
-                        Open in Workbench
+                        Open Workbench
                       </button>
                       <button
                         type="button"
                         onClick={() => onDeleteMaterial(mat.id)}
                         title="Remove Material"
                         aria-label={`Delete ${mat.title}`}
-                        className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-600 hover:border-red-200 cursor-pointer"
+                        className="p-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-zinc-400 hover:text-rose-500 cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -2049,53 +2043,50 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
       {(subTab === 'Chapter Notes' || subTab === 'AI Tutor') && (
         <div className="w-full px-6 lg:px-10 xl:px-12 py-5 flex-1 flex flex-col gap-4">
           {!selectedMaterial || !currentPageData ? (
-            /* Clean Zero-State when no material has been uploaded yet */
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-10 my-4 text-center space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center mx-auto">
-                <Upload className="w-6 h-6" />
+            <div className="rounded-2xl bg-white dark:bg-[#111113] border border-dashed border-zinc-300 dark:border-white/[0.1] p-10 my-4 text-center space-y-4">
+              <div className="w-11 h-11 rounded-xl bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-300 flex items-center justify-center mx-auto">
+                <Upload className="w-5 h-5" />
               </div>
-              <div className="space-y-1 max-w-lg mx-auto">
-                <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">
-                  Upload Your First Material to Start Studying
+              <div className="space-y-1 max-w-md mx-auto">
+                <h2 className="font-display font-bold text-lg text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
+                  No material selected
                 </h2>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  LearnMate JEE starts 100% clean with zero preloaded demo notes. Upload a PDF
-                  chapter, a photo of your handwritten notes (for 4-font handwriting
-                  conversion), or an up-to-12-hour YouTube marathon lecture.
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Upload a chapter PDF, handwritten scan, or YouTube lecture to generate structured notes and flashcards.
                 </p>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => onOpenAddMaterial('pdf')}
-                  className="px-4 py-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <FileText className="w-4 h-4" />
-                  <span>+ Upload Chapter PDF</span>
+                  <span>Upload PDF</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenAddMaterial('photo')}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <ImageIcon className="w-4 h-4 text-[#4F46E5]" />
-                  <span>+ Handwritten Notes Photo</span>
+                  <ImageIcon className="w-4 h-4 text-zinc-400" />
+                  <span>Handwritten Photo</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenAddMaterial('youtube')}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Youtube className="w-4 h-4 text-rose-600" />
-                  <span>+ 12h YouTube Marathon Lecture</span>
+                  <Youtube className="w-4 h-4 text-rose-500" />
+                  <span>YouTube (12h)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenAddMaterial('text')}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <TypeIcon className="w-4 h-4 text-emerald-600" />
-                  <span>+ Paste Study Notes</span>
+                  <TypeIcon className="w-4 h-4 text-emerald-500" />
+                  <span>Paste Text</span>
                 </button>
               </div>
             </div>
@@ -2107,32 +2098,29 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                   role="dialog"
                   aria-modal="true"
                   aria-label="Choose What to Annotate and Edit"
-                  className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+                  className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
                 >
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl p-6 space-y-5">
+                  <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] w-full max-w-xl p-6 space-y-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold uppercase tracking-wider">
-                          Annotate &amp; Edit Mode
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                          Annotate &amp; Edit
                         </span>
-                        <h3 className="font-display font-extrabold text-lg text-slate-900 dark:text-white mt-1">
-                          What would you like to annotate or edit?
+                        <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-[#fafafa] mt-0.5 tracking-[-0.02em]">
+                          Select annotation target
                         </h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Choose whether to annotate your actual uploaded material or the full detailed chapter notes generated from your scan.
-                        </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowAnnotateChoiceModal(false)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+                        aria-label="Close annotation target modal"
+                        className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white cursor-pointer"
                       >
-                        ✕
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Option 1: Annotate Original Uploaded Material */}
                       <button
                         type="button"
                         onClick={() => {
@@ -2142,21 +2130,19 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                           setAnnotateMode(true);
                           setShowAnnotateChoiceModal(false);
                         }}
-                        className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-indigo-600 bg-slate-50/60 dark:bg-slate-800/60 text-left space-y-2.5 transition-all cursor-pointer group"
+                        className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] bg-zinc-50 dark:bg-[#18181b] text-left space-y-2 transition-colors cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                          <Eye className="w-5 h-5" />
+                        <div className="w-9 h-9 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-200 flex items-center justify-center">
+                          <Eye className="w-4 h-4" />
                         </div>
-                        <div className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
-                          1. Annotate Original Uploaded Material
+                        <div className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                          1. Original Uploaded File
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                          Draw with freehand pen, highlight, or pin sticky callouts directly over your uploaded{' '}
-                          <strong>{selectedMaterial.sourceType.toUpperCase()}</strong> file ({selectedMaterial.title}).
+                        <p className="text-xs text-zinc-500 leading-relaxed">
+                          Draw or pin callouts over {selectedMaterial.sourceType.toUpperCase()} ({selectedMaterial.title}).
                         </p>
                       </button>
 
-                      {/* Option 2: Annotate & Edit Full Detailed Notes */}
                       <button
                         type="button"
                         onClick={() => {
@@ -2165,16 +2151,16 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                           setAnnotateMode(true);
                           setShowAnnotateChoiceModal(false);
                         }}
-                        className="p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/30 text-left space-y-2.5 transition-all cursor-pointer group"
+                        className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] bg-zinc-50 dark:bg-[#18181b] text-left space-y-2 transition-colors cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
-                          <Edit3 className="w-5 h-5" />
+                        <div className="w-9 h-9 rounded-lg bg-[#D4653B] text-[#FAF8F5] flex items-center justify-center">
+                          <Edit3 className="w-4 h-4" />
                         </div>
-                        <div className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
-                          2. Annotate &amp; Edit Full Detailed Notes
+                        <div className="font-display font-semibold text-sm text-zinc-900 dark:text-[#fafafa]">
+                          2. Detailed Chapter Notes
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                          Highlight, draw, pin sticky notes, or directly edit the complete theory, derivations, solved examples, and formulas.
+                        <p className="text-xs text-zinc-500 leading-relaxed">
+                          Highlight, annotate, or edit equations and theory text.
                         </p>
                       </button>
                     </div>
@@ -2185,25 +2171,24 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
               {/* Breadcrumb & Action Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm text-slate-500">Study</span>
-                  <span className="text-slate-300">/</span>
-                  <h1 className="font-display font-bold text-lg text-slate-900 dark:text-white">
+                  <span className="text-xs text-zinc-500">Study</span>
+                  <span className="text-zinc-400">/</span>
+                  <h1 className="font-display font-semibold text-lg text-zinc-900 dark:text-[#fafafa] tracking-[-0.02em]">
                     {selectedMaterial.chapter || selectedMaterial.title}
                   </h1>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Detailed Notes &amp; Equations Ready
+                    Notes Ready
                   </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {/* View Mode Switcher right in the Workbench Header */}
-                  <div className="inline-flex items-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1 text-xs font-bold">
+                  <div className="inline-flex items-center rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-1 text-xs font-semibold">
                     {(
                       [
                         { id: 'Full', label: 'Full Notes' },
                         { id: 'Quick', label: 'Quick Notes' },
-                        { id: 'Original', label: 'View Original File' },
+                        { id: 'Original', label: 'Original File' },
                         { id: 'Split', label: 'Split Screen' },
                       ] as const
                     ).map((mode) => (
@@ -2213,8 +2198,8 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                         onClick={() => setNotesDensity(mode.id)}
                         className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                           notesDensity === mode.id
-                            ? 'bg-indigo-600 text-white shadow-2xs'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                         }`}
                       >
                         {mode.label}
@@ -2232,7 +2217,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                         activeBundle?.quizQuestions
                       )
                     }
-                    className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-[#1f1f23] cursor-pointer"
                   >
                     Chapter Quiz
                   </button>
@@ -2246,14 +2231,14 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                         activeBundle?.quizQuestions
                       )
                     }
-                    className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-[#1f1f23] cursor-pointer"
                   >
                     Adaptive Drill
                   </button>
                   <button
                     type="button"
                     onClick={onOpenVoiceTutor}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#EEF2FF] text-[#4F46E5] border border-indigo-200 text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-indigo-100 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Headphones className="w-3.5 h-3.5" />
                     <span>Live Voice Tutor</span>
@@ -2262,22 +2247,22 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
               </div>
 
               {/* Split-Screen Workbench */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
-                {/* Left Document Viewer + Original PDF/Video Viewer + Handwritten View + Full Annotation Editor (8 Cols on wide screen) */}
-                <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between overflow-hidden shadow-2xs">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+                {/* Left Document Viewer */}
+                <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] flex flex-col justify-between overflow-hidden">
                   {/* Viewer Top Toolbar */}
-                  <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <div className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700">
+                      <div className="inline-flex items-center rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b]">
                         <button
                           type="button"
                           onClick={() => setPageIdx((p) => Math.max(0, p - 1))}
                           aria-label="Previous page"
-                          className="p-1.5 hover:bg-slate-50 cursor-pointer"
+                          className="p-1.5 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                         >
                           <ChevronLeft className="w-3.5 h-3.5" />
                         </button>
-                        <span className="px-3 py-1 font-semibold border-x border-slate-200 dark:border-slate-700 tabular-nums">
+                        <span className="px-3 py-1 font-mono font-semibold border-x border-zinc-200 dark:border-white/[0.07] tabular-nums">
                           {currentPageData.pageNumber} / {pagesList.length}
                         </span>
                         <button
@@ -2286,29 +2271,29 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             setPageIdx((p) => Math.min(pagesList.length - 1, p + 1))
                           }
                           aria-label="Next page"
-                          className="p-1.5 hover:bg-slate-50 cursor-pointer"
+                          className="p-1.5 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                         >
                           <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
-                      <div className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700">
+                      <div className="inline-flex items-center rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b]">
                         <button
                           type="button"
                           onClick={() => setZoomLevel((z) => Math.max(80, z - 10))}
                           aria-label="Zoom out notes"
-                          className="px-2 py-1 hover:bg-slate-50 cursor-pointer"
+                          className="px-2 py-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                         >
                           −
                         </button>
-                        <span className="px-2.5 py-1 border-x border-slate-200 dark:border-slate-700 font-mono tabular-nums">
+                        <span className="px-2.5 py-1 border-x border-zinc-200 dark:border-white/[0.07] font-mono tabular-nums">
                           {zoomLevel}%
                         </span>
                         <button
                           type="button"
                           onClick={() => setZoomLevel((z) => Math.min(140, z + 10))}
                           aria-label="Zoom in notes"
-                          className="px-2 py-1 hover:bg-slate-50 cursor-pointer"
+                          className="px-2 py-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
                         >
                           +
                         </button>
@@ -2316,21 +2301,19 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* Toggle Handwritten Notebook View */}
                       <button
                         type="button"
                         onClick={() => setHandwrittenView((v) => !v)}
-                        className={`px-3 py-1 rounded-lg border font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
+                        className={`px-3 py-1 rounded-lg border font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
                           handwrittenView
-                            ? 'bg-amber-50 text-amber-900 border-amber-300'
-                            : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                            : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                         }`}
                       >
                         <PenTool className="w-3.5 h-3.5" />
-                        <span>{handwrittenView ? 'Handwritten View ON' : 'Handwritten View'}</span>
+                        <span>{handwrittenView ? 'Handwritten ON' : 'Handwritten View'}</span>
                       </button>
 
-                      {/* Toggle Dual-Target Annotation & Editor (Opens Choice Modal when turning on) */}
                       <button
                         type="button"
                         onClick={() => {
@@ -2340,16 +2323,16 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             setShowAnnotateChoiceModal(true);
                           }
                         }}
-                        className={`px-3 py-1 rounded-lg border font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
+                        className={`px-3 py-1 rounded-lg border font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
                           annotateMode
-                            ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]'
-                            : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                            ? 'border-[#1C1917] dark:border-[#F5F0E6] bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                            : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300'
                         }`}
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>
                           {annotateMode
-                            ? `Annotating: ${annotateTarget === 'original' ? 'Original File' : 'Detailed Notes'}`
+                            ? `Annotating: ${annotateTarget === 'original' ? 'Original' : 'Notes'}`
                             : 'Annotate & Edit'}
                         </span>
                       </button>
@@ -2358,16 +2341,16 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
 
                   {/* Handwritten 4-Font & Paper Switcher Bar */}
                   {handwrittenView && (
-                    <div className="px-4 py-2 bg-amber-50/70 dark:bg-slate-800 border-b border-amber-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="px-4 py-2 bg-amber-50/70 dark:bg-[#18181b] border-b border-amber-200/80 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-bold text-amber-900 dark:text-amber-200">
-                          Handwriting Font:
+                        <span className="font-semibold text-amber-900 dark:text-amber-300">
+                          Handwriting:
                         </span>
                         {(
                           [
-                            { id: 'font-hand-caveat', label: 'Caveat (Neat Cursive)' },
-                            { id: 'font-hand-kalam', label: 'Kalam (Indian Pen)' },
-                            { id: 'font-hand-patrick', label: 'Patrick Hand (Print)' },
+                            { id: 'font-hand-caveat', label: 'Caveat' },
+                            { id: 'font-hand-kalam', label: 'Kalam' },
+                            { id: 'font-hand-patrick', label: 'Patrick Hand' },
                             { id: 'font-hand-indie', label: 'Indie Flower' },
                           ] as const
                         ).map((f) => (
@@ -2375,10 +2358,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             key={f.id}
                             type="button"
                             onClick={() => setHandwritingFont(f.id)}
-                            className={`px-2.5 py-1 rounded-lg font-semibold cursor-pointer ${
+                            className={`px-2.5 py-1 rounded-lg font-medium cursor-pointer ${
                               handwritingFont === f.id
-                                ? 'bg-amber-800 text-white'
-                                : 'bg-white text-slate-700 border border-amber-200'
+                                ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                                : 'bg-white dark:bg-[#111113] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/[0.07]'
                             }`}
                           >
                             {f.label}
@@ -2398,10 +2381,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             key={p.id}
                             type="button"
                             onClick={() => setPaperStyle(p.id)}
-                            className={`px-2 py-0.5 rounded font-semibold cursor-pointer ${
+                            className={`px-2 py-0.5 rounded font-medium cursor-pointer ${
                               paperStyle === p.id
-                                ? 'bg-[#4F46E5] text-white'
-                                : 'bg-white text-slate-600 border border-slate-200'
+                                ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                                : 'bg-white dark:bg-[#111113] text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-white/[0.07]'
                             }`}
                           >
                             {p.label}
@@ -2413,20 +2396,19 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
 
                   {/* Full Dual-Mode Annotation & Rich-Text Equation Editor Toolbar */}
                   {annotateMode && (
-                    <div className="px-4 py-2.5 bg-[#EEF2FF]/70 dark:bg-indigo-950/40 border-b border-indigo-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="px-4 py-2.5 bg-zinc-50 dark:bg-[#18181b] border-b border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {/* Target Switcher inside Annotation Bar */}
-                        <div className="inline-flex rounded-lg bg-white dark:bg-slate-800 border border-indigo-200 p-0.5 mr-1">
+                        <div className="inline-flex rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-0.5 mr-1">
                           <button
                             type="button"
                             onClick={() => {
                               setAnnotateTarget('original');
                               setNotesDensity('Original');
                             }}
-                            className={`px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer ${
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
                               annotateTarget === 'original'
-                                ? 'bg-indigo-600 text-white'
-                                : 'text-slate-600'
+                                ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                                : 'text-zinc-600 dark:text-zinc-400'
                             }`}
                           >
                             Original File
@@ -2437,10 +2419,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                               setAnnotateTarget('notes');
                               if (notesDensity === 'Original') setNotesDensity('Full');
                             }}
-                            className={`px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer ${
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
                               annotateTarget === 'notes'
-                                ? 'bg-indigo-600 text-white'
-                                : 'text-slate-600'
+                                ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                                : 'text-zinc-600 dark:text-zinc-400'
                             }`}
                           >
                             Detailed Notes
@@ -2449,10 +2431,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
 
                         {[
                           { id: 'pen', label: 'Pen', icon: PenTool },
-                          { id: 'highlighter', label: 'Highlighter', icon: Highlighter },
+                          { id: 'highlighter', label: 'Highlight', icon: Highlighter },
                           { id: 'eraser', label: 'Eraser', icon: Eraser },
-                          { id: 'callout', label: 'Sticky Callout', icon: StickyNote },
-                          { id: 'edit-text', label: 'Edit Notes & Equations', icon: Edit3 },
+                          { id: 'callout', label: 'Callout', icon: StickyNote },
+                          { id: 'edit-text', label: 'Edit Notes', icon: Edit3 },
                         ].map((t) => {
                           const Icon = t.icon;
                           return (
@@ -2460,10 +2442,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                               key={t.id}
                               type="button"
                               onClick={() => setAnnotationTool(t.id as any)}
-                              className={`px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1 cursor-pointer ${
+                              className={`px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer ${
                                 annotationTool === t.id
-                                  ? 'bg-[#4F46E5] text-white'
-                                  : 'bg-white text-slate-700 border border-slate-200'
+                                  ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                                  : 'bg-white dark:bg-[#111113] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/[0.07]'
                               }`}
                             >
                               <Icon className="w-3.5 h-3.5" />
@@ -2474,14 +2456,14 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {['#4F46E5', '#DC2626', '#059669', '#D97706'].map((c) => (
+                        {['#D4653B', '#3b82f6', '#10b981', '#f59e0b'].map((c) => (
                           <button
                             key={c}
                             type="button"
                             onClick={() => setPenColor(c)}
                             aria-label={`Select annotation color ${c}`}
-                            className={`w-5 h-5 rounded-full cursor-pointer ${
-                              penColor === c ? 'ring-2 ring-offset-1 ring-slate-900' : ''
+                            className={`w-4 h-4 rounded-full cursor-pointer ${
+                              penColor === c ? 'ring-2 ring-offset-1 ring-zinc-900 dark:ring-white' : ''
                             }`}
                             style={{ backgroundColor: c }}
                           />
@@ -2489,29 +2471,28 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                         <button
                           type="button"
                           onClick={handleUndoLastStroke}
-                          className="px-2 py-1 rounded bg-white border border-slate-200 text-[11px] font-semibold text-slate-700 hover:text-indigo-600 cursor-pointer"
+                          className="px-2 py-1 rounded bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-[11px] font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer"
                         >
-                          Undo Stroke
+                          Undo
                         </button>
                         <button
                           type="button"
                           onClick={clearAnnotationCanvas}
-                          className="px-2 py-1 rounded bg-white border border-slate-200 text-[11px] font-semibold text-slate-600 hover:text-red-600 cursor-pointer"
+                          className="px-2 py-1 rounded bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-[11px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-rose-500 cursor-pointer"
                         >
-                          Clear Ink ({savedStrokes.filter((s) => s.pageNumber === (currentPageData?.pageNumber || pageIdx + 1) && s.target === annotateTarget).length})
+                          Clear ({savedStrokes.filter((s) => s.pageNumber === (currentPageData?.pageNumber || pageIdx + 1) && s.target === annotateTarget).length})
                         </button>
                       </div>
                     </div>
                   )}
 
-                  {/* Document Sheet Content: Supports Full Notes, Quick Notes, Original Uploaded File Viewer, and Split Screen */}
+                  {/* Document Sheet Content */}
                   <div
                     className={`relative p-6 sm:p-8 space-y-5 flex-1 overflow-y-auto ${
                       handwrittenView ? `${handwritingFont} ${paperStyle}` : ''
                     }`}
                     style={{ fontSize: `${zoomLevel}%` }}
                   >
-                    {/* Persistent Freehand Pen / Highlighter Canvas Overlay */}
                     {(annotateMode ||
                       savedStrokes.some(
                         (s) =>
@@ -2537,21 +2518,16 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       />
                     )}
 
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-[#4F46E5] text-xs font-bold">
-                          {selectedMaterial.subject} · {selectedMaterial.sourceType.toUpperCase()}
-                        </span>
-                        <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
-                          Mode: {notesDensity === 'Full' ? 'Full Detailed Notes (All 4 Sections)' : notesDensity === 'Quick' ? 'Quick Revision Summary' : notesDensity === 'Original' ? 'Original Uploaded Material' : 'Split Screen (Original + Full Notes)'}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-400">
-                        **Bold** = Key Law · *Italic* = Exam Trap · Visual Equations
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
+                      <span className="font-mono uppercase">
+                        {selectedMaterial.subject} · {selectedMaterial.sourceType} · {notesDensity}
+                      </span>
+                      <span>
+                        Bold law · Italic trap
                       </span>
                     </div>
 
-                    {/* ORIGINAL UPLOADED MATERIAL VIEWER (Shown in 'Original' or Left Half of 'Split') */}
+                    {/* ORIGINAL UPLOADED MATERIAL VIEWER */}
                     {(notesDensity === 'Original' || notesDensity === 'Split') && (
                       <div
                         className={
@@ -2560,22 +2536,21 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             : 'space-y-4'
                         }
                       >
-                        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 p-4 space-y-3">
-                          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
+                        <div className="rounded-2xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] p-4 space-y-3">
+                          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.07] pb-2.5">
                             <div className="flex items-center gap-2">
-                              <Eye className="w-4 h-4 text-indigo-600" />
-                              <span className="font-display font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                                Original Uploaded {selectedMaterial.sourceType.toUpperCase()}: {selectedMaterial.title}
+                              <Eye className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                              <span className="font-semibold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100">
+                                {selectedMaterial.sourceType.toUpperCase()} · {selectedMaterial.title}
                               </span>
                             </div>
                             {selectedMaterial.sourceRef && (
-                              <span className="text-[11px] font-mono text-slate-500 truncate max-w-[220px]">
+                              <span className="text-[11px] font-mono text-zinc-500 truncate max-w-[220px]">
                                 {selectedMaterial.sourceRef}
                               </span>
                             )}
                           </div>
 
-                          {/* Render Actual Video Player + 12-Hour Marathon Timestamp Chunks if YouTube */}
                           {selectedMaterial.sourceType === 'youtube' && (() => {
                             const rawUrl =
                               selectedMaterial.originalFileUrl ||
@@ -2600,7 +2575,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             return (
                               <div className="space-y-3">
                                 {videoId ? (
-                                  <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md">
+                                  <div className="aspect-video w-full rounded-xl overflow-hidden bg-black border border-zinc-200 dark:border-white/[0.07]">
                                     <iframe
                                       key={`${videoId}-${youtubeSeekSeconds}`}
                                       src={embedSrc}
@@ -2611,23 +2586,22 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                     />
                                   </div>
                                 ) : (
-                                  <div className="aspect-video w-full rounded-xl bg-slate-900 text-white p-6 flex flex-col items-center justify-center text-center space-y-2">
-                                    <Youtube className="w-10 h-10 text-rose-500" />
-                                    <div className="font-bold text-sm">{selectedMaterial.title}</div>
-                                    <p className="text-xs text-slate-300 max-w-md">
-                                      Video lecture source: {rawUrl || 'Uploaded YouTube Marathon Lecture'}
+                                  <div className="aspect-video w-full rounded-xl bg-black text-white p-6 flex flex-col items-center justify-center text-center space-y-2 border border-white/[0.07]">
+                                    <Youtube className="w-8 h-8 text-rose-500" />
+                                    <div className="font-semibold text-sm">{selectedMaterial.title}</div>
+                                    <p className="text-xs text-zinc-400 max-w-md">
+                                      {rawUrl || 'YouTube Lecture'}
                                     </p>
                                   </div>
                                 )}
 
-                                {/* 12-Hour Marathon Interactive Timestamp Seeker */}
-                                <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-slate-900 border border-indigo-200/80 dark:border-slate-700 space-y-2">
+                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-xs font-extrabold text-indigo-800 dark:text-indigo-300">
-                                      12-Hour Marathon Timestamp Chunks (Click to Seek Video &amp; Notes)
+                                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                                      Timestamp Chapters
                                     </span>
-                                    <span className="text-[11px] font-mono text-indigo-600">
-                                      {marathonChunks.length} Segments
+                                    <span className="text-[11px] font-mono tabular-nums text-zinc-500">
+                                      {marathonChunks.length} segments
                                     </span>
                                   </div>
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
@@ -2643,22 +2617,22 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                           );
                                           setPageIdx(targetIdx);
                                         }}
-                                        className={`p-2 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2 ${
+                                        className={`p-2 rounded-lg border text-left transition-colors duration-150 cursor-pointer flex items-start gap-2 ${
                                           youtubeSeekSeconds === chunk.seconds
-                                            ? 'bg-indigo-600 text-white border-indigo-600'
-                                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-400'
+                                            ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B] border-[#1C1917] dark:border-[#F5F0E6]'
+                                            : 'bg-zinc-50 dark:bg-[#18181b] border-zinc-200 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                                         }`}
                                       >
                                         <span
-                                          className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-bold shrink-0 ${
+                                          className={`px-1.5 py-0.5 rounded font-mono tabular-nums text-[10px] font-semibold shrink-0 ${
                                             youtubeSeekSeconds === chunk.seconds
-                                              ? 'bg-white/20 text-white'
-                                              : 'bg-indigo-100 text-indigo-700'
+                                              ? 'bg-white/20 dark:bg-black/15'
+                                              : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
                                           }`}
                                         >
                                           {chunk.timestampLabel}
                                         </span>
-                                        <span className="text-[11px] font-semibold line-clamp-1">
+                                        <span className="text-[11px] font-medium line-clamp-1">
                                           {chunk.topicTitle}
                                         </span>
                                       </button>
@@ -2666,9 +2640,9 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                   </div>
                                 </div>
 
-                                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5 max-h-56 overflow-y-auto">
-                                  <div className="font-bold text-indigo-600">
-                                    Uploaded Lecture Transcript &amp; Timestamps:
+                                <div className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-xs space-y-1.5 max-h-56 overflow-y-auto">
+                                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">
+                                    Transcript
                                   </div>
                                   <MathRichText content={selectedMaterial.contentSummary} />
                                 </div>
@@ -2676,7 +2650,6 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             );
                           })()}
 
-                          {/* Render Actual PDF Document Viewer if PDF */}
                           {selectedMaterial.sourceType === 'pdf' && (
                             <div className="space-y-3">
                               {selectedMaterial.originalFileUrl &&
@@ -2686,28 +2659,27 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                 <iframe
                                   src={selectedMaterial.originalFileUrl}
                                   title={`Original PDF: ${selectedMaterial.title}`}
-                                  className="w-full h-[460px] rounded-xl border border-slate-200 bg-white"
+                                  className="w-full h-[460px] rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white"
                                 />
                               ) : null}
-                              <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2 max-h-[420px] overflow-y-auto">
-                                <div className="flex items-center justify-between text-xs font-bold text-indigo-600 border-b border-slate-100 pb-2">
-                                  <span>Original Uploaded PDF Document Content ({selectedMaterial.sourceRef || selectedMaterial.title})</span>
-                                  <span>Page {currentPageData.pageNumber}</span>
+                              <div className="p-4 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2 max-h-[420px] overflow-y-auto">
+                                <div className="flex items-center justify-between text-xs font-semibold text-zinc-500 border-b border-zinc-200 dark:border-white/[0.07] pb-2">
+                                  <span>{selectedMaterial.sourceRef || selectedMaterial.title}</span>
+                                  <span className="font-mono tabular-nums">Page {currentPageData.pageNumber}</span>
                                 </div>
-                                <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed">
+                                <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed">
                                   <MathRichText content={selectedMaterial.contentSummary} />
                                 </div>
                               </div>
                             </div>
                           )}
 
-                          {/* Render Actual Uploaded Photo / Handwritten Scan if Photo */}
                           {selectedMaterial.sourceType === 'photo' && (
                             <div className="space-y-3">
                               {selectedMaterial.originalFileUrl &&
                               (selectedMaterial.originalFileUrl.startsWith('data:image') ||
                                 selectedMaterial.originalFileUrl.startsWith('http')) ? (
-                                <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 flex justify-center">
+                                <div className="p-3 bg-white dark:bg-[#111113] rounded-xl border border-zinc-200 dark:border-white/[0.07] flex justify-center">
                                   <img
                                     src={selectedMaterial.originalFileUrl}
                                     alt={selectedMaterial.title}
@@ -2715,55 +2687,53 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                   />
                                 </div>
                               ) : null}
-                              <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-slate-900 border border-amber-200 space-y-2">
-                                <div className="text-xs font-bold text-amber-900 dark:text-amber-300">
-                                  Original Handwritten Scan Content ({selectedMaterial.sourceRef || selectedMaterial.title}):
+                              <div className="p-4 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2">
+                                <div className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                  Scan OCR · {selectedMaterial.sourceRef || selectedMaterial.title}
                                 </div>
-                                <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed">
+                                <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed">
                                   <MathRichText content={selectedMaterial.contentSummary} />
                                 </div>
                               </div>
                             </div>
                           )}
 
-                          {/* Render Original Uploaded Text / Drive Document */}
                           {(selectedMaterial.sourceType === 'text' ||
                             selectedMaterial.sourceType === 'drive') && (
-                            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2 max-h-[460px] overflow-y-auto">
-                              <div className="text-xs font-bold text-indigo-600">
-                                Original Uploaded Material ({selectedMaterial.sourceRef || selectedMaterial.title}):
+                            <div className="p-4 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2 max-h-[460px] overflow-y-auto">
+                              <div className="text-xs font-semibold text-zinc-500">
+                                {selectedMaterial.sourceRef || selectedMaterial.title}
                               </div>
-                              <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed">
+                              <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed">
                                 <MathRichText content={selectedMaterial.contentSummary} />
                               </div>
                             </div>
                           )}
                         </div>
 
-                        {/* Right Half of Split Screen: Exhaustive Detailed Notes */}
                         {notesDensity === 'Split' && (
                           <div className="space-y-4">
-                            <h2 className="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white">
+                            <h2 className="font-semibold tracking-[-0.02em] text-lg sm:text-xl text-zinc-900 dark:text-zinc-50">
                               <MathRichText content={currentPageData.heading} inline />
                             </h2>
                             {currentPageData.sections.map((sec, idx) => (
                               <div
                                 key={idx}
-                                className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 space-y-2.5"
+                                className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-2.5"
                               >
-                                <h3 className="font-display font-bold text-sm text-indigo-700 dark:text-indigo-300">
+                                <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
                                   <MathRichText content={sec.numberTitle} inline />
                                 </h3>
                                 {sec.paragraphs?.map((p, pIdx) => (
                                   <div
                                     key={pIdx}
-                                    className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed"
+                                    className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed"
                                   >
                                     <MathRichText content={p} />
                                   </div>
                                 ))}
                                 {sec.bullets && (
-                                  <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                                  <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
                                     {sec.bullets.map((b, bIdx) => (
                                       <li key={bIdx}>
                                         <MathRichText content={b} inline />
@@ -2772,7 +2742,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                   </ul>
                                 )}
                                 {sec.formulas && sec.formulas.length > 0 && (
-                                  <div className="p-3.5 rounded-xl bg-indigo-50/60 dark:bg-slate-900 border border-indigo-200/80 space-y-2 text-xs sm:text-sm">
+                                  <div className="p-3.5 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100">
                                     {sec.formulas.map((f, fIdx) => (
                                       <div key={fIdx}>
                                         <MathRichText content={f} />
@@ -2790,58 +2760,58 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                     {/* FULL DETAILED NOTES OR QUICK NOTES VIEW */}
                     {(notesDensity === 'Full' || notesDensity === 'Quick') && (
                       <>
-                        <h2 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white">
+                        <h2 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl text-zinc-900 dark:text-zinc-50">
                           <MathRichText content={currentPageData.heading} inline />
                         </h2>
 
                         {annotateMode && annotationTool === 'edit-text' ? (
-                          <div className="p-4 rounded-xl bg-indigo-50/60 dark:bg-slate-800 border border-indigo-200 space-y-3 relative z-20">
-                            <div className="text-xs font-bold text-[#4F46E5]">
-                              Direct Rich-Text &amp; Equation Editor (Supports **bold**, *italic*, $...$ and $$...$$)
+                          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-3 relative z-20">
+                            <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                              Edit Notes &amp; Equations
                             </div>
                             <textarea
                               rows={6}
                               value={editingPageText}
                               onChange={(e) => setEditingPageText(e.target.value)}
                               placeholder="Edit extracted paragraphs and derivations..."
-                              className="w-full p-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 text-xs font-mono leading-relaxed"
+                              className="w-full p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-xs font-mono leading-relaxed text-zinc-900 dark:text-zinc-100"
                             />
                             <textarea
                               rows={3}
                               value={editingFormulasText}
                               onChange={(e) => setEditingFormulasText(e.target.value)}
                               placeholder="One equation block per line (e.g. $$E = mc^2$$)..."
-                              className="w-full p-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 text-xs font-mono"
+                              className="w-full p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-xs font-mono text-zinc-900 dark:text-zinc-100"
                             />
                             <button
                               type="button"
                               onClick={handleSaveEditedPageNotes}
-                              className="px-4 py-2 rounded-xl bg-[#4F46E5] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                              className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
                             >
                               <Save className="w-3.5 h-3.5" />
-                              <span>Save Edited Page to Library</span>
+                              <span>Save Changes</span>
                             </button>
                           </div>
                         ) : (
                           currentPageData.sections.map((sec, idx) => (
                             <div
                               key={idx}
-                              className="p-4 sm:p-5 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3"
+                              className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-3"
                             >
-                              <h3 className="font-display font-bold text-sm sm:text-base text-indigo-700 dark:text-indigo-300">
+                              <h3 className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100">
                                 <MathRichText content={sec.numberTitle} inline />
                               </h3>
                               {notesDensity === 'Full' &&
                                 sec.paragraphs?.map((p, pIdx) => (
                                   <div
                                     key={pIdx}
-                                    className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed"
+                                    className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed"
                                   >
                                     <MathRichText content={p} />
                                   </div>
                                 ))}
                               {sec.bullets && (
-                                <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                                <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
                                   {sec.bullets.map((b, bIdx) => (
                                     <li key={bIdx}>
                                       <MathRichText content={b} inline />
@@ -2850,7 +2820,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                 </ul>
                               )}
                               {sec.formulas && sec.formulas.length > 0 && (
-                                <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-slate-800/90 border border-indigo-200/80 dark:border-slate-700 space-y-2 text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                                <div className="p-4 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100">
                                   {sec.formulas.map((f, fIdx) => (
                                     <div key={fIdx}>
                                       <MathRichText content={f} />
@@ -2864,13 +2834,13 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       </>
                     )}
 
-                    {/* Sticky Callout Notes added by student */}
+                    {/* Sticky Callout Notes */}
                     {callouts.length > 0 && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 relative z-20">
                         {callouts.map((c) => (
                           <div
                             key={c.id}
-                            className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-xs text-amber-950 flex items-start justify-between gap-2 shadow-xs"
+                            className="p-3 rounded-xl bg-amber-50 dark:bg-[#18181b] border border-amber-500/30 text-xs text-zinc-900 dark:text-zinc-100 flex items-start justify-between gap-2"
                           >
                             <MathRichText content={c.text} />
                             <button
@@ -2878,7 +2848,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                               onClick={() =>
                                 setCallouts((prev) => prev.filter((item) => item.id !== c.id))
                               }
-                              className="text-amber-700 hover:text-red-600 font-bold cursor-pointer"
+                              className="text-amber-600 dark:text-amber-400 hover:text-rose-500 font-bold cursor-pointer"
                             >
                               ×
                             </button>
@@ -2888,13 +2858,13 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                     )}
 
                     {annotateMode && annotationTool === 'callout' && (
-                      <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 flex items-center gap-2 relative z-20">
+                      <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-amber-500/30 flex items-center gap-2 relative z-20">
                         <input
                           type="text"
                           value={newCalloutText}
                           onChange={(e) => setNewCalloutText(e.target.value)}
-                          placeholder="Add sticky callout or equation ($...$) to this page..."
-                          className="flex-1 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs"
+                          placeholder="Add callout or equation ($...$)..."
+                          className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-xs text-zinc-900 dark:text-zinc-100"
                         />
                         <button
                           type="button"
@@ -2911,50 +2881,48 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                               setNewCalloutText('');
                             }
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-semibold cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer"
                         >
-                          Pin Callout
+                          Pin
                         </button>
                       </div>
                     )}
                   </div>
 
                   {/* Bottom Page Progress Bar */}
-                  <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 text-xs text-slate-500">
-                    <span>Page Progress</span>
-                    <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="px-6 py-3 border-t border-zinc-200 dark:border-white/[0.07] flex items-center justify-between gap-4 text-xs text-zinc-500">
+                    <span>Progress</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-zinc-100 dark:bg-[#18181b] overflow-hidden">
                       <div
-                        className="h-full bg-[#4F46E5] rounded-full transition-all"
+                        className="h-full bg-[#D4653B] rounded-full transition-all"
                         style={{
                           width: `${Math.round(((pageIdx + 1) / Math.max(1, pagesList.length)) * 100)}%`,
                         }}
                       />
                     </div>
-                    <span className="font-semibold tabular-nums">
-                      {currentPageData.pageNumber} / {pagesList.length} pages
+                    <span className="font-mono font-medium tabular-nums">
+                      {currentPageData.pageNumber} / {pagesList.length}
                     </span>
                   </div>
                 </div>
 
-                {/* Right AI Tutor Panel with 2-Way Context Toggle & One-Click "Create Visual" Button (4 Cols on wide screen) */}
-                <div className="lg:col-span-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-2xs">
+                {/* Right AI Tutor Panel */}
+                <div className="lg:col-span-4 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-5 flex flex-col justify-between space-y-4">
                   <div className="space-y-4 flex-1 flex flex-col">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="font-display font-bold text-base text-slate-900 dark:text-white">
-                          AI Tutor
-                        </h2>
-                      </div>
-                      <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-[11px] font-semibold">
+                      <h2 className="font-semibold tracking-[-0.02em] text-base text-zinc-900 dark:text-zinc-50">
+                        AI Tutor
+                      </h2>
+                      <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] p-0.5 text-[11px] font-medium">
                         {(['English', 'Hinglish'] as const).map((l) => (
                           <button
                             key={l}
                             type="button"
                             onClick={() => setTutorLang(l)}
-                            className={`px-2 py-0.5 rounded cursor-pointer ${
+                            className={`px-2 py-0.5 rounded cursor-pointer transition-colors duration-150 ${
                               tutorLang === l
-                                ? 'bg-white text-[#4F46E5] shadow-2xs'
-                                : 'text-slate-500'
+                                ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
+                                : 'text-zinc-500'
                             }`}
                           >
                             {l}
@@ -2963,30 +2931,29 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       </div>
                     </div>
 
-                    {/* 2-Way Context Mode Toggle: Strict Uploaded Material Only vs Open JEE Tutor */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800 text-xs">
-                      <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 gap-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200 dark:border-white/[0.07] text-xs">
+                      <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] p-1 gap-1">
                         <button
                           type="button"
                           onClick={() => setTutorContextMode('strict_material')}
-                          className={`px-2.5 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-md font-medium transition-colors duration-150 cursor-pointer ${
                             tutorContextMode === 'strict_material'
-                              ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-2xs'
-                              : 'text-slate-600 dark:text-slate-400'
+                              ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                              : 'text-zinc-600 dark:text-zinc-400'
                           }`}
                         >
-                          Strict Uploaded Material Only
+                          Strict Material
                         </button>
                         <button
                           type="button"
                           onClick={() => setTutorContextMode('open_jee')}
-                          className={`px-2.5 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-md font-medium transition-colors duration-150 cursor-pointer ${
                             tutorContextMode === 'open_jee'
-                              ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-2xs'
-                              : 'text-slate-600 dark:text-slate-400'
+                              ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                              : 'text-zinc-600 dark:text-zinc-400'
                           }`}
                         >
-                          Open JEE Tutor
+                          Open JEE
                         </button>
                       </div>
 
@@ -2994,14 +2961,14 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                         <button
                           type="button"
                           onClick={() => setShowCreateDropdown((v) => !v)}
-                          className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-[#EEF2FF]/60 text-[#4F46E5] font-semibold inline-flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-700 dark:text-zinc-200 font-medium inline-flex items-center gap-1 cursor-pointer transition-colors duration-150"
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span>Create Studio ▾</span>
+                          <span>Create ▾</span>
                         </button>
 
                         {showCreateDropdown && (
-                          <div className="absolute right-0 mt-1.5 w-44 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-20 text-xs">
+                          <div className="absolute right-0 mt-1.5 w-44 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] py-1.5 z-20 text-xs">
                             {(
                               [
                                 { label: '2D / 3D Diagram', tab: 'Diagram Maker' },
@@ -3017,9 +2984,9 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                   setCreateTab(item.tab);
                                   setSubTab('Create');
                                 }}
-                                className="w-full px-3.5 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 cursor-pointer"
+                                className="w-full px-3.5 py-2 text-left hover:bg-zinc-100 dark:hover:bg-[#1f1f23] font-medium text-zinc-700 dark:text-zinc-200 flex items-center gap-2 cursor-pointer transition-colors duration-150"
                               >
-                                <Sparkles className="w-3.5 h-3.5 text-[#4F46E5]" />
+                                <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
                                 <span>{item.label}</span>
                               </button>
                             ))}
@@ -3028,7 +2995,6 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Difficulty Level Pills */}
                     <div className="flex flex-wrap items-center gap-1.5 pb-1">
                       {(
                         [
@@ -3041,10 +3007,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                           key={lvl.id}
                           type="button"
                           onClick={() => setTutorDifficulty(lvl.id)}
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border cursor-pointer ${
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border cursor-pointer transition-colors duration-150 ${
                             tutorDifficulty === lvl.id
-                              ? 'bg-indigo-600 text-white border-indigo-600'
-                              : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300'
+                              ? 'bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B] border-[#1C1917] dark:border-[#F5F0E6]'
+                              : 'border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                           }`}
                         >
                           {lvl.label}
@@ -3052,25 +3018,24 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       ))}
                     </div>
 
-                    {/* Default Page Summary Card + Chat Thread */}
                     <div className="space-y-3 max-h-[430px] overflow-y-auto pr-1 flex-1">
-                      <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 bg-slate-50/40 dark:bg-slate-800/40">
+                      <div className="rounded-xl border border-zinc-200 dark:border-white/[0.07] p-4 space-y-3 bg-zinc-50 dark:bg-[#18181b]">
                         <div className="flex items-center justify-between">
-                          <span className="px-2.5 py-0.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-xs font-bold">
+                          <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                             Page {currentPageData.pageNumber} Summary
                           </span>
                           <button
                             type="button"
                             onClick={handlePlayTTS}
                             disabled={ttsPlaying}
-                            className="text-xs font-semibold text-[#4F46E5] inline-flex items-center gap-1 hover:underline cursor-pointer"
+                            className="text-xs font-medium text-zinc-600 dark:text-zinc-300 inline-flex items-center gap-1 hover:underline cursor-pointer"
                           >
                             <Volume2 className="w-3.5 h-3.5" />
                             <span>{ttsPlaying ? 'Speaking...' : 'Read Aloud'}</span>
                           </button>
                         </div>
 
-                        <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
+                        <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
                           <MathRichText
                             content={
                               currentPageData.aiTutorSummary[
@@ -3085,7 +3050,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             type="button"
                             disabled={tutorLoading}
                             onClick={() => handleTutorExplain('Simpler')}
-                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
                           >
                             Explain Simpler
                           </button>
@@ -3093,7 +3058,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             type="button"
                             disabled={tutorLoading}
                             onClick={() => handleTutorExplain('Deeper')}
-                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
                           >
                             Explain Deeper
                           </button>
@@ -3101,36 +3066,35 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             type="button"
                             disabled={tutorLoading}
                             onClick={() => handleTutorExplain('UnitCheck')}
-                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
                           >
                             Unit Check
                           </button>
                         </div>
                       </div>
 
-                      {/* Chat Messages with Citations & One-Click "Create Visual" Button */}
                       {tutorChat.map((turn) => (
                         <div
                           key={turn.id}
                           className={`p-3.5 rounded-xl border text-xs space-y-2.5 ${
                             turn.role === 'user'
-                              ? 'bg-[#EEF2FF]/60 border-indigo-200 ml-6'
-                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700'
+                              ? 'bg-zinc-50 dark:bg-[#18181b] border-zinc-200 dark:border-white/[0.07] ml-6'
+                              : 'bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.07]'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-[11px] uppercase text-[#4F46E5]">
+                            <span className="font-mono font-semibold text-[11px] uppercase text-zinc-500">
                               {turn.role === 'user'
                                 ? 'You'
-                                : `AI Tutor (${
+                                : `Tutor · ${
                                     turn.contextMode === 'strict_material'
-                                      ? 'Strict Material'
+                                      ? 'Strict'
                                       : 'Open JEE'
-                                  })`}
+                                  }`}
                             </span>
                           </div>
 
-                          <MathRichText content={turn.text} className="leading-relaxed" />
+                          <MathRichText content={turn.text} className="leading-relaxed text-zinc-700 dark:text-zinc-200" />
 
                           {turn.citations && turn.citations.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 pt-1">
@@ -3139,7 +3103,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                   key={cIdx}
                                   type="button"
                                   onClick={() => setPageIdx(Math.max(0, cit.pageNumber - 1))}
-                                  className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold hover:bg-indigo-100 cursor-pointer"
+                                  className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/[0.07] text-[10px] font-medium hover:bg-zinc-200 dark:hover:bg-[#1f1f23] cursor-pointer"
                                   title={cit.excerpt}
                                 >
                                   Page {cit.pageNumber}
@@ -3148,30 +3112,27 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             </div>
                           )}
 
-                          {/* One-Click "Create Visual" Button on Every AI Tutor Reply */}
                           {turn.role === 'tutor' && (
-                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setVisualPickerTurnId(
-                                      visualPickerTurnId === turn.id ? null : turn.id
-                                    )
-                                  }
-                                  className="px-3 py-1.5 rounded-lg bg-[#EEF2FF] hover:bg-indigo-100 text-[#4F46E5] font-semibold inline-flex items-center gap-1.5 cursor-pointer"
-                                >
-                                  <Sparkles className="w-3.5 h-3.5" />
-                                  <span>
-                                    {generatingInlineVisual === turn.id
-                                      ? 'Synthesizing Visual...'
-                                      : 'Create Visual to Understand Better'}
-                                  </span>
-                                </button>
-                              </div>
+                            <div className="pt-2 border-t border-zinc-200 dark:border-white/[0.07] space-y-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setVisualPickerTurnId(
+                                    visualPickerTurnId === turn.id ? null : turn.id
+                                  )
+                                }
+                                className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-zinc-200 font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>
+                                  {generatingInlineVisual === turn.id
+                                    ? 'Synthesizing...'
+                                    : 'Create Visual'}
+                                </span>
+                              </button>
 
                               {visualPickerTurnId === turn.id && (
-                                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 grid grid-cols-2 gap-1.5">
+                                <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] grid grid-cols-2 gap-1.5">
                                   {(
                                     [
                                       '2D Diagram',
@@ -3186,7 +3147,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                       onClick={() =>
                                         handleCreateVisualFromTutorReply(turn, vType)
                                       }
-                                      className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 hover:border-[#4F46E5] text-left font-semibold text-slate-800 dark:text-slate-200 cursor-pointer"
+                                      className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-left font-medium text-zinc-800 dark:text-zinc-200 cursor-pointer transition-colors duration-150"
                                     >
                                       + {vType}
                                     </button>
@@ -3194,13 +3155,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                 </div>
                               )}
 
-                              {/* Inline Embedded Visual inside AI Tutor Reply */}
                               {turn.embeddedVisual && (
-                                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-indigo-200 space-y-2">
-                                  <div className="flex items-center justify-between text-[11px] font-bold text-[#4F46E5]">
-                                    <span>
-                                      Generated {turn.embeddedVisual.type} (Saved to Create Library)
-                                    </span>
+                                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-2">
+                                  <div className="text-[11px] font-medium text-zinc-500">
+                                    {turn.embeddedVisual.type} · Saved to Library
                                   </div>
                                   {turn.embeddedVisual.type === '2D Diagram' &&
                                     turn.embeddedVisual.svgHtml && (
@@ -3255,13 +3213,12 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Bottom Ask a Question Input */}
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       if (tutorQuestion.trim()) handleTutorExplain('Custom');
                     }}
-                    className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800"
+                    className="flex items-center gap-2 pt-3 border-t border-zinc-200 dark:border-white/[0.07]"
                   >
                     <input
                       type="text"
@@ -3269,16 +3226,16 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       onChange={(e) => setTutorQuestion(e.target.value)}
                       placeholder={
                         tutorContextMode === 'strict_material'
-                          ? `Ask strictly from ${selectedMaterial.title}...`
-                          : 'Ask any JEE Physics, Chemistry, or Math doubt...'
+                          ? `Ask from ${selectedMaterial.title}...`
+                          : 'Ask a JEE doubt...'
                       }
-                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-[#4F46E5]"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
                     />
                     <button
                       type="submit"
                       disabled={tutorLoading}
                       aria-label="Send question to AI Tutor"
-                      className="p-2.5 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white cursor-pointer"
+                      className="p-2.5 rounded-lg btn-terracotta cursor-pointer transition-colors duration-150"
                     >
                       <Send className="w-4 h-4" />
                     </button>

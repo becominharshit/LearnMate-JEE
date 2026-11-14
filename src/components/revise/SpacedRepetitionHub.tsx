@@ -91,28 +91,27 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Mode Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setSubMode('neuronz_queue')}
-            className={`px-4 py-2 rounded-xl text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors duration-150 ${
               subMode === 'neuronz_queue'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-[#1f1f23]'
             }`}
           >
             <Brain className="w-4 h-4" />
-            Active Recall Queue ({dueCards.length})
+            Recall Queue ({dueCards.length})
           </button>
           <button
             type="button"
             onClick={() => setSubMode('mistake_book')}
-            className={`px-4 py-2 rounded-xl text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors duration-150 ${
               subMode === 'mistake_book'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-[#1f1f23]'
             }`}
           >
             <Zap className="w-4 h-4" />
@@ -120,13 +119,12 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
           </button>
         </div>
 
-        <div className="text-xs font-bold text-slate-500 flex items-center gap-3">
+        <div className="text-xs font-mono tabular-nums text-zinc-500 flex items-center gap-3">
           <span>
-            Reviewed Today: <strong className="text-indigo-600">{reviewedTodayCount}</strong>
+            Reviewed: <strong className="text-zinc-900 dark:text-zinc-100">{reviewedTodayCount}</strong>
           </span>
-          <span>
-            SM-2 Spaced Repetition
-          </span>
+          <span>·</span>
+          <span>SM-2</span>
         </div>
       </div>
 
@@ -143,7 +141,7 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
               handleAddCard({
                 subject: entry.question.subject,
                 chapter: entry.question.chapter,
-                frontPrompt: `**[Mistake Remediation • ${rootCause}]** ${entry.question.stem}`,
+                frontPrompt: `**[Mistake Remediation · ${rootCause}]** ${entry.question.stem}`,
                 backAnswer: `${entry.question.explanation}\n\n*Root Cause Logged: ${rootCause}*`,
                 intervalDays: 1,
                 repetitionCount: 0,
@@ -153,38 +151,36 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
               });
             }
             if (showToast) {
-              showToast(`Converted "${entry.question.chapter}" mistake to NeuronZ SM-2 Queue!`);
+              showToast(`Added "${entry.question.chapter}" to SM-2 queue`);
             }
           }}
         />
       ) : activeCard ? (
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+        <div className="p-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-extrabold">
-                {activeCard.subject} • {activeCard.chapter}
+            <div className="flex items-center gap-2 font-mono text-zinc-500">
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                {activeCard.subject} · {activeCard.chapter}
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold">
-                SM-2 Interval: {activeCard.intervalDays}d • Repetitions: {activeCard.repetitionCount} • EF: {activeCard.easeFactor}
+              <span>·</span>
+              <span className="tabular-nums">
+                {activeCard.intervalDays}d · Rep {activeCard.repetitionCount} · EF {activeCard.easeFactor}
               </span>
             </div>
-            <span className="text-slate-400 font-bold">
-              Card {(activeIndex % dueCards.length) + 1} of {dueCards.length}
+            <span className="font-mono tabular-nums text-zinc-500">
+              {(activeIndex % dueCards.length) + 1} / {dueCards.length}
             </span>
           </div>
 
-          {/* Flashcard Box */}
           <div
             onClick={() => setIsFlipped((f) => !f)}
-            className="min-h-60 p-8 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-gradient-to-br from-indigo-50/40 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 flex flex-col justify-between cursor-pointer transition-all hover:border-indigo-400"
+            className="min-h-60 p-8 rounded-2xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] flex flex-col justify-between cursor-pointer transition-colors duration-150"
           >
-            <div className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              {isFlipped
-                ? 'Back — Formula, Derivation & Exam Trap'
-                : 'Front — Active Recall Prompt (Click to Flip)'}
+            <div className="text-[11px] font-mono uppercase text-zinc-500">
+              {isFlipped ? 'Back · Answer & Trap' : 'Front · Tap to Flip'}
             </div>
 
-            <div className="my-4 text-base font-semibold text-slate-900 dark:text-white leading-relaxed">
+            <div className="my-4 text-base font-medium text-zinc-900 dark:text-zinc-100 leading-relaxed">
               {isFlipped ? (
                 <MathRichText content={activeCard.backAnswer} />
               ) : (
@@ -192,57 +188,60 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
               )}
             </div>
 
-            <div className="text-xs font-bold text-slate-400 flex items-center justify-between">
-              <span>Click card to {isFlipped ? 'view prompt' : 'reveal solution'}</span>
-              <span>Next Due: {new Date(activeCard.nextReviewIso).toLocaleDateString()}</span>
+            <div className="text-xs font-mono tabular-nums text-zinc-500 flex items-center justify-between">
+              <span>{isFlipped ? 'Show prompt' : 'Reveal solution'}</span>
+              <span>Due {new Date(activeCard.nextReviewIso).toLocaleDateString()}</span>
             </div>
           </div>
 
-          {/* SM-2 Rating Buttons */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button
               type="button"
               onClick={() => handleRateCard(1)}
-              className="p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/50 hover:bg-rose-100 text-rose-700 dark:text-rose-300 text-xs font-extrabold cursor-pointer text-center"
+              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-rose-600 dark:text-rose-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
-              <div>Again (Reset)</div>
-              <div className="text-[10px] font-semibold opacity-80 mt-0.5">1 Day • EF -0.20</div>
+              <div>Again</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">1d · EF −0.2</div>
             </button>
             <button
               type="button"
               onClick={() => handleRateCard(3)}
-              className="p-3 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/70 dark:bg-amber-950/50 hover:bg-amber-100 text-amber-700 dark:text-amber-300 text-xs font-extrabold cursor-pointer text-center"
+              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Hard</div>
-              <div className="text-[10px] font-semibold opacity-80 mt-0.5">SM-2 Quality 3</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">Quality 3</div>
             </button>
             <button
               type="button"
               onClick={() => handleRateCard(4)}
-              className="p-3 rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50/70 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold cursor-pointer text-center"
+              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-900 dark:text-zinc-100 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Good</div>
-              <div className="text-[10px] font-semibold opacity-80 mt-0.5">SM-2 Quality 4</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">Quality 4</div>
             </button>
             <button
               type="button"
               onClick={() => handleRateCard(5)}
-              className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold cursor-pointer text-center"
+              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-emerald-600 dark:text-emerald-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Easy</div>
-              <div className="text-[10px] font-semibold opacity-80 mt-0.5">SM-2 Quality 5 • EF +0.10</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">Quality 5 · EF +0.1</div>
             </button>
           </div>
         </div>
       ) : (
-        <div className="p-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-2">
-          <Sparkles className="w-8 h-8 text-indigo-600 mx-auto" />
-          <div className="text-sm font-extrabold text-slate-900 dark:text-white">
-            Your NeuronZ SM-2 Active Recall Queue is empty
+        <div className="p-10 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-center space-y-2">
+          <Sparkles className="w-6 h-6 text-zinc-400 mx-auto" />
+          <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            No cards due today
           </div>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Upload study materials, add Mind Map nodes to flashcards, or tag a mistake in the Mistake Book to automatically populate your SuperMemo SM-2 queue.
-          </p>
+          <button
+            type="button"
+            onClick={() => setSubMode('mistake_book')}
+            className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:underline cursor-pointer"
+          >
+            Start Practice →
+          </button>
         </div>
       )}
     </div>

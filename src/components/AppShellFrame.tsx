@@ -12,7 +12,6 @@ import {
   Sun,
   Moon,
   Bell,
-  GraduationCap,
   CheckCircle2,
   X,
   PanelLeftClose,
@@ -26,6 +25,7 @@ import {
 import { MaterialItem } from './HomeAndStudyViews';
 import { PrimaryTab, StudySubTabId } from '../hooks/useLearnMateAppState';
 import { ExamTrack } from '../utils/jeeEngine';
+import { BrandLogo } from './BrandLogo';
 
 export interface AppShellFrameProps {
   children: React.ReactNode;
@@ -61,6 +61,8 @@ export interface AppShellFrameProps {
   userInitial: string;
   onStartCBTMock: (mode: ExamTrack) => void;
   toastMessage: string | null;
+  companionSlot?: React.ReactNode;
+  mobileCompanionSlot?: React.ReactNode;
 }
 
 export const AppShellFrame: React.FC<AppShellFrameProps> = ({
@@ -97,70 +99,68 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
   userInitial,
   onStartCBTMock,
   toastMessage,
+  companionSlot,
+  mobileCompanionSlot,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
     <div
-      className={`min-h-screen transition-colors ${
-        darkMode ? 'bg-slate-950 text-slate-100' : 'bg-[#F8FAFC] text-slate-900'
+      className={`min-h-screen transition-colors duration-150 ${
+        darkMode ? 'bg-[#09090B] text-[#F5F0E6]' : 'bg-[#FAF8F5] text-[#1C1917]'
       }`}
     >
-      {/* STREAMLINED TOP NAVBAR (Responsive Mobile/Tablet + Full Desktop Edge-to-Edge) */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 px-3 sm:px-4 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4 w-full">
+      {/* STREAMLINED TOP NAVBAR */}
+      <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#121214] border-b border-[#E7E2DA] dark:border-white/[0.08] px-3 sm:px-4 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4 w-full">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="hidden lg:inline-flex p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all cursor-pointer shrink-0"
-            title={sidebarCollapsed ? 'Expand Navigation Sidebar' : 'Collapse Navigation Sidebar'}
+            className="hidden lg:inline-flex p-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#1C1917] dark:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             aria-label="Toggle Left Navigation Sidebar"
           >
             {sidebarCollapsed ? (
-              <PanelLeftOpen className="w-4 h-4 text-indigo-600" />
+              <PanelLeftOpen className="w-4 h-4" />
             ) : (
-              <PanelLeftClose className="w-4 h-4 text-indigo-600" />
+              <PanelLeftClose className="w-4 h-4" />
             )}
           </button>
 
           <button
             type="button"
             onClick={() => onSelectTab('Home')}
-            className="flex items-center gap-2 text-left cursor-pointer group min-w-0"
+            className="flex items-center text-left cursor-pointer group min-w-0"
+            aria-label="LearnMate JEE Home"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-base shadow-xs group-hover:bg-indigo-700 transition-colors shrink-0">
-              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white truncate">
-                LearnMate
-              </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-indigo-50 text-indigo-600 rounded-md border border-indigo-200/70">
-                JEE
-              </span>
-            </div>
+            <BrandLogo
+              className="w-7 h-6 sm:w-8 sm:h-7"
+              showWordmark
+              wordmarkClassName="font-display font-semibold text-sm sm:text-base tracking-[-0.02em]"
+              badgeText="JEE"
+            />
           </button>
         </div>
 
-        {/* Right: Global Actions & Utilities ONLY */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        {/* Right: Global Actions & Utilities */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <button
             type="button"
             onClick={onOpenProModal}
-            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-extrabold transition-all cursor-pointer ${
+            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors duration-150 cursor-pointer ${
               subscriptionTier === 'pro' || subscriptionTier === 'institute'
-                ? 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                : 'border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300'
+                ? 'border-[#D4653B]/35 bg-[#D4653B]/10 text-[#D4653B] dark:text-[#E07348]'
+                : 'border-[#E7E2DA] dark:border-white/[0.08] bg-[#F3EFEA] dark:bg-[#1A1A1D] text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
             }`}
-            title="View Commercial Student & Institute Plans"
+            title="Plans"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>
+            <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348] shrink-0" />
+            <span className="font-mono tabular-nums text-[11px]">
               {subscriptionTier === 'institute'
-                ? 'INSTITUTE SEAT'
+                ? 'INSTITUTE'
                 : subscriptionTier === 'pro'
-                ? 'PRO ASPIRANT'
-                : `Free • ${Math.min(5, materials.length)}/5 Scans`}
+                ? 'PRO'
+                : `${Math.min(5, materials.length)}/5 Free`}
             </span>
           </button>
 
@@ -168,7 +168,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenAddMaterial}
             aria-label="Add Material"
-            className="inline-flex items-center gap-1.5 px-2.5 lg:px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer shrink-0"
+            className="btn-terracotta inline-flex items-center gap-1.5 p-1.5 sm:px-3 lg:px-3.5 sm:py-2 rounded-lg text-xs font-semibold cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden lg:inline">Add Material</span>
@@ -179,10 +179,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={() => onSetSearchModalOpen(true)}
             aria-label="Search"
-            className="inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shrink-0"
-            title="Global Search (Cmd+K)"
+            className="inline-flex items-center gap-1.5 p-1.5 sm:p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            title="Search (Cmd+K)"
           >
-            <Search className="w-3.5 h-3.5 text-slate-500" />
+            <Search className="w-3.5 h-3.5 text-[#57534E] dark:text-[#A1A1AA]" />
             <span className="hidden lg:inline">Search</span>
           </button>
 
@@ -190,22 +190,22 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenStudyTools}
             aria-label="Study Tools"
-            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
           >
-            <Grid className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="hidden lg:inline leading-tight text-left">Study Tools</span>
+            <Grid className="w-3.5 h-3.5 text-[#57534E] dark:text-[#A1A1AA]" />
+            <span className="hidden lg:inline">Tools</span>
           </button>
 
           <button
             type="button"
             onClick={onToggleFocusTimer}
-            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-extrabold transition-all cursor-pointer ${
+            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-mono tabular-nums font-medium transition-colors duration-150 cursor-pointer ${
               focusTimerOpen || focusRunning
-                ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-200'
+                ? 'border-[#D4653B]/40 bg-[#D4653B]/10 text-[#D4653B] dark:text-[#E07348]'
+                : 'border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA]'
             }`}
           >
-            <Clock className="w-3.5 h-3.5 text-indigo-600" />
+            <Clock className="w-3.5 h-3.5" />
             <span>{focusClockLabel}</span>
           </button>
 
@@ -213,10 +213,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onToggleDarkMode}
             aria-label="Toggle Theme"
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-all cursor-pointer shrink-0"
+            className="p-1.5 sm:p-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA] transition-colors duration-150 cursor-pointer shrink-0"
             title="Toggle Theme"
           >
-            {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
+            {darkMode ? <Sun className="w-4 h-4 text-[#E07348]" /> : <Moon className="w-4 h-4" />}
           </button>
 
           <div className="relative hidden sm:block">
@@ -224,61 +224,59 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
               type="button"
               onClick={onToggleNotifications}
               aria-label="Notifications"
-              className="relative p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
-              title="Notifications"
+              className="relative p-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA] transition-colors duration-150 cursor-pointer"
+              title="Alerts"
             >
               <Bell className="w-4 h-4" />
               {materials.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-extrabold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#D4653B] text-[#FAF8F5] text-[9px] font-mono font-bold flex items-center justify-center">
                   {materials.length}
                 </span>
               )}
             </button>
 
             {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-4 z-50 text-slate-900 dark:text-white">
-                <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-xs font-extrabold">
-                    Study Alerts &amp; Workspace Status
-                  </span>
+              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] shadow-2xl p-4 z-50 text-zinc-900 dark:text-[#fafafa]">
+                <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-zinc-200 dark:border-white/[0.07]">
+                  <span className="text-xs font-semibold">Alerts</span>
                   <button
                     onClick={onCloseNotifications}
-                    className="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer"
+                    className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-[#fafafa] cursor-pointer"
                   >
                     Close
                   </button>
                 </div>
-                <div className="space-y-2.5 text-xs">
+                <div className="space-y-2 text-xs">
                   {materials.length === 0 ? (
-                    <div
+                    <button
+                      type="button"
                       onClick={() => {
                         onCloseNotifications();
                         onOpenAddMaterial();
                       }}
-                      className="p-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800 cursor-pointer"
+                      className="w-full text-left p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
                     >
-                      <div className="font-extrabold text-indigo-950 dark:text-indigo-200">
-                        Upload Your First Study Material
+                      <div className="font-semibold">No materials uploaded</div>
+                      <div className="text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Upload PDF, photo, or lecture link →
                       </div>
-                      <div className="text-slate-600 dark:text-slate-400 mt-0.5">
-                        Add a PDF, handwritten photo, or 12-hour YouTube marathon to unlock detailed notes &amp; mind maps.
-                      </div>
-                    </div>
+                    </button>
                   ) : (
-                    <div
+                    <button
+                      type="button"
                       onClick={() => {
                         onCloseNotifications();
                         onSelectTab('Revise');
                       }}
-                      className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-100 cursor-pointer"
+                      className="w-full text-left p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
                     >
-                      <div className="font-extrabold text-indigo-950">
-                        {materials.length} Uploaded Material(s) Ready for Revision
+                      <div className="font-semibold">
+                        {materials.length} {materials.length === 1 ? 'material' : 'materials'} ready
                       </div>
-                      <div className="text-slate-600 mt-0.5">
-                        Review your formula sheets, mind maps, handwritten sheets, and 3D flashcards.
+                      <div className="text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Open Revise →
                       </div>
-                    </div>
+                    </button>
                   )}
                 </div>
               </div>
@@ -289,19 +287,21 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenVoiceTutor}
             aria-label="Voice Tutor"
-            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/70 hover:bg-indigo-100 text-xs font-extrabold text-indigo-700 dark:text-indigo-300 transition-all cursor-pointer shrink-0"
-            title="Open Live Classroom Voice JEE Tutor"
+            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#1C1917] dark:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            title="Voice Tutor"
           >
-            <Mic className="w-3.5 h-3.5 text-indigo-600" />
+            <Mic className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
             <span className="hidden lg:inline">Voice Tutor</span>
           </button>
+
+          {mobileCompanionSlot}
 
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-label="Open Mobile Study Menu"
             aria-expanded={mobileMenuOpen}
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer shrink-0"
+            className="md:hidden inline-flex items-center justify-center p-1.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6] cursor-pointer shrink-0"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
@@ -309,25 +309,25 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           <button
             type="button"
             onClick={onOpenProfileModal}
-            style={{ backgroundColor: avatarColor || '#4F46E5' }}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full text-white font-extrabold text-xs flex items-center justify-center shadow-xs transition-all cursor-pointer ring-2 ring-indigo-100 hover:opacity-90 shrink-0"
-            title="Open Student Profile & Account Settings"
+            style={{ backgroundColor: avatarColor || '#D4653B' }}
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white font-semibold text-xs flex items-center justify-center transition-opacity cursor-pointer border border-white/15 hover:opacity-90 shrink-0"
+            title="Profile & Settings"
           >
             {userInitial}
           </button>
         </div>
       </header>
 
-      {/* MOBILE (<768px) HAMBURGER DRAWER FOR SECONDARY CONTROLS */}
+      {/* MOBILE (<768px) MENU */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl p-4 space-y-2.5">
+        <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-white dark:bg-[#111113] border-b border-zinc-200 dark:border-white/[0.07] shadow-2xl p-4 space-y-2.5">
           <button
             type="button"
             onClick={() => {
               setMobileMenuOpen(false);
               onOpenProModal();
             }}
-            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 dark:bg-indigo-950/60 dark:border-indigo-800 text-xs font-extrabold text-indigo-700 dark:text-indigo-300 cursor-pointer"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-800 dark:text-[#fafafa] cursor-pointer"
           >
             <span className="inline-flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-500" />
@@ -336,7 +336,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                   ? 'Institute Seat'
                   : subscriptionTier === 'pro'
                   ? 'Pro Aspirant'
-                  : `Free • ${Math.min(5, materials.length)}/5 Scans`}
+                  : `${Math.min(5, materials.length)}/5 Free Scans`}
               </span>
             </span>
             <span>Plans →</span>
@@ -349,9 +349,9 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onOpenStudyTools();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 cursor-pointer"
             >
-              <Grid className="w-4 h-4 text-indigo-600" />
+              <Grid className="w-4 h-4 text-zinc-400" />
               <span>Study Tools</span>
             </button>
             <button
@@ -360,10 +360,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onToggleFocusTimer();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 cursor-pointer"
             >
-              <Clock className="w-4 h-4 text-indigo-600" />
-              <span>Pomodoro {focusClockLabel}</span>
+              <Clock className="w-4 h-4 text-zinc-400" />
+              <span className="font-mono tabular-nums">{focusClockLabel}</span>
             </button>
             <button
               type="button"
@@ -371,9 +371,9 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onOpenVoiceTutor();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 text-xs font-extrabold text-indigo-700 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-800 dark:text-[#fafafa] cursor-pointer"
             >
-              <Mic className="w-4 h-4 text-indigo-600" />
+              <Mic className="w-4 h-4 text-emerald-500" />
               <span>Voice Tutor</span>
             </button>
             <button
@@ -382,38 +382,38 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onToggleNotifications();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 cursor-pointer"
             >
-              <Bell className="w-4 h-4 text-slate-600" />
+              <Bell className="w-4 h-4 text-zinc-400" />
               <span>Alerts ({materials.length})</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* FULL-DESKTOP SHELL (>=1024px): SIDEBAR + 100% FLUID STAGE */}
+      {/* FULL-DESKTOP SHELL (>=1024px): SIDEBAR + FLUID STAGE */}
       <div className="flex min-h-[calc(100vh-4rem)] w-full">
         <aside
           data-testid="desktop-sidebar"
-          className={`hidden lg:flex shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200/90 dark:border-slate-800 transition-all duration-200 flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto ${
+          className={`hidden lg:flex shrink-0 bg-[#FFFFFF] dark:bg-[#121214] border-r border-[#E7E2DA] dark:border-white/[0.08] transition-all duration-150 flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto ${
             sidebarCollapsed ? 'w-[72px] px-2.5 py-4' : 'w-64 px-3.5 py-5'
           }`}
         >
           <div className="space-y-6">
             <div>
               {!sidebarCollapsed && (
-                <div className="px-2.5 mb-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Workspace Navigation
+                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA]">
+                  Workspace
                 </div>
               )}
               <nav className="space-y-1">
                 {(
                   [
-                    { id: 'Home', label: 'Home Dashboard', icon: Home },
-                    { id: 'Study', label: 'Study Workbench', icon: BookOpen },
-                    { id: 'Practice', label: 'Practice & PYQs', icon: Target },
-                    { id: 'Revise', label: 'Revise & Formula Book', icon: Layers },
-                    { id: 'Progress', label: 'Progress & Analytics', icon: BarChart3 },
+                    { id: 'Home', label: 'Home', icon: Home },
+                    { id: 'Study', label: 'Study', icon: BookOpen },
+                    { id: 'Practice', label: 'Practice', icon: Target },
+                    { id: 'Revise', label: 'Revise', icon: Layers },
+                    { id: 'Progress', label: 'Progress', icon: BarChart3 },
                   ] as const
                 ).map((tab) => {
                   const Icon = tab.icon;
@@ -424,11 +424,11 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                       onClick={() => onSelectTab(tab.id)}
                       title={sidebarCollapsed ? tab.label : undefined}
                       className={`w-full flex items-center ${
-                        sidebarCollapsed ? 'justify-center px-2 py-2.5' : ' gap-3 px-3 py-2.5'
-                      } rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                        sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2'
+                      } rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                         isActive
-                          ? 'bg-indigo-600 text-white shadow-xs'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-slate-800'
+                          ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] text-[#D4653B] dark:text-[#E07348] font-semibold'
+                          : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D]'
                       }`}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
@@ -441,17 +441,17 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
 
             {!sidebarCollapsed && (
               <div>
-                <div className="px-2.5 mb-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Study Sections
+                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA]">
+                  Study
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {(
                     [
-                      { id: 'Chapter Notes', label: 'Full Chapter Notes', icon: FileText },
-                      { id: 'My Materials', label: 'Uploaded Materials', icon: FolderOpen },
-                      { id: 'AI Tutor', label: 'Doubt Solver & Visuals', icon: Sparkles },
-                      { id: 'Syllabus', label: 'JEE Syllabus Tracker', icon: BookOpen },
-                      { id: 'Create', label: 'Visual Creations', icon: Grid },
+                      { id: 'Chapter Notes', label: 'Chapter Notes', icon: FileText },
+                      { id: 'My Materials', label: 'Materials', icon: FolderOpen },
+                      { id: 'AI Tutor', label: 'Doubt Solver', icon: Sparkles },
+                      { id: 'Syllabus', label: 'Syllabus', icon: BookOpen },
+                      { id: 'Create', label: 'Visuals', icon: Grid },
                       { id: 'Resources', label: 'Reference Books', icon: Layers },
                     ] as const
                   ).map((sub) => {
@@ -464,10 +464,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                           onSelectStudySubTab(sub.id);
                           onSelectTab('Study');
                         }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                           isSubActive
-                            ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800'
+                            ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] text-[#D4653B] dark:text-[#E07348] font-semibold'
+                            : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D]'
                         }`}
                       >
                         <SubIcon className="w-3.5 h-3.5 shrink-0" />
@@ -481,8 +481,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
 
             {!sidebarCollapsed && materials.length > 0 && (
               <div>
-                <div className="px-2.5 mb-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Recent Uploads ({materials.length})
+                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA]">
+                  Recent ({materials.length})
                 </div>
                 <div className="space-y-1">
                   {materials.slice(0, 5).map((mat) => {
@@ -495,19 +495,15 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                           onSelectStudySubTab('Chapter Notes');
                           onSelectTab('Study');
                         }}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all cursor-pointer ${
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors duration-150 cursor-pointer ${
                           isSelected
-                            ? 'bg-slate-900 text-white font-extrabold'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold'
+                            ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] text-[#1C1917] dark:text-[#F5F0E6] border border-[#D4653B]/25 font-semibold'
+                            : 'text-[#57534E] dark:text-[#A1A1AA] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] font-medium'
                         }`}
                       >
                         <div className="truncate">{mat.title}</div>
-                        <div
-                          className={`text-[10px] truncate ${
-                            isSelected ? 'text-indigo-200' : 'text-slate-400'
-                          }`}
-                        >
-                          {mat.subject} • {mat.chapter}
+                        <div className="text-[10px] text-[#57534E] dark:text-[#A1A1AA] truncate">
+                          {mat.subject} · {mat.chapter}
                         </div>
                       </button>
                     );
@@ -517,19 +513,20 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             )}
           </div>
 
-          <div className="pt-4 pb-8 border-t border-slate-200/80 dark:border-slate-800">
+          <div className="pt-4 pb-10 border-t border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+            {companionSlot}
             <button
               onClick={onToggleSidebar}
               className={`w-full flex items-center ${
-                sidebarCollapsed ? 'justify-center p-2.5' : 'justify-between px-3 py-2.5'
-              } rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer`}
+                sidebarCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-2'
+              } rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] hover:bg-[#EAE4DC] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] text-xs font-medium transition-colors duration-150 cursor-pointer`}
               title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
-              {!sidebarCollapsed && <span>Collapse Sidebar</span>}
+              {!sidebarCollapsed && <span>Collapse</span>}
               {sidebarCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4 text-indigo-600" />
+                <PanelLeftOpen className="w-4 h-4" />
               ) : (
-                <PanelLeftClose className="w-4 h-4 text-slate-500" />
+                <PanelLeftClose className="w-4 h-4" />
               )}
             </button>
           </div>
@@ -538,11 +535,11 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
         <main className="flex-1 min-w-0 w-full pb-28">{children}</main>
       </div>
 
-      {/* MOBILE & TABLET (<1024px) PERMANENT 5-TAB BOTTOM NAVIGATION BAR (NO COLLAPSIBLE SIDEBAR) */}
+      {/* MOBILE & TABLET (<1024px) 5-TAB BOTTOM BAR */}
       <nav
         aria-label="Primary Mobile Navigation"
         data-testid="mobile-bottom-nav"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-1.5 py-1 flex items-center justify-around shadow-[0_-4px_16px_rgba(15,23,42,0.06)]"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#FFFFFF] dark:bg-[#121214] border-t border-[#E7E2DA] dark:border-white/[0.08] px-1.5 py-1 flex items-center justify-around"
       >
         {(
           [
@@ -561,10 +558,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
               type="button"
               onClick={() => onSelectTab(tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`min-h-[44px] min-w-[44px] flex-1 flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-[11px] font-extrabold transition-colors cursor-pointer ${
+              className={`min-h-[44px] min-w-[44px] flex-1 flex flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 text-[11px] font-medium transition-colors duration-150 cursor-pointer ${
                 isActive
-                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'text-[#D4653B] dark:text-[#E07348] bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] font-semibold'
+                  : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -580,30 +577,30 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           role="dialog"
           aria-modal="true"
           aria-label="Global Search"
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-start justify-center pt-20 p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-start justify-center pt-20 p-4"
         >
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden text-slate-900 dark:text-white">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-              <Search className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] shadow-2xl w-full max-w-xl overflow-hidden text-zinc-900 dark:text-[#fafafa]">
+            <div className="p-4 border-b border-zinc-200 dark:border-white/[0.07] flex items-center gap-3">
+              <Search className="w-4 h-4 text-zinc-400" />
               <input
                 type="text"
                 autoFocus
                 value={globalSearchQuery}
                 onChange={(e) => onSetGlobalSearchQuery(e.target.value)}
-                placeholder="Jump to uploaded materials, Desmos calculator, Voice Tutor, or 75-Q CBT..."
-                className="flex-1 text-sm font-medium focus:outline-none bg-transparent"
+                placeholder="Jump to materials, calculator, Voice Tutor, or CBT..."
+                className="flex-1 text-sm font-medium focus:outline-none bg-transparent placeholder:text-zinc-400"
               />
               <button
                 onClick={() => onSetSearchModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-[#fafafa] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-3 max-h-80 overflow-y-auto space-y-1.5 text-xs">
+            <div className="p-2.5 max-h-80 overflow-y-auto space-y-1 text-xs">
               {[
                 ...materials.map((m) => ({
-                  label: `Uploaded Material: ${m.title} (${m.subject})`,
+                  label: `${m.title} · ${m.subject}`,
                   action: () => {
                     onSelectMaterial(m);
                     onSelectTab('Study');
@@ -611,27 +608,27 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                   },
                 })),
                 {
-                  label: 'Upload PDF, Handwritten Photo, or 12-Hour YouTube Marathon',
+                  label: 'Upload Material (PDF, Photo, YouTube)',
                   action: () => onOpenAddMaterial(),
                 },
                 {
-                  label: 'Live Voice AI Tutor (Word-by-Word Streaming & Barge-In)',
+                  label: 'Live Voice Tutor',
                   action: () => onOpenVoiceTutor(),
                 },
                 {
-                  label: 'Desmos Graphing Calculator & Offline Scientific Calculator',
+                  label: 'Graphing & Scientific Calculator',
                   action: () => onOpenStudyTools(),
                 },
                 {
-                  label: 'Full 75-Question NTA JEE Main CBT Mock Exam',
+                  label: '75-Q JEE Main CBT Mock',
                   action: () => onStartCBTMock('JEE Main'),
                 },
                 {
-                  label: 'JEE Advanced Paper 1 Multi-Format CBT Mock Exam',
+                  label: 'JEE Advanced CBT Mock',
                   action: () => onStartCBTMock('JEE Advanced'),
                 },
                 {
-                  label: 'Revise: Formula Book, Mind Maps & 4-Font Handwritten Notes',
+                  label: 'Revise · Formula Book & Flashcards',
                   action: () => onSelectTab('Revise'),
                 },
               ]
@@ -647,10 +644,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                       item.action();
                       onSetSearchModalOpen(false);
                     }}
-                    className="w-full p-3 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800 text-left font-bold flex items-center justify-between cursor-pointer"
+                    className="w-full p-2.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-[#18181b] text-left font-medium flex items-center justify-between cursor-pointer transition-colors duration-150"
                   >
                     <span>{item.label}</span>
-                    <span className="text-indigo-600">Jump →</span>
+                    <span className="text-zinc-400">→</span>
                   </button>
                 ))}
             </div>
@@ -659,8 +656,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
       )}
 
       {toastMessage && (
-        <div className="fixed bottom-28 md:bottom-14 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-auto max-w-md px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-slate-700">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="fixed bottom-28 md:bottom-14 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-auto max-w-md px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-[#18181b] text-[#fafafa] text-xs font-medium shadow-2xl flex items-center gap-2 border border-zinc-800 dark:border-white/[0.1]">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}

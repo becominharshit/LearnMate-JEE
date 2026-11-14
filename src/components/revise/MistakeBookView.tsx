@@ -23,32 +23,32 @@ const ROOT_CAUSE_TAGS: {
   {
     id: 'Conceptual Gap',
     label: 'Conceptual Gap',
-    colorClass: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800',
-    remedyHint: 'Re-read Section 1 (First Principles & Derivations) and test with Socratic Hints.',
+    colorClass: 'bg-zinc-50 text-rose-600 border-rose-500/30 dark:bg-[#18181b] dark:text-rose-400',
+    remedyHint: 'Re-read Section 1 and test with Socratic Hints.',
   },
   {
     id: 'Formula Forgotten',
     label: 'Formula Forgotten',
-    colorClass: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
-    remedyHint: 'Scheduled into Daily NeuronZ SM-2 Active Recall Queue for 1d → 6d → 15d review.',
+    colorClass: 'bg-zinc-50 text-amber-600 border-amber-500/30 dark:bg-[#18181b] dark:text-amber-400',
+    remedyHint: 'Scheduled into SM-2 queue (1d → 6d → 15d).',
   },
   {
     id: 'Calculation/Silly Error',
     label: 'Calculation/Silly Error',
-    colorClass: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800',
-    remedyHint: 'Simplify symbolically before substituting decimals in Section B numericals.',
+    colorClass: 'bg-zinc-50 text-blue-600 border-blue-500/30 dark:bg-[#18181b] dark:text-blue-400',
+    remedyHint: 'Simplify symbolically before substituting decimals.',
   },
   {
     id: 'Misread Question',
     label: 'Misread Question',
-    colorClass: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800',
-    remedyHint: 'Underline "NOT", "incorrect", and non-SI units ($\\text{cm, mM, }^\\circ\\text{C}$) in the stem.',
+    colorClass: 'bg-zinc-50 text-amber-600 border-amber-500/30 dark:bg-[#18181b] dark:text-amber-400',
+    remedyHint: 'Check "NOT", "incorrect", and non-SI units.',
   },
   {
     id: 'Time Pressure',
     label: 'Time Pressure',
-    colorClass: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
-    remedyHint: 'Use Round-1 / Round-2 NTA CBT strategy and dimensional elimination.',
+    colorClass: 'bg-zinc-50 text-emerald-600 border-emerald-500/30 dark:bg-[#18181b] dark:text-emerald-400',
+    remedyHint: 'Use Round-1 / Round-2 strategy and unit checks.',
   },
 ];
 
@@ -96,35 +96,33 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+            <h3 className="text-lg font-semibold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
               Mistake Book ({allMistakes.length})
             </h3>
             {untaggedCount > 0 && (
-              <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[11px] font-extrabold">
-                {untaggedCount} Untagged
+              <span className="text-xs font-mono text-amber-600 dark:text-amber-400">
+                · {untaggedCount} untagged
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Tag error root causes, run a 2-step targeted reteach, and pass concept rechecks to schedule SM-2 mastery.
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Tag root causes, reteach concepts, and verify rechecks.
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {(['All', 'Physics', 'Chemistry', 'Mathematics'] as const).map((subj) => (
             <button
               key={subj}
               type="button"
               onClick={() => setFilterSubject(subj)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150 ${
                 filterSubject === subj
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
+                  : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-[#1f1f23]'
               }`}
             >
               {subj}
@@ -133,18 +131,17 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
         </div>
       </div>
 
-      {/* Root Cause Filter Pills */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
           onClick={() => setFilterRootCause('All')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors duration-150 ${
             filterRootCause === 'All'
-              ? 'border-indigo-600 bg-indigo-600 text-white'
-              : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300'
+              ? 'border-[#1C1917] dark:border-[#F5F0E6] bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+              : 'border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-zinc-600 dark:text-zinc-400'
           }`}
         >
-          All Root Causes ({allMistakes.length})
+          All ({allMistakes.length})
         </button>
         {ROOT_CAUSE_TAGS.map((tag) => {
           const count = allMistakes.filter((m) => m.rootCauseTag === tag.id).length;
@@ -153,10 +150,10 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
               key={tag.id}
               type="button"
               onClick={() => setFilterRootCause(tag.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors duration-150 ${
                 filterRootCause === tag.id
-                  ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300'
+                  ? 'border-[#1C1917] dark:border-[#F5F0E6] bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                  : 'border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-zinc-600 dark:text-zinc-400'
               }`}
             >
               {tag.label} ({count})
@@ -165,15 +162,14 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
         })}
       </div>
 
-      {/* Mistake Entries */}
       {filtered.length === 0 ? (
-        <div className="p-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-2">
-          <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-          <div className="text-sm font-extrabold text-slate-900 dark:text-white">
-            No mistakes logged in this filter yet
+        <div className="p-10 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-center space-y-2">
+          <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
+          <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            No mistakes in this filter
           </div>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Attempt questions in the 75-Q NTA CBT Mock or Official PYQ Bank. Any incorrect or skipped question will automatically appear here for Root-Cause tagging, targeted reteaching, and SM-2 scheduling.
+          <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+            Attempt mocks or PYQs to log mistakes for reteaching.
           </p>
         </div>
       ) : (
@@ -194,44 +190,45 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
             return (
               <div
                 key={entry.id}
-                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4"
+                className="p-5 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold">
-                      {entry.question.subject} • {entry.question.chapter}
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {entry.question.subject} · {entry.question.chapter}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold">
-                      {entry.source} • Logged {entry.loggedAt}
+                    <span className="text-zinc-400">·</span>
+                    <span className="font-mono text-[11px] text-zinc-500">
+                      {entry.source} · {entry.loggedAt}
                     </span>
                     {activeCause ? (
                       <span
-                        className={`px-2.5 py-0.5 rounded-md border text-[11px] font-extrabold ${
+                        className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${
                           causeMeta?.colorClass || ''
                         }`}
                       >
-                        Root Cause: {activeCause}
+                        {activeCause}
                       </span>
                     ) : (
-                      <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[11px] font-extrabold flex items-center gap-1">
+                      <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 inline-flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" />
-                        Tag Root Cause Required
+                        Untagged
                       </span>
                     )}
                     {typeof entry.masteryDelta === 'number' && entry.masteryDelta !== 0 && (
                       <span
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-extrabold ${
+                        className={`text-[11px] font-mono font-semibold ${
                           entry.masteryDelta > 0
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-amber-600 dark:text-amber-400'
                         }`}
                       >
-                        Mastery {entry.masteryDelta > 0 ? `+${entry.masteryDelta}%` : `${entry.masteryDelta}%`}
+                        {entry.masteryDelta > 0 ? `+${entry.masteryDelta}%` : `${entry.masteryDelta}%`}
                       </span>
                     )}
                     {entry.nextDueIso && (
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-bold">
-                        Next Due: {new Date(entry.nextDueIso).toLocaleDateString()}
+                      <span className="font-mono text-[10px] text-zinc-500">
+                        Due {new Date(entry.nextDueIso).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -240,29 +237,29 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setActiveReteachId(isReteachOpen ? null : entry.id)}
-                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer border ${
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium inline-flex items-center gap-1 cursor-pointer border transition-colors duration-150 ${
                         isReteachOpen
-                          ? 'border-indigo-600 bg-indigo-50 text-indigo-800'
-                          : 'border-indigo-200 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50'
+                          ? 'border-[#1C1917] dark:border-[#F5F0E6] bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                          : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                       }`}
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      {isReteachOpen ? 'Hide Reteach' : 'Targeted Reteach & Recheck'}
+                      {isReteachOpen ? 'Hide Reteach' : 'Reteach & Recheck'}
                     </button>
                     {onVerifyMistakeRecheck && (
                       <>
                         <button
                           type="button"
                           onClick={() => onVerifyMistakeRecheck(entry.id, true)}
-                          className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors duration-150"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          Pass Recheck (+8%)
+                          Pass (+8%)
                         </button>
                         <button
                           type="button"
                           onClick={() => onVerifyMistakeRecheck(entry.id, false)}
-                          className="px-2.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg border border-amber-500/30 bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors duration-150"
                         >
                           <RefreshCw className="w-3 h-3" />
                           Retry 1d
@@ -272,24 +269,23 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handlePracticeQ(entry.question)}
-                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold inline-flex items-center gap-1.5 cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
                     >
                       <Play className="w-3.5 h-3.5" />
-                      Re-Attempt Question
+                      Re-Attempt
                     </button>
                   </div>
                 </div>
 
-                {/* Targeted Misconception Diagnosis + 2-Step Reteach & Concept Recheck */}
                 {isReteachOpen && (
-                  <div className="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-3 text-xs">
+                  <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-3 text-xs">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="font-extrabold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
-                        <Zap className="w-4 h-4 text-indigo-600" />
-                        <span>Misconception Diagnosis: {diagnosis.headline}</span>
+                      <div className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        <span>{diagnosis.headline}</span>
                       </div>
-                      <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
-                        Likely Trap: {diagnosis.likelyTrap}
+                      <span className="text-[11px] text-zinc-500">
+                        Trap: {diagnosis.likelyTrap}
                       </span>
                     </div>
 
@@ -297,19 +293,19 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                       {diagnosis.reteachSteps.map((step, sIdx) => (
                         <div
                           key={sIdx}
-                          className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900"
+                          className="p-2.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]"
                         >
-                          <span className="font-extrabold text-indigo-700 dark:text-indigo-300 block mb-0.5">
-                            Reteach Step {sIdx + 1}
+                          <span className="font-semibold text-zinc-900 dark:text-zinc-100 block mb-0.5">
+                            Step {sIdx + 1}
                           </span>
                           <MathRichText content={step} />
                         </div>
                       ))}
                     </div>
 
-                    <div className="pt-2 border-t border-indigo-200/70 dark:border-indigo-800 space-y-2">
-                      <div className="font-bold text-slate-900 dark:text-white">
-                        Quick Recheck: {diagnosis.recheckPrompt}
+                    <div className="pt-2 border-t border-zinc-200 dark:border-white/[0.07] space-y-2">
+                      <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                        Recheck: {diagnosis.recheckPrompt}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {diagnosis.recheckChoices.map((choice, cIdx) => {
@@ -330,12 +326,12 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                                   onVerifyMistakeRecheck(entry.id, passed);
                                 }
                               }}
-                              className={`px-3 py-1.5 rounded-lg border text-left font-semibold cursor-pointer ${
+                              className={`px-3 py-1.5 rounded-lg border text-left font-medium cursor-pointer transition-colors duration-150 ${
                                 picked
                                   ? isCorrectChoice
-                                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                                    : 'border-rose-500 bg-rose-600 text-white'
-                                  : 'border-indigo-200 dark:border-indigo-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:border-indigo-500'
+                                    ? 'border-emerald-500/40 bg-emerald-600 text-white'
+                                    : 'border-rose-500/40 bg-rose-600 text-white'
+                                  : 'border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                               }`}
                             >
                               {choice}
@@ -345,46 +341,45 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                       </div>
                       {checkFeedback && (
                         <div
-                          className={`font-extrabold ${
-                            checkFeedback === 'passed' ? 'text-emerald-700' : 'text-amber-700'
+                          className={`font-semibold ${
+                            checkFeedback === 'passed'
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-amber-600 dark:text-amber-400'
                           }`}
                         >
                           {checkFeedback === 'passed'
-                            ? 'Recheck passed! Mastery updated (+8%) and SM-2 interval expanded.'
-                            : 'Not quite — review Reteach Steps 1–2 above; card reset to 1-day SM-2 interval.'}
+                            ? 'Passed (+8% mastery, SM-2 updated).'
+                            : 'Review steps above; reset to 1d.'}
                         </div>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Question Stem */}
-                <div className="text-sm font-medium text-slate-900 dark:text-slate-100 leading-relaxed">
+                <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-relaxed">
                   <MathRichText content={entry.question.stem} />
                 </div>
 
-                {/* User vs Correct Answer */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200/70 dark:border-rose-900">
-                    <span className="font-extrabold text-rose-700 dark:text-rose-300 block mb-0.5">
-                      Your Response:
+                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-rose-500/30">
+                    <span className="font-semibold text-rose-600 dark:text-rose-400 block mb-0.5">
+                      Your Response
                     </span>
-                    <MathRichText content={entry.userAnswer || 'Skipped / Unattempted'} />
+                    <MathRichText content={entry.userAnswer || 'Unattempted'} />
                   </div>
-                  <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-900">
-                    <span className="font-extrabold text-emerald-700 dark:text-emerald-300 block mb-0.5">
-                      Correct Answer &amp; Derivation:
+                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-emerald-500/30">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 block mb-0.5">
+                      Solution
                     </span>
                     <MathRichText content={entry.question.explanation} />
                   </div>
                 </div>
 
-                {/* Root Cause Tag Selector + Auto SM-2 Trigger */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div className="pt-3 border-t border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[11px] font-extrabold text-slate-500 flex items-center gap-1 mr-1">
-                      <Tag className="w-3.5 h-3.5 text-indigo-600" />
-                      Tag Error Root Cause:
+                    <span className="text-[11px] font-medium text-zinc-500 flex items-center gap-1 mr-1">
+                      <Tag className="w-3.5 h-3.5" />
+                      Root Cause:
                     </span>
                     {ROOT_CAUSE_TAGS.map((tag) => {
                       const selected = activeCause === tag.id;
@@ -398,10 +393,10 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                               onConvertMistakeToSM2Card(entry, tag.id);
                             }
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors duration-150 cursor-pointer ${
                             selected
-                              ? 'border-indigo-600 bg-indigo-600 text-white'
-                              : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-indigo-400'
+                              ? 'border-[#1C1917] dark:border-[#F5F0E6] bg-[#1C1917] dark:bg-[#F5F0E6] text-[#FAF8F5] dark:text-[#09090B]'
+                              : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
                           }`}
                         >
                           {tag.label}
@@ -411,7 +406,7 @@ export const MistakeBookView: React.FC<MistakeBookViewProps> = ({
                   </div>
 
                   {causeMeta && (
-                    <div className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                    <div className="text-[11px] text-zinc-500 flex items-center gap-1">
                       <Brain className="w-3.5 h-3.5 shrink-0" />
                       <span>{causeMeta.remedyHint}</span>
                     </div>

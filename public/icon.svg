@@ -1,5 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="112" fill="#4F46E5" />
-  <path d="M256 116L96 196l160 80 128-64v96h32V196L256 116z" fill="#FFFFFF" />
-  <path d="M160 262v74c0 36 43 66 96 66s96-30 96-66v-74l-96 48-96-48z" fill="#C7D2FE" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 96" width="120" height="96" fill="none">
+  <style>
+    .ribbon-primary { fill: #1C1917; }
+    @media (prefers-color-scheme: dark) {
+      .ribbon-primary { fill: #F5F0E6; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="lm-terracotta-fav" x1="28" y1="68" x2="80" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4653B" />
+      <stop offset="100%" stop-color="#E07348" />
+    </linearGradient>
+  </defs>
+  <path d="M27 65 C37 56, 48 39, 64 31 L79 44 C67 48, 59 61, 52 72 Z" fill="url(#lm-terracotta-fav)" />
+  <path d="M54 36 C68 25, 84 26, 92 43 L106 75 C94 70, 84 70, 74 75 L61 48 C58 42, 54 41, 49 43 Z" class="ribbon-primary" />
+  <path d="M36 14 C38 10, 44 10, 48 13 C52 16, 54 21, 51 27 L32 63 C38 62, 46 64, 53 71 C46 80, 36 83, 22 83 C12 83, 8 74, 13 64 L36 14 Z" class="ribbon-primary" />
 </svg>

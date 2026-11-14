@@ -297,16 +297,16 @@ export function buildGroundedMaterialStudyBundle(params: {
     subtitle: `Source-linked summary (${pg.timestampRange || `Page ${pg.pageNumber}`})`,
     colorClass:
       idx % 3 === 0
-        ? 'bg-[#EEF2FF] dark:bg-indigo-950/60'
+        ? 'bg-zinc-100 dark:bg-[#18181b]'
         : idx % 3 === 1
-        ? 'bg-[#ECFDF5] dark:bg-emerald-950/50'
-        : 'bg-[#FFFBEB] dark:bg-amber-950/50',
+        ? 'bg-emerald-500/10 dark:bg-[#111113]'
+        : 'bg-amber-500/10 dark:bg-[#111113]',
     borderClass:
       idx % 3 === 0
-        ? 'border-indigo-400 dark:border-indigo-500'
+        ? 'border-zinc-300 dark:border-white/[0.12]'
         : idx % 3 === 1
-        ? 'border-emerald-400 dark:border-emerald-500'
-        : 'border-amber-400 dark:border-amber-500',
+        ? 'border-emerald-500/30 dark:border-emerald-500/30'
+        : 'border-amber-500/30 dark:border-amber-500/30',
     pageRef: pg.timestampRange ? `${pg.timestampRange} (P${pg.pageNumber})` : `Page ${pg.pageNumber}`,
     badgeType: idx === 0 ? 'High Weightage' : formulas[idx] ? 'Formula' : 'Exception Trap',
     formulaLatex: formulas[idx]?.formula?.replace(/\$\$/g, '$'),

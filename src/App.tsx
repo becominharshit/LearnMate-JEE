@@ -1,5 +1,5 @@
 import React from 'react';
-import { GraduationCap } from 'lucide-react';
+import { BrandLogo } from './components/BrandLogo';
 import { LandingPage, AuthScreen } from './components/LandingAndAuth';
 import { ReviseWorkspaceView } from './components/RevisePracticeProgressCBT';
 import {
@@ -33,12 +33,12 @@ export function App() {
 
   if (s.authLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#09090B] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md animate-pulse">
-            <GraduationCap className="w-6 h-6" />
+          <div className="animate-pulse">
+            <BrandLogo className="w-12 h-10" />
           </div>
-          <div className="text-sm font-bold text-slate-600">Loading LearnMate JEE...</div>
+          <div className="text-sm font-medium text-[#57534E] dark:text-[#A1A1AA]">Loading LearnMate JEE...</div>
         </div>
       </div>
     );
@@ -156,19 +156,42 @@ export function App() {
         darkMode={s.darkMode}
         onToggleDarkMode={() => {
           s.setDarkMode(!s.darkMode);
-          s.showToast(s.darkMode ? 'Switched to High-Craft Light Mode' : 'Dark Mode Active');
+          s.showToast(s.darkMode ? 'Light mode enabled' : 'Night mode enabled');
         }}
         notificationsOpen={s.notificationsOpen}
         onToggleNotifications={() => s.setNotificationsOpen((prev) => !prev)}
         onCloseNotifications={() => s.setNotificationsOpen(false)}
         onOpenVoiceTutor={() => s.setVoiceTutorOpen(true)}
         onOpenProfileModal={() => s.setProfileModalOpen(true)}
-        avatarColor={s.studentProfile.avatarColor || '#4F46E5'}
+        avatarColor={s.studentProfile.avatarColor || '#D4653B'}
         userInitial={userInitial}
         onStartCBTMock={(mode) => {
           s.startCBTMockSession(mode);
         }}
         toastMessage={s.toastMessage}
+        companionSlot={
+          <DynamicCompanion
+            activeChapterName={s.selectedMaterial?.chapter || 'Rotational Motion'}
+            activeMaterialId={s.selectedMaterial?.id}
+            sidebarCollapsed={s.sidebarCollapsed}
+            variant="sidebar"
+            onEarnXp={(earned, reason) => {
+              s.setXp((x) => x + earned);
+              if (reason) s.showToast(reason);
+            }}
+          />
+        }
+        mobileCompanionSlot={
+          <DynamicCompanion
+            activeChapterName={s.selectedMaterial?.chapter || 'Rotational Motion'}
+            activeMaterialId={s.selectedMaterial?.id}
+            variant="mobile-icon"
+            onEarnXp={(earned, reason) => {
+              s.setXp((x) => x + earned);
+              if (reason) s.showToast(reason);
+            }}
+          />
+        }
       >
         {s.activeTab === 'Home' && (
           <DashboardView
@@ -226,6 +249,9 @@ export function App() {
               s.setAddMaterialOpen(true);
             }}
             onOpenStudyTools={() => s.setStudyToolsOpen(true)}
+            onOpenCustomTestGenerator={() => s.setCustomTestModalOpen(true)}
+            sm2DueCount={s.sm2Cards.length}
+            mistakesCount={s.mistakesNotebook.length}
           />
         )}
 
@@ -342,6 +368,7 @@ export function App() {
             onStartCBTMock={(mode = 'JEE Main') => {
               s.startCBTMockSession(mode);
             }}
+            onOpenCustomTestGenerator={() => s.setCustomTestModalOpen(true)}
             onPracticeWeakTopic={(topic) => {
               s.setInstantPracticeConfig({
                 isOpen: true,
@@ -358,15 +385,6 @@ export function App() {
           />
         )}
       </AppShellFrame>
-
-      <DynamicCompanion
-        activeChapterName={s.selectedMaterial?.chapter || 'Rotational Motion'}
-        activeMaterialId={s.selectedMaterial?.id}
-        onEarnXp={(earned, reason) => {
-          s.setXp((x) => x + earned);
-          if (reason) s.showToast(reason);
-        }}
-      />
 
       <PwaOfflineAndJobsBar
         isAdmin={s.isAdmin}

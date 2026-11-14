@@ -132,7 +132,13 @@ export function useLearnMateAppState() {
   });
   const [instantPracticeConfig, setInstantPracticeConfig] =
     useState<InstantPracticeConfig | null>(null);
-  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('learnmate_theme') === 'dark';
+    } catch {
+      return false;
+    }
+  });
 
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
   const [materialBundles, setMaterialBundles] = useState<Record<string, MaterialStudyBundle>>({});
@@ -175,7 +181,7 @@ export function useLearnMateAppState() {
   const [studentProfile, setStudentProfile] = useState<StudentProfileData>({
     displayName: 'JEE Aspirant',
     email: '',
-    avatarColor: '#4F46E5',
+    avatarColor: '#D4653B',
     targetExam: 'JEE Main 2027',
     preferredLanguage: 'English',
     dailyGoalHours: 6,
@@ -186,6 +192,15 @@ export function useLearnMateAppState() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
+    try {
+      localStorage.setItem('learnmate_theme', darkMode ? 'dark' : 'light');
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', darkMode ? '#09090B' : '#FAF8F5');
+      }
+    } catch {
+      // ignore storage failure
+    }
   }, [darkMode]);
 
   const showToast = (msg: string) => {
