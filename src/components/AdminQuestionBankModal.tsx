@@ -65,16 +65,16 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
       aria-label="NTA 58-Chapter and PYQ Bank Inspector"
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden text-zinc-900 dark:text-zinc-100">
-        <div className="px-6 py-4 border-b border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#141417] flex items-center justify-between">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden text-[#0F172A] dark:text-[#F8FAFC]">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Database className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+            <Database className="w-5 h-5 text-[#2563EB] dark:text-blue-400" />
             <div>
               <h2 className="text-base font-semibold tracking-[-0.02em]">
                 NTA Syllabus &amp; PYQ Bank Inspector
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                <span className="font-mono tabular-nums">{EXPANDED_NTA_58_CHAPTERS.length}</span> Chapters · <span className="font-mono tabular-nums">{CORE_PYQ_POOL.length}</span> Curated Items · 2027 Paper 1 Spec
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
+                <span className="tabular-nums font-medium">{EXPANDED_NTA_58_CHAPTERS.length}</span> Chapters · <span className="tabular-nums font-medium">{CORE_PYQ_POOL.length}</span> Curated Items · 2027 Paper 1 Spec
               </p>
             </div>
           </div>
@@ -82,7 +82,7 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Question Bank Inspector"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -100,7 +100,7 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
             {Object.entries(provenanceCounts).map(([tag, count]) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded-md bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] font-mono tabular-nums font-medium"
+                className="px-2 py-0.5 rounded-md bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] tabular-nums font-medium"
               >
                 {tag}: {count}
               </span>
@@ -108,7 +108,7 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
           </div>
         </div>
 
-        <div className="px-6 py-3 bg-zinc-50 dark:bg-[#141417] border-b border-zinc-200 dark:border-white/[0.07] flex items-center justify-between gap-2">
+        <div className="px-6 py-3 bg-[#F8FAFF] dark:bg-[#070B14] border-b border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-xs font-medium">
             {(['All', 'Physics', 'Chemistry', 'Mathematics'] as const).map((sub) => (
               <button
@@ -117,15 +117,15 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
                 onClick={() => setSubjectFilter(sub)}
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   subjectFilter === sub
-                    ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
-                    : 'bg-white dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/[0.07] hover:text-zinc-900 dark:hover:text-zinc-200'
+                    ? 'btn-brand font-semibold'
+                    : 'bg-white dark:bg-[#1E293B] text-slate-600 dark:text-slate-400 border border-[#E2E8F0] dark:border-white/[0.08] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                 }`}
               >
                 {sub}
               </button>
             ))}
           </div>
-          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1 font-mono tabular-nums">
+          <span className="text-xs font-medium text-[#00A86B] dark:text-emerald-400 inline-flex items-center gap-1 tabular-nums">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {filteredChapters.length} chapters
           </span>
@@ -136,18 +136,18 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
             {filteredChapters.map((ch) => (
               <div
                 key={ch.id}
-                className="p-3.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-1.5"
+                className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-1.5"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                  <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400 shrink-0" />
                     {ch.chapterName}
                   </span>
-                  <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 font-mono tabular-nums shrink-0">
+                  <span className="text-[11px] font-medium text-[#475569] dark:text-[#94A3B8] tabular-nums shrink-0">
                     {ch.subject} · {ch.ntaWeightagePct}%
                   </span>
                 </div>
-                <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                   {ch.keyFormulasLatex.join(' | ')}
                 </div>
               </div>
@@ -157,9 +157,9 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
           {/* Authenticated Academic Issue Reporter */}
           <form
             onSubmit={handleSubmitIssue}
-            className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-3"
+            className="p-4 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-3"
           >
-            <div className="font-semibold flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
+            <div className="font-semibold flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
               <Flag className="w-4 h-4 text-rose-500" />
               <span>Report Question Key or Provenance Issue</span>
             </div>
@@ -168,7 +168,7 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
                 value={reportQId}
                 onChange={(e) => setReportQId(e.target.value)}
                 aria-label="Select question ID"
-                className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
+                className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC]"
               >
                 {CORE_PYQ_POOL.slice(0, 25).map((q) => (
                   <option key={q.id} value={q.id}>
@@ -180,7 +180,7 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value as any)}
                 aria-label="Issue type"
-                className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
+                className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC]"
               >
                 <option value="wrong_answer_key">Wrong Answer Key</option>
                 <option value="typo_or_latex">Typo or LaTeX Rendering</option>
@@ -195,16 +195,16 @@ export const AdminQuestionBankModal: React.FC<AdminQuestionBankModalProps> = ({
                 value={reportDetails}
                 onChange={(e) => setReportDetails(e.target.value)}
                 placeholder="Describe exact option or numerical discrepancy..."
-                className="flex-1 px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100"
+                className="flex-1 px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
               />
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg btn-terracotta font-semibold transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg btn-brand font-semibold transition-colors cursor-pointer"
               >
                 Submit Report
               </button>
             </div>
-            {reportStatus && <div className="font-medium text-emerald-600 dark:text-emerald-400">{reportStatus}</div>}
+            {reportStatus && <div className="font-medium text-[#00A86B] dark:text-emerald-400">{reportStatus}</div>}
           </form>
         </div>
       </div>

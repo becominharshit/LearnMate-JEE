@@ -108,6 +108,11 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
   wss.on('connection', async (clientWs: WebSocket, _request: http.IncomingMessage, uid?: string) => {
     let liveSession: any = null;
     let lastActivityAt = Date.now();
+    let isAlive = true;
+
+    clientWs.on('pong', () => {
+      isAlive = true;
+    });
 
     const heartbeatTimer = setInterval(() => {
       if (Date.now() - lastActivityAt > WS_IDLE_TIMEOUT_MS) {
@@ -118,7 +123,13 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
         clientWs.close(1000, 'Idle timeout');
         return;
       }
+      if (!isAlive) {
+        clearInterval(heartbeatTimer);
+        clientWs.terminate();
+        return;
+      }
       if (clientWs.readyState === clientWs.OPEN) {
+        isAlive = false;
         clientWs.ping();
       }
     }, 25000);
@@ -165,6 +176,16 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
               error: err?.message || 'Live API error',
               retryAfterSeconds: 5,
             });
+          },
+          onclose: (ev: any) => {
+            clearInterval(heartbeatTimer);
+            safeWsSend(clientWs, {
+              status: 'closed',
+              reason: ev?.reason || 'Live upstream session closed.',
+            });
+            if (clientWs.readyState === clientWs.OPEN) {
+              clientWs.close(1000, 'Upstream session ended');
+            }
           },
         },
       });
@@ -230,11 +251,12 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
       });
       safeWsSend(clientWs, {
         errorCode: error?.errorCode || 'LIVE_SESSION_UNAVAILABLE',
-        error: error?.message || 'Failed to connect to Gemini 3.8 Live',
+        error: error?.message || 'Failed to connect to Gemini Live session',
         retryAfterSeconds: 10,
       });
       if (clientWs.readyState === clientWs.OPEN || clientWs.readyState === clientWs.CONNECTING) {
-        clientWs.close();
+        const closeReason = String(error?.errorCode || 'LIVE_SESSION_UNAVAILABLE').slice(0, 120);
+        clientWs.close(1011, closeReason);
       }
     }
   });

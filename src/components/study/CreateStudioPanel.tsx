@@ -48,12 +48,43 @@ const PRESET_LIST: Preset3DId[] = [
   'Ellipse',
 ];
 
+interface AnimatedLessonKeyframe {
+  timeSec: number;
+  title: string;
+  formula: string;
+  visualCue: string;
+  caption: string;
+}
+
+interface AnimatedLessonData {
+  kind: 'animated_lesson';
+  lessonTitle: string;
+  durationSec: number;
+  summary: string;
+  keyframes: AnimatedLessonKeyframe[];
+  animatedSvg?: string;
+  videoUrl?: string;
+}
+
 function parse3DSavedSnapshot(assetData?: string): ThreeSceneSnapshot | null {
   if (!assetData || !assetData.trim().startsWith('{')) return null;
   try {
     const parsed = JSON.parse(assetData);
     if (parsed && parsed.kind === '3d') {
       return parsed as ThreeSceneSnapshot;
+    }
+  } catch {
+    // ignore malformed JSON
+  }
+  return null;
+}
+
+function parseAnimatedLessonData(assetData?: string): AnimatedLessonData | null {
+  if (!assetData || !assetData.trim().startsWith('{')) return null;
+  try {
+    const parsed = JSON.parse(assetData);
+    if (parsed && parsed.kind === 'animated_lesson') {
+      return parsed as AnimatedLessonData;
     }
   } catch {
     // ignore malformed JSON
@@ -88,6 +119,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
   const [solverNotice, setSolverNotice] = useState<string | null>(null);
   const [diagramLoading, setDiagramLoading] = useState<boolean>(false);
   const [renderMode, setRenderMode] = useState<'2D SVG' | '3D Interactive'>('2D SVG');
+  const [inclineAngleDeg, setInclineAngleDeg] = useState<30 | 60 | 90>(30);
   const [animateDiagramMotion, setAnimateDiagramMotion] = useState(false);
   const [animTimeSec, setAnimTimeSec] = useState<number>(0);
   const [diagramZoom, setDiagramZoom] = useState(100);
@@ -107,7 +139,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
   const [selectedVectorId, setSelectedVectorId] = useState<string | null>(null);
   const [newVectorLabel, setNewVectorLabel] = useState('');
   const [newVectorAngle, setNewVectorAngle] = useState<number>(45);
-  const [newVectorColor, setNewVectorColor] = useState('#D4653B');
+  const [newVectorColor, setNewVectorColor] = useState('#2563EB');
   const svgStageRef = useRef<HTMLDivElement | null>(null);
 
   // Visual state
@@ -123,6 +155,8 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
   const [videoAspectRatio, setVideoAspectRatio] = useState<'16:9' | '9:16'>('16:9');
   const [videoPhotoBase64, setVideoPhotoBase64] = useState<string | null>(null);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+  const [generatedLesson, setGeneratedLesson] = useState<AnimatedLessonData | null>(null);
+  const [activeKeyframeIdx, setActiveKeyframeIdx] = useState<number>(0);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState<string | null>(null);
   const [showFallback3DPreview, setShowFallback3DPreview] = useState(false);
@@ -153,6 +187,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
       preset: activePreset,
       timeSec: animTimeSec,
       animateMotion: animateDiagramMotion,
+      thetaDeg: inclineAngleDeg,
     });
     return { svg: solved.svg, matched: solved.matched };
   })();
@@ -183,6 +218,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
       preset: matchedPreset,
       timeSec: 0,
       animateMotion: false,
+      thetaDeg: inclineAngleDeg,
     });
 
     if (localSolved.matched) {
@@ -330,6 +366,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
           prompt: diagramPrompt,
           category: diagramCategory,
           preset: activePreset,
+          thetaDeg: inclineAngleDeg,
         });
         const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(solved.svg)}`;
         setGeneratedImageUrl(svgDataUrl);
@@ -370,33 +407,56 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
     setVideoLoading(true);
     setVideoError(null);
     setShowFallback3DPreview(false);
+    setActiveKeyframeIdx(0);
     try {
-      const res = await apiFetchWithAuth<{ videoUrl?: string }>('/api/ai/video', {
-        prompt: `Educational JEE physics/chemistry animated explanation: ${diagramPrompt}`,
-        aspectRatio: videoAspectRatio,
-        base64Image: videoPhotoBase64,
-        mimeType: 'image/png',
-      });
-      if (!res.ok || !res.data.videoUrl) {
+      const res = await apiFetchWithAuth<{
+        lessonTitle?: string;
+        durationSec?: number;
+        summary?: string;
+        keyframes?: AnimatedLessonKeyframe[];
+        animatedSvg?: string;
+        videoUrl?: string;
+      }>(
+        '/api/ai/video',
+        {
+          prompt: `Educational JEE physics/chemistry/math animated concept lesson: ${diagramPrompt}`,
+          aspectRatio: videoAspectRatio,
+          imageBase64: videoPhotoBase64 || undefined,
+          imageMimeType: 'image/png',
+        },
+        'POST',
+        { signal: AbortSignal.timeout(30_000) }
+      );
+      if (!res.ok || (!res.data.animatedSvg && !res.data.videoUrl)) {
         setVideoError(
           !res.ok
             ? `[${res.error.errorCode}] ${res.error.message}`
-            : 'Video endpoint returned no MP4 stream.'
+            : 'Animated lesson endpoint returned no playable visual.'
         );
         return;
       }
-      setGeneratedVideoUrl(res.data.videoUrl);
+      const lessonData: AnimatedLessonData = {
+        kind: 'animated_lesson',
+        lessonTitle: res.data.lessonTitle || `${activePreset} Animated Lesson`,
+        durationSec: res.data.durationSec || 12,
+        summary: res.data.summary || `Interactive step-by-step concept animation for ${diagramPrompt}`,
+        keyframes: Array.isArray(res.data.keyframes) ? res.data.keyframes : [],
+        animatedSvg: res.data.animatedSvg ? sanitizeSvgMarkup(res.data.animatedSvg) : undefined,
+        videoUrl: res.data.videoUrl,
+      };
+      setGeneratedLesson(lessonData);
+      setGeneratedVideoUrl(res.data.videoUrl || null);
       await onSaveCreation({
         type: 'video',
-        title: `${activePreset} Animated Lesson (${videoAspectRatio})`,
+        title: `${lessonData.lessonTitle.slice(0, 40)} (${videoAspectRatio})`,
         prompt: diagramPrompt,
         subject: subjectFilter,
         preset: activePreset,
-        assetData: res.data.videoUrl,
-        resolutionOrRatio: videoAspectRatio,
+        assetData: JSON.stringify(lessonData),
+        resolutionOrRatio: `${videoAspectRatio} · ${lessonData.durationSec}s`,
       });
     } catch (err: any) {
-      setVideoError(err?.message || 'Video generation failed.');
+      setVideoError(err?.message || 'Animated lesson generation failed.');
     } finally {
       setVideoLoading(false);
     }
@@ -407,12 +467,12 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
   return (
     <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-5 space-y-5">
       <div>
-        <h1 className="font-semibold tracking-[-0.02em] text-2xl text-zinc-900 dark:text-zinc-50">
+        <h1 className="font-semibold tracking-[-0.02em] text-2xl text-[#0F172A] dark:text-[#F8FAFC]">
           Create Studio
         </h1>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/[0.07] pb-1 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#E2E8F0] dark:border-white/[0.08] pb-1 overflow-x-auto">
         {(['Diagram Maker', 'Visual', 'Animated Lesson', 'Saved Library'] as const).map((tab) => (
           <button
             key={tab}
@@ -420,8 +480,8 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
             onClick={() => setCreateTab(tab)}
             className={`px-4 py-2.5 rounded-t-lg text-xs font-semibold border-b-2 transition-colors duration-150 whitespace-nowrap cursor-pointer ${
               createTab === tab
-                ? 'text-[#D4653B] dark:text-[#E07348] border-[#D4653B] dark:border-[#E07348]'
-                : 'text-zinc-500 border-transparent hover:text-zinc-900 dark:hover:text-zinc-200'
+                ? 'text-[#2563EB] dark:text-[#60A5FA] border-[#2563EB] dark:border-[#60A5FA]'
+                : 'text-[#475569] dark:text-[#94A3B8] border-transparent hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
             }`}
           >
             {tab} {tab === 'Saved Library' ? `(${creations.length})` : ''}
@@ -430,37 +490,49 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
       </div>
 
       {saveBanner && (
-        <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-emerald-500/30 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+        <div className="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#00A86B]/35 text-xs font-medium text-[#00A86B] dark:text-emerald-400">
           {saveBanner}
         </div>
       )}
 
       {createTab === 'Saved Library' ? (
         creations.length === 0 ? (
-          <div className="p-10 rounded-2xl bg-white dark:bg-[#111113] border border-dashed border-zinc-300 dark:border-white/[0.12] text-center text-xs text-zinc-500">
-            No saved visuals yet. Generate a diagram or visual to save it here.
+          <div className="p-10 rounded-2xl bg-white dark:bg-[#111827] border border-dashed border-[#CBD5E1] dark:border-white/[0.12] text-center text-xs text-[#475569] dark:text-[#94A3B8]">
+            No saved visuals yet. Generate a diagram, visual, or animated lesson to save it here.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {creations.map((item) => {
               const snap3d = item.type === '3d' ? parse3DSavedSnapshot(item.assetData) : null;
+              const savedLesson = item.type === 'video' ? parseAnimatedLessonData(item.assetData) : null;
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-4 space-y-3 flex flex-col justify-between"
+                  className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] p-4 space-y-3 flex flex-col justify-between"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-mono text-zinc-500">
+                    <div className="flex items-center justify-between text-xs tabular-nums text-[#475569] dark:text-[#94A3B8]">
                       <span className="uppercase font-semibold">{item.type}</span>
                       <span>{item.resolutionOrRatio}</span>
                     </div>
 
-                    <div className="h-44 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center overflow-hidden p-2">
-                      {item.type === 'video' && item.assetData?.startsWith('data:video') ? (
+                    <div className="h-44 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14] flex items-center justify-center overflow-hidden p-2">
+                      {item.type === 'video' && savedLesson?.animatedSvg ? (
+                        <div
+                          className="w-full h-full flex items-center justify-center overflow-hidden"
+                          dangerouslySetInnerHTML={{ __html: sanitizeSvgMarkup(savedLesson.animatedSvg) }}
+                        />
+                      ) : item.type === 'video' && item.assetData?.startsWith('data:video') ? (
                         <video
                           controls
                           src={item.assetData}
                           className="max-h-full max-w-full rounded-lg"
+                        />
+                      ) : item.type === 'video' && item.assetData?.startsWith('data:image/svg+xml') ? (
+                        <img
+                          src={item.assetData}
+                          alt={item.title}
+                          className="max-h-full max-w-full object-contain rounded-lg"
                         />
                       ) : snap3d?.previewPngDataUrl ? (
                         <img
@@ -495,14 +567,14 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     </div>
 
                     <div>
-                      <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                      <h3 className="font-semibold text-sm text-[#0F172A] dark:text-[#F8FAFC]">
                         {item.title}
                       </h3>
-                      <p className="text-xs text-zinc-500 line-clamp-2 mt-0.5">{item.prompt}</p>
+                      <p className="text-xs text-[#475569] dark:text-[#94A3B8] line-clamp-2 mt-0.5">{item.prompt}</p>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-zinc-200 dark:border-white/[0.07] flex items-center justify-between gap-2 text-xs">
+                  <div className="pt-2 border-t border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between gap-2 text-xs">
                     <button
                       type="button"
                       onClick={() => {
@@ -527,7 +599,10 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                           }
                           setCreateTab('Visual');
                         } else if (item.type === 'video') {
-                          if (item.assetData?.startsWith('data:video')) {
+                          if (savedLesson) {
+                            setGeneratedLesson(savedLesson);
+                            setGeneratedVideoUrl(savedLesson.videoUrl || null);
+                          } else if (item.assetData?.startsWith('data:video') || item.assetData?.startsWith('data:image/svg+xml')) {
                             setGeneratedVideoUrl(item.assetData);
                           }
                           setCreateTab('Animated Lesson');
@@ -539,23 +614,24 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                           setCreateTab('Diagram Maker');
                         }
                       }}
-                      className="px-3 py-1.5 rounded-lg btn-terracotta font-semibold cursor-pointer transition-colors duration-150"
+                      className="px-3 py-1.5 rounded-lg btn-brand font-semibold cursor-pointer transition-all duration-150"
                     >
                       Open in Studio
                     </button>
 
-                    {item.assetData?.includes('<svg') && (
+                    {(item.assetData?.includes('<svg') || savedLesson?.animatedSvg) && (
                       <button
                         type="button"
                         onClick={() => {
-                          const blob = new Blob([sanitizeSvgMarkup(item.assetData)], {
+                          const rawSvg = savedLesson?.animatedSvg || item.assetData;
+                          const blob = new Blob([sanitizeSvgMarkup(rawSvg)], {
                             type: 'image/svg+xml;charset=utf-8',
                           });
                           const url = URL.createObjectURL(blob);
                           triggerDownloadUrl(url, `${item.title.replace(/\s+/g, '_')}.svg`);
                           URL.revokeObjectURL(url);
                         }}
-                        className="px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer inline-flex items-center gap-1 transition-colors duration-150"
+                        className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] font-medium hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer inline-flex items-center gap-1 transition-colors duration-150"
                       >
                         <Download className="w-3.5 h-3.5" />
                         SVG
@@ -570,7 +646,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                             `${item.title.replace(/\s+/g, '_')}.png`
                           )
                         }
-                        className="px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer inline-flex items-center gap-1 transition-colors duration-150"
+                        className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] font-medium hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer inline-flex items-center gap-1 transition-colors duration-150"
                       >
                         <Download className="w-3.5 h-3.5" />
                         PNG
@@ -585,15 +661,15 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* Left Prompt & Presets Column (3 Cols) */}
-          <div className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-5 space-y-4">
+          <div className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] p-5 space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Source Material
               </label>
               <select
                 value={selectedMaterialTitle}
                 onChange={(e) => setSelectedMaterialTitle(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] text-xs font-medium bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100"
+                className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]"
               >
                 {materials.length === 0 ? (
                   <option value="Uploaded Material">General JEE Concept</option>
@@ -608,7 +684,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Prompt
               </label>
               <textarea
@@ -619,18 +695,18 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                   setAiSvgOverride(null);
                 }}
                 placeholder="Describe diagram, ray optics, Wheatstone bridge, or conic..."
-                className="w-full p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-zinc-100 leading-relaxed"
+                className="w-full p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-xs text-[#0F172A] dark:text-[#F8FAFC] leading-relaxed"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Category
               </label>
               <select
                 value={diagramCategory}
                 onChange={(e) => setDiagramCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] text-xs bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100"
+                className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] text-xs bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]"
               >
                 <option value="Auto-detect">Auto-detect</option>
                 <option value="Free-Body Diagram">Free-Body Diagram</option>
@@ -653,7 +729,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                   void handleGenerateDiagramSvg();
                 }
               }}
-              className="w-full py-2.5 rounded-lg btn-terracotta disabled:opacity-60 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer"
+              className="w-full py-2.5 rounded-lg btn-brand disabled:opacity-60 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all duration-150 cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>
@@ -662,7 +738,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
             </button>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-1.5">
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">
                 Quick Presets
               </label>
               <div className="grid grid-cols-3 gap-1.5">
@@ -684,8 +760,8 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     }}
                     className={`px-2 py-2 rounded-lg text-[11px] font-medium border transition-colors duration-150 cursor-pointer ${
                       activePreset === preset && !aiSvgOverride
-                        ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] border-[#1C1917] dark:border-[#F5F0E6]'
-                        : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
+                        ? 'bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white border-transparent font-semibold'
+                        : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#243247]'
                     }`}
                   >
                     {preset}
@@ -696,12 +772,12 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
           </div>
 
           {/* Center Canvas Area (6 Cols) */}
-          <div className="lg:col-span-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-4 space-y-4">
+          <div className="lg:col-span-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] p-4 space-y-4">
             {createTab === 'Diagram Maker' && (
               <>
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200 dark:border-white/[0.07] text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] p-0.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#E2E8F0] dark:border-white/[0.08] text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="inline-flex rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] p-0.5">
                       {(['2D SVG', '3D Interactive'] as const).map((m) => (
                         <button
                           key={m}
@@ -709,8 +785,8 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                           onClick={() => setRenderMode(m)}
                           className={`px-2.5 py-1 rounded-md font-medium cursor-pointer transition-colors duration-150 ${
                             renderMode === m
-                              ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
-                              : 'text-zinc-500'
+                              ? 'bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] shadow-2xs'
+                              : 'text-[#475569] dark:text-[#94A3B8]'
                           }`}
                         >
                           {m}
@@ -719,27 +795,59 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     </div>
 
                     {renderMode === '2D SVG' && (
-                      <div className="inline-flex items-center rounded-lg border border-zinc-200 dark:border-white/[0.07]">
-                        <button
-                          type="button"
-                          onClick={() => setDiagramZoom((z) => Math.max(60, z - 20))}
-                          aria-label="Zoom out diagram"
-                          className="px-2.5 py-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
+                      <>
+                        <div className="inline-flex items-center rounded-lg border border-[#E2E8F0] dark:border-white/[0.08]">
+                          <button
+                            type="button"
+                            onClick={() => setDiagramZoom((z) => Math.max(60, z - 20))}
+                            aria-label="Zoom out diagram"
+                            className="px-2.5 py-1 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer"
+                          >
+                            −
+                          </button>
+                          <span className="px-2.5 py-1 border-x border-[#E2E8F0] dark:border-white/[0.08] tabular-nums font-medium">
+                            {diagramZoom}%
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setDiagramZoom((z) => Math.min(150, z + 20))}
+                            aria-label="Zoom in diagram"
+                            className="px-2.5 py-1 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <div
+                          className="inline-flex items-center rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] p-0.5 gap-0.5"
+                          role="group"
+                          aria-label="Incline angle presets"
                         >
-                          −
-                        </button>
-                        <span className="px-2.5 py-1 border-x border-zinc-200 dark:border-white/[0.07] font-mono tabular-nums">
-                          {diagramZoom}%
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setDiagramZoom((z) => Math.min(150, z + 20))}
-                          aria-label="Zoom in diagram"
-                          className="px-2.5 py-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer"
-                        >
-                          +
-                        </button>
-                      </div>
+                          {([30, 60, 90] as const).map((deg) => (
+                            <button
+                              key={deg}
+                              type="button"
+                              onClick={() => {
+                                setInclineAngleDeg(deg);
+                                setActivePreset('Incline');
+                                setAiSvgOverride(null);
+                                if (!diagramPrompt.toLowerCase().includes('incline')) {
+                                  setDiagramPrompt(
+                                    'Free-body diagram of a block on an inclined plane, show gravity mg, normal N, and friction.'
+                                  );
+                                }
+                              }}
+                              className={`px-2 py-1 rounded-md text-[11px] font-semibold tabular-nums cursor-pointer transition-colors ${
+                                inclineAngleDeg === deg && activePreset === 'Incline'
+                                  ? 'bg-[#2563EB] text-white'
+                                  : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
+                              }`}
+                            >
+                              {deg}°
+                            </button>
+                          ))}
+                        </div>
+                      </>
                     )}
                   </div>
 
@@ -748,7 +856,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                       <button
                         type="button"
                         onClick={handleExportSvg}
-                        className="px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] font-medium text-zinc-700 dark:text-zinc-200 inline-flex items-center gap-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
+                        className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] font-medium text-[#0F172A] dark:text-[#F8FAFC] inline-flex items-center gap-1 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors duration-150"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>SVG</span>
@@ -757,7 +865,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                       <button
                         type="button"
                         onClick={handleExport3DJson}
-                        className="px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] font-medium text-zinc-700 dark:text-zinc-200 inline-flex items-center gap-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
+                        className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] font-medium text-[#0F172A] dark:text-[#F8FAFC] inline-flex items-center gap-1 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors duration-150"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>JSON</span>
@@ -766,7 +874,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     <button
                       type="button"
                       onClick={handleExportPng}
-                      className="px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] font-medium text-zinc-700 dark:text-zinc-200 inline-flex items-center gap-1 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
+                      className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] font-medium text-[#0F172A] dark:text-[#F8FAFC] inline-flex items-center gap-1 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors duration-150"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>PNG</span>
@@ -774,7 +882,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => void handleSaveDiagramOr3D()}
-                      className="px-3.5 py-1.5 rounded-lg btn-terracotta font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
+                      className="px-3.5 py-1.5 rounded-lg btn-brand font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all duration-150"
                     >
                       <Bookmark className="w-3.5 h-3.5" />
                       <span>Save</span>
@@ -783,7 +891,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                 </div>
 
                 {solverNotice && (
-                  <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-[#18181b] border border-amber-500/30 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                  <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-[#1E293B] border border-amber-500/30 text-[11px] font-medium text-amber-700 dark:text-amber-300">
                     {solverNotice}
                   </div>
                 )}
@@ -811,15 +919,15 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                       }}
                       onMouseUp={() => setDraggingVectorId(null)}
                       onMouseLeave={() => setDraggingVectorId(null)}
-                      className="w-full h-[420px] rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white flex items-center justify-center overflow-hidden p-4 relative select-none"
+                      className="w-full h-[420px] rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-white flex items-center justify-center overflow-hidden p-4 relative select-none"
                     >
                       {diagramLoading && (
-                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-zinc-900 text-white text-[11px] font-semibold z-20">
+                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-[#0F172A] text-white text-[11px] font-semibold z-20">
                           Synthesizing SVG...
                         </span>
                       )}
                       {diagramVectors.length > 0 && (
-                        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-zinc-900/90 text-white text-[10px] font-medium z-20">
+                        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#0F172A]/90 text-white text-[10px] font-medium z-20">
                           Drag added vectors
                         </span>
                       )}
@@ -844,7 +952,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                             color: vec.color,
                           }}
                           className={`absolute -translate-x-1/2 -translate-y-1/2 z-20 px-2.5 py-1 rounded-lg bg-white/95 border text-[11px] font-semibold flex items-center gap-1.5 cursor-grab active:cursor-grabbing ${
-                            selectedVectorId === vec.id ? 'ring-2 ring-zinc-900/30' : ''
+                            selectedVectorId === vec.id ? 'ring-2 ring-[#2563EB]/40' : ''
                           }`}
                         >
                           <span
@@ -860,7 +968,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                                 prev.filter((item) => item.id !== vec.id)
                               );
                             }}
-                            className="ml-1 text-zinc-400 hover:text-rose-500 cursor-pointer inline-flex items-center"
+                            className="ml-1 text-slate-400 hover:text-rose-500 cursor-pointer inline-flex items-center"
                             aria-label={`Remove ${vec.label}`}
                           >
                             <X className="w-3 h-3" />
@@ -869,16 +977,16 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                       ))}
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2 text-xs">
                       <div className="flex flex-wrap items-center gap-2">
                         <input
                           type="text"
                           value={newVectorLabel}
                           onChange={(e) => setNewVectorLabel(e.target.value)}
                           placeholder="Vector label (e.g. T_1, E_net, v_cm)..."
-                          className="flex-1 min-w-[180px] px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-xs font-medium text-zinc-900 dark:text-zinc-100"
+                          className="flex-1 min-w-[180px] px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC]"
                         />
-                        <label className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-600 dark:text-zinc-300">
+                        <label className="flex items-center gap-1.5 text-[11px] tabular-nums text-[#475569] dark:text-[#94A3B8]">
                           <RotateCw className="w-3.5 h-3.5" />
                           <span>{newVectorAngle}°</span>
                           <input
@@ -888,14 +996,14 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                             value={newVectorAngle}
                             onChange={(e) => setNewVectorAngle(Number(e.target.value))}
                             aria-label="New vector angle"
-                            className="w-16 accent-[#D4653B]"
+                            className="w-16 accent-[#2563EB]"
                           />
                         </label>
                         <input
                           type="color"
                           value={newVectorColor}
                           onChange={(e) => setNewVectorColor(e.target.value)}
-                          className="w-7 h-7 rounded cursor-pointer border border-zinc-200 dark:border-white/[0.07]"
+                          className="w-7 h-7 rounded cursor-pointer border border-[#E2E8F0] dark:border-white/[0.08]"
                           aria-label="Vector color"
                         />
                         <button
@@ -921,17 +1029,17 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                             setSelectedVectorId(id);
                             setNewVectorLabel('');
                           }}
-                          className="px-3 py-1.5 rounded-lg btn-terracotta font-semibold text-xs cursor-pointer transition-colors duration-150"
+                          className="px-3 py-1.5 rounded-lg btn-brand font-semibold text-xs cursor-pointer transition-all duration-150"
                         >
                           + Add Vector
                         </button>
                       </div>
                       {selectedVector && (
-                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-zinc-200 dark:border-white/[0.07] text-[11px]">
-                          <span className="font-semibold text-zinc-700 dark:text-zinc-200">
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-[#E2E8F0] dark:border-white/[0.08] text-[11px]">
+                          <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                             Selected: {selectedVector.label}
                           </span>
-                          <label className="flex items-center gap-2 font-mono text-zinc-600 dark:text-zinc-400">
+                          <label className="flex items-center gap-2 tabular-nums text-[#475569] dark:text-[#94A3B8]">
                             <span>Angle ({selectedVector.angleDeg ?? 0}°):</span>
                             <input
                               type="range"
@@ -947,7 +1055,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                                 );
                               }}
                               aria-label="Rotate selected vector"
-                              className="w-28 accent-[#D4653B]"
+                              className="w-28 accent-[#2563EB]"
                             />
                           </label>
                         </div>
@@ -971,8 +1079,8 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     onClick={() => setAnimateDiagramMotion((prev) => !prev)}
                     className={`px-4 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                       animateDiagramMotion
-                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
-                        : 'text-zinc-700 dark:text-zinc-200 bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
+                        ? 'bg-[#00A86B]/15 text-[#00A86B] dark:text-emerald-400 border border-[#00A86B]/30'
+                        : 'text-[#0F172A] dark:text-[#F8FAFC] bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] hover:bg-[#F1F5F9] dark:hover:bg-[#243247]'
                     }`}
                   >
                     <Play className="w-3.5 h-3.5" />
@@ -988,15 +1096,15 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
 
             {createTab === 'Visual' && (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200 dark:border-white/[0.07] text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#E2E8F0] dark:border-white/[0.08] text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setVisualEngine('pro')}
                       className={`px-3 py-1.5 rounded-lg font-medium cursor-pointer transition-colors duration-150 ${
                         visualEngine === 'pro'
-                          ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                          : 'text-zinc-600 dark:text-zinc-400'
+                          ? 'bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white font-semibold'
+                          : 'text-[#475569] dark:text-[#94A3B8]'
                       }`}
                     >
                       Pro Image (1K / 2K / 4K)
@@ -1006,8 +1114,8 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                       onClick={() => setVisualEngine('nano')}
                       className={`px-3 py-1.5 rounded-lg font-medium cursor-pointer transition-colors duration-150 ${
                         visualEngine === 'nano'
-                          ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                          : 'text-zinc-600 dark:text-zinc-400'
+                          ? 'bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white font-semibold'
+                          : 'text-[#475569] dark:text-[#94A3B8]'
                       }`}
                     >
                       Image Edit
@@ -1021,10 +1129,10 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                           key={ar}
                           type="button"
                           onClick={() => setVisualAspectRatio(ar)}
-                          className={`px-2 py-1 rounded-md font-mono font-semibold cursor-pointer ${
+                          className={`px-2 py-1 rounded-md tabular-nums font-semibold cursor-pointer ${
                             visualAspectRatio === ar
-                              ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                              : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400'
+                              ? 'bg-[#2563EB] text-white'
+                              : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8]'
                           }`}
                         >
                           {ar}
@@ -1038,10 +1146,10 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                             key={sz}
                             type="button"
                             onClick={() => setImageSize(sz)}
-                            className={`px-2.5 py-1 rounded-md font-mono font-semibold cursor-pointer ${
+                            className={`px-2.5 py-1 rounded-md tabular-nums font-semibold cursor-pointer ${
                               imageSize === sz
-                                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                                : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400'
+                                ? 'bg-[#7C3AED] text-white'
+                                : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8]'
                             }`}
                           >
                             {sz}
@@ -1053,9 +1161,9 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                 </div>
 
                 {visualEngine === 'nano' && (
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-xs">
-                    <span className="text-zinc-600 dark:text-zinc-300">Reference image (optional)</span>
-                    <label className="px-3 py-1 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] font-medium cursor-pointer">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-xs">
+                    <span className="text-[#475569] dark:text-[#94A3B8]">Reference image (optional)</span>
+                    <label className="px-3 py-1 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] font-medium cursor-pointer">
                       Upload Image
                       <input
                         type="file"
@@ -1074,9 +1182,9 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                   </div>
                 )}
 
-                <div className="h-[360px] rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#09090b] flex flex-col items-center justify-center p-4 overflow-hidden">
+                <div className="h-[360px] rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14] flex flex-col items-center justify-center p-4 overflow-hidden">
                   {visualLoading ? (
-                    <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200">
+                    <p className="text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC]">
                       Generating {imageSize} ({visualAspectRatio})...
                     </p>
                   ) : generatedImageUrl ? (
@@ -1087,15 +1195,15 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                     />
                   ) : (
                     <div className="text-center space-y-2 max-w-sm">
-                      <ImageIcon className="w-7 h-7 text-zinc-400 mx-auto" />
-                      <p className="text-xs text-zinc-500">
+                      <ImageIcon className="w-7 h-7 text-slate-400 mx-auto" />
+                      <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
                         Click Generate for a {imageSize} ({visualAspectRatio}) diagram.
                       </p>
                     </div>
                   )}
                 </div>
                 {visualError && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 bg-zinc-50 dark:bg-[#18181b] border border-amber-500/30 rounded-lg p-2.5">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 bg-[#F8FAFF] dark:bg-[#1E293B] border border-amber-500/30 rounded-lg p-2.5">
                     {visualError}
                   </p>
                 )}
@@ -1104,18 +1212,20 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
 
             {createTab === 'Animated Lesson' && (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200 dark:border-white/[0.07] text-xs">
-                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">Animated Video</span>
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#E2E8F0] dark:border-white/[0.08] text-xs">
+                  <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+                    Animated Concept Lesson
+                  </span>
                   <div className="flex items-center gap-1.5">
                     {(['16:9', '9:16'] as const).map((ratio) => (
                       <button
                         key={ratio}
                         type="button"
                         onClick={() => setVideoAspectRatio(ratio)}
-                        className={`px-3 py-1 rounded-lg font-medium cursor-pointer ${
+                        className={`px-3 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           videoAspectRatio === ratio
-                            ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                            : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400'
+                            ? 'bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white font-semibold'
+                            : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8]'
                         }`}
                       >
                         {ratio === '16:9' ? '16:9 Landscape' : '9:16 Portrait'}
@@ -1124,9 +1234,11 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-xs">
-                  <span className="text-zinc-600 dark:text-zinc-300">Animate photo (optional)</span>
-                  <label className="px-3 py-1 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] font-medium cursor-pointer">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-xs">
+                  <span className="text-[#475569] dark:text-[#94A3B8]">
+                    Reference diagram photo (optional)
+                  </span>
+                  <label className="px-3 py-1 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] font-medium cursor-pointer">
                     Upload Photo
                     <input
                       type="file"
@@ -1144,38 +1256,91 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                   </label>
                 </div>
 
-                <div className="h-[340px] rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center p-4 overflow-hidden">
+                <div className="min-h-[340px] rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14] flex flex-col items-center justify-center p-4 overflow-hidden space-y-3">
                   {videoLoading ? (
-                    <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200">
-                      Generating {videoAspectRatio} video...
+                    <p className="text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC]">
+                      Synthesizing {videoAspectRatio} interactive animated lesson...
                     </p>
-                  ) : generatedVideoUrl ? (
+                  ) : generatedLesson?.animatedSvg ? (
+                    <div className="w-full space-y-3">
+                      <div
+                        className="w-full h-[270px] flex items-center justify-center overflow-hidden rounded-lg"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeSvgMarkup(generatedLesson.animatedSvg),
+                        }}
+                      />
+                      {generatedLesson.keyframes.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-left">
+                            {generatedLesson.keyframes.map((kf, idx) => (
+                              <button
+                                key={`${kf.timeSec}-${idx}`}
+                                type="button"
+                                onClick={() => setActiveKeyframeIdx(idx)}
+                                className={`p-2 rounded-lg border text-[11px] transition-colors cursor-pointer ${
+                                  activeKeyframeIdx === idx
+                                    ? 'border-[#2563EB] bg-[#2563EB]/10 text-[#0F172A] dark:text-[#F8FAFC]'
+                                    : 'border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-[#475569] dark:text-[#94A3B8]'
+                                }`}
+                              >
+                                <div className="font-semibold text-[#2563EB] dark:text-[#60A5FA] tabular-nums">
+                                  t = {kf.timeSec}s
+                                </div>
+                                <div className="font-semibold truncate">{kf.title}</div>
+                              </button>
+                            ))}
+                          </div>
+                          {generatedLesson.keyframes[activeKeyframeIdx] && (
+                            <div className="p-3 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-xs space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+                                  {generatedLesson.keyframes[activeKeyframeIdx].title}
+                                </span>
+                                <span className="font-semibold text-[#00A86B]">
+                                  {generatedLesson.keyframes[activeKeyframeIdx].formula}
+                                </span>
+                              </div>
+                              <p className="text-[#475569] dark:text-[#94A3B8]">
+                                {generatedLesson.keyframes[activeKeyframeIdx].caption}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : generatedVideoUrl?.startsWith('data:video') ? (
                     <video
                       controls
                       src={generatedVideoUrl}
                       className="max-h-full max-w-full rounded-lg"
                     />
+                  ) : generatedVideoUrl ? (
+                    <img
+                      src={generatedVideoUrl}
+                      alt="Animated JEE Concept Lesson"
+                      className="max-h-[300px] max-w-full object-contain rounded-lg"
+                    />
                   ) : showFallback3DPreview ? (
-                    <div className="w-full h-full">
+                    <div className="w-full h-[310px]">
                       <ThreeSceneCanvas preset={activePreset} animateMotion={true} />
                     </div>
                   ) : (
                     <div className="text-center space-y-2 max-w-sm">
-                      <Video className="w-7 h-7 text-zinc-400 mx-auto" />
-                      <p className="text-xs text-zinc-500">
-                        Click Generate to render an animated concept video.
+                      <Video className="w-7 h-7 text-slate-400 mx-auto" />
+                      <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
+                        Click Generate to build an interactive 4-step animated concept lesson.
                       </p>
                     </div>
                   )}
                 </div>
                 {videoError && (
-                  <div className="text-xs text-amber-600 dark:text-amber-400 bg-zinc-50 dark:bg-[#18181b] border border-amber-500/30 rounded-lg p-3 space-y-2">
+                  <div className="text-xs text-amber-600 dark:text-amber-400 bg-[#F8FAFF] dark:bg-[#1E293B] border border-amber-500/30 rounded-lg p-3 space-y-2">
                     <p>{videoError}</p>
                     {!showFallback3DPreview && (
                       <button
                         type="button"
                         onClick={() => setShowFallback3DPreview(true)}
-                        className="px-3 py-1.5 rounded-lg btn-terracotta font-semibold cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg btn-brand font-semibold cursor-pointer"
                       >
                         Preview 3D Simulation
                       </button>
@@ -1187,31 +1352,31 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
           </div>
 
           {/* Right Cited Source Column (3 Cols) */}
-          <div className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] p-5 space-y-4">
-            <h2 className="font-semibold tracking-[-0.02em] text-base text-zinc-900 dark:text-zinc-50">
+          <div className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] p-5 space-y-4">
+            <h2 className="font-semibold tracking-[-0.02em] text-base text-[#0F172A] dark:text-[#F8FAFC]">
               Cited Source
             </h2>
-            <div className="rounded-xl border border-zinc-200 dark:border-white/[0.07] divide-y divide-zinc-200 dark:divide-white/[0.07] text-xs">
-              <div className="p-3 flex items-center gap-2.5 font-medium text-zinc-700 dark:text-zinc-200">
-                <FileText className="w-4 h-4 text-zinc-400 shrink-0" />
+            <div className="rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] divide-y divide-[#E2E8F0] dark:divide-white/[0.08] text-xs">
+              <div className="p-3 flex items-center gap-2.5 font-medium text-[#0F172A] dark:text-[#F8FAFC]">
+                <FileText className="w-4 h-4 text-slate-400 shrink-0" />
                 <span>{selectedMaterial?.title || selectedMaterialTitle}</span>
               </div>
-              <div className="p-3 flex items-center gap-2.5 font-medium text-zinc-700 dark:text-zinc-200">
-                <FileText className="w-4 h-4 text-zinc-400 shrink-0" />
+              <div className="p-3 flex items-center gap-2.5 font-medium text-[#0F172A] dark:text-[#F8FAFC]">
+                <FileText className="w-4 h-4 text-slate-400 shrink-0" />
                 <span>{sourcePageLabel}</span>
               </div>
-              <div className="p-3 flex items-center gap-2.5 font-medium text-zinc-700 dark:text-zinc-200">
-                <Layers className="w-4 h-4 text-zinc-400 shrink-0" />
-                <span>Preset: {activePreset}</span>
+              <div className="p-3 flex items-center gap-2.5 font-medium text-[#0F172A] dark:text-[#F8FAFC]">
+                <Layers className="w-4 h-4 text-slate-400 shrink-0" />
+                <span>Preset: {activePreset}{activePreset === 'Incline' ? ` (${inclineAngleDeg}°)` : ''}</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => setCreateTab('Animated Lesson')}
-              className="w-full py-2 px-4 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-800 dark:text-zinc-200 font-medium text-xs flex items-center justify-center gap-2 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors duration-150 cursor-pointer"
+              className="w-full py-2 px-4 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] font-medium text-xs flex items-center justify-center gap-2 hover:bg-[#F1F5F9] dark:hover:bg-[#243247] transition-colors duration-150 cursor-pointer"
             >
-              <Play className="w-3.5 h-3.5" />
+              <Play className="w-3.5 h-3.5 text-[#2563EB]" />
               <span>Animated Lesson</span>
             </button>
           </div>

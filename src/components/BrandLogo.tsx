@@ -9,8 +9,8 @@ export interface BrandLogoProps {
 }
 
 /**
- * Official LearnMate folded-ribbon monogram (Warm Cream / Deep Charcoal + Terracotta Fold).
- * Zero container backdrop or blur — only the pure vector ribbon mark.
+ * Official LearnMate folded-ribbon monogram (Royal Blue #2563EB -> Violet #7C3AED -> Emerald #00A86B).
+ * Zero container backdrop or blur — only the crisp scalable vector ribbon mark.
  */
 export const BrandLogo: React.FC<BrandLogoProps> = ({
   className = 'w-8 h-7',
@@ -20,17 +20,19 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   badgeText,
 }) => {
   const uid = React.useId().replace(/:/g, '');
-  const gradId = `lm-terracotta-${uid}`;
+  const leftGradId = `lm-ribbon-left-${uid}`;
+  const foldGradId = `lm-ribbon-fold-${uid}`;
+  const rightGradId = `lm-ribbon-right-${uid}`;
 
-  const primaryColorClass =
+  const wordmarkToneClass =
     tone === 'dark-surface'
-      ? 'text-[#F5F0E6]'
+      ? 'text-[#F8FAFC]'
       : tone === 'light-surface'
-      ? 'text-[#1C1917]'
-      : 'text-[#1C1917] dark:text-[#F5F0E6]';
+      ? 'text-[#0F172A]'
+      : 'text-[#0F172A] dark:text-[#F8FAFC]';
 
   return (
-    <span className={`inline-flex items-center gap-1.5 sm:gap-2.5 shrink-0 ${primaryColorClass}`}>
+    <span className={`inline-flex items-center gap-1.5 sm:gap-2.5 shrink-0 ${wordmarkToneClass}`}>
       <svg
         viewBox="0 0 120 96"
         fill="none"
@@ -39,28 +41,39 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id={gradId} x1="28" y1="68" x2="80" y2="30" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#D4653B" />
-            <stop offset="100%" stopColor="#E07348" />
+          <linearGradient id={leftGradId} x1="12" y1="12" x2="54" y2="84" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#2563EB" />
+            <stop offset="65%" stopColor="#4F46E5" />
+            <stop offset="100%" stopColor="#7C3AED" />
+          </linearGradient>
+          <linearGradient id={foldGradId} x1="27" y1="68" x2="78" y2="30" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#1D4ED8" />
+            <stop offset="50%" stopColor="#4F46E5" />
+            <stop offset="100%" stopColor="#7C3AED" />
+          </linearGradient>
+          <linearGradient id={rightGradId} x1="50" y1="30" x2="106" y2="76" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#7C3AED" />
+            <stop offset="48%" stopColor="#6366F1" />
+            <stop offset="100%" stopColor="#00A86B" />
           </linearGradient>
         </defs>
 
-        {/* Inner Terracotta Burnt-Orange Fold */}
+        {/* Inner Folded Bridge */}
         <path
           d="M27 65 C37 56, 48 39, 64 31 L79 44 C67 48, 59 61, 52 72 Z"
-          fill={`url(#${gradId})`}
+          fill={`url(#${foldGradId})`}
         />
 
-        {/* Right Overhanging Ribbon Arch */}
+        {/* Right Overhanging Arch (Violet -> Emerald) */}
         <path
           d="M54 36 C68 25, 84 26, 92 43 L106 75 C94 70, 84 70, 74 75 L61 48 C58 42, 54 41, 49 43 Z"
-          fill="currentColor"
+          fill={`url(#${rightGradId})`}
         />
 
-        {/* Left Folded Pillar & Sweeping Bottom Elbow */}
+        {/* Left Pillar & Sweeping Elbow (Royal Blue -> Violet) */}
         <path
           d="M36 14 C38 10, 44 10, 48 13 C52 16, 54 21, 51 27 L32 63 C38 62, 46 64, 53 71 C46 80, 36 83, 22 83 C12 83, 8 74, 13 64 L36 14 Z"
-          fill="currentColor"
+          fill={`url(#${leftGradId})`}
         />
       </svg>
 
@@ -68,7 +81,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         <span className="inline-flex items-baseline gap-1.5 min-w-0">
           <span className={wordmarkClassName}>LearnMate</span>
           {badgeText && (
-            <span className="hidden sm:inline text-[11px] font-mono text-[#57534E] dark:text-[#A1A1AA]">
+            <span className="hidden sm:inline text-[11px] font-medium text-[#475569] dark:text-[#94A3B8]">
               {badgeText}
             </span>
           )}

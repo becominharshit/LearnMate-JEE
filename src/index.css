@@ -3,34 +3,35 @@
 
 @layer base {
   :root {
-    --bg-canvas: #FAF8F5;
+    --bg-canvas: #F8FAFF;
     --bg-surface: #FFFFFF;
-    --bg-elevated: #F3EFEA;
-    --bg-elevated-hover: #EAE4DC;
-    --border-subtle: #E7E2DA;
-    --text-primary: #1C1917;
-    --text-muted: #57534E;
-    --accent-primary: #D4653B;
-    --accent-hover: #C2562E;
-    --accent-highlight: #E07348;
-    --accent-soft: rgba(212, 101, 59, 0.10);
+    --bg-elevated: #F1F5F9;
+    --bg-elevated-hover: #E2E8F0;
+    --border-subtle: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-muted: #475569;
+    --accent-primary: #2563EB;
+    --accent-hover: #4F46E5;
+    --accent-highlight: #7C3AED;
+    --accent-emerald: #00A86B;
+    --accent-soft: rgba(37, 99, 235, 0.10);
     --font-display: 'Inter', 'Geist', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-sans: 'Inter', 'Geist', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   }
 
   .dark {
-    --bg-canvas: #09090B;
-    --bg-surface: #121214;
-    --bg-elevated: #1A1A1D;
-    --bg-elevated-hover: #222226;
+    --bg-canvas: #070B14;
+    --bg-surface: #111827;
+    --bg-elevated: #1E293B;
+    --bg-elevated-hover: #283548;
     --border-subtle: rgba(255, 255, 255, 0.08);
-    --text-primary: #F5F0E6;
-    --text-muted: #A1A1AA;
-    --accent-primary: #D4653B;
-    --accent-hover: #E07348;
-    --accent-highlight: #E07348;
-    --accent-soft: rgba(212, 101, 59, 0.08);
+    --text-primary: #F8FAFC;
+    --text-muted: #94A3B8;
+    --accent-primary: #2563EB;
+    --accent-hover: #4F46E5;
+    --accent-highlight: #7C3AED;
+    --accent-emerald: #00A86B;
+    --accent-soft: rgba(37, 99, 235, 0.14);
   }
 
   body {
@@ -49,26 +50,32 @@
     letter-spacing: -0.02em;
   }
 
-  .font-mono, .tabular-nums {
-    font-family: var(--font-mono);
+  .tabular-nums {
+    font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
   }
 }
 
-/* Primary Terracotta CTA utility */
-.btn-terracotta {
-  background: linear-gradient(135deg, #D4653B 0%, #E07348 100%);
-  color: #FAF8F5;
+/* Primary Royal Blue -> Indigo -> Violet CTA utility */
+.btn-brand {
+  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
+  color: #FFFFFF;
   transition: filter 150ms ease, background 150ms ease, transform 150ms ease;
 }
 
-.btn-terracotta:hover:not(:disabled) {
-  background: linear-gradient(135deg, #C2562E 0%, #D4653B 100%);
+.btn-brand:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
 
-/* Subtle top-edge sheen for dark hero surfaces (no neon glow) */
-.obsidian-sheen {
-  background-image: linear-gradient(180deg, rgba(245, 240, 230, 0.025) 0%, rgba(255, 255, 255, 0) 100%);
+/* Secondary Violet -> Indigo -> Emerald completion/mastery CTA utility */
+.btn-brand-secondary {
+  background: linear-gradient(135deg, #7C3AED 0%, #6366F1 50%, #00A86B 100%);
+  color: #FFFFFF;
+  transition: filter 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.btn-brand-secondary:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
 
 /* Prevent KaTeX FOIT blank flash */
@@ -121,31 +128,31 @@
 
 /* Realistic Student Notebook Paper Backgrounds */
 .paper-ruled {
-  background-color: #fffef7;
+  background-color: #FFFFFF;
   background-image:
-    linear-gradient(90deg, transparent 44px, rgba(212, 101, 59, 0.30) 44px, rgba(212, 101, 59, 0.30) 45px, transparent 45px),
-    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(87, 83, 78, 0.14) 29px, rgba(87, 83, 78, 0.14) 30px);
+    linear-gradient(90deg, transparent 44px, rgba(37, 99, 235, 0.28) 44px, rgba(37, 99, 235, 0.28) 45px, transparent 45px),
+    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(71, 85, 105, 0.14) 29px, rgba(71, 85, 105, 0.14) 30px);
   padding-left: 58px !important;
 }
 
 .dark .paper-ruled {
-  background-color: #121214;
+  background-color: #111827;
   background-image:
-    linear-gradient(90deg, transparent 44px, rgba(212, 101, 59, 0.32) 44px, rgba(212, 101, 59, 0.32) 45px, transparent 45px),
-    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(255, 255, 255, 0.05) 29px, rgba(255, 255, 255, 0.05) 30px);
+    linear-gradient(90deg, transparent 44px, rgba(37, 99, 235, 0.32) 44px, rgba(37, 99, 235, 0.32) 45px, transparent 45px),
+    repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(255, 255, 255, 0.06) 29px, rgba(255, 255, 255, 0.06) 30px);
   padding-left: 58px !important;
 }
 
 .paper-grid {
-  background-color: #FAF8F5;
+  background-color: #F8FAFF;
   background-size: 22px 22px;
   background-image:
-    linear-gradient(to right, rgba(87, 83, 78, 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(87, 83, 78, 0.1) 1px, transparent 1px);
+    linear-gradient(to right, rgba(71, 85, 105, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(71, 85, 105, 0.1) 1px, transparent 1px);
 }
 
 .dark .paper-grid {
-  background-color: #121214;
+  background-color: #111827;
   background-size: 22px 22px;
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -153,27 +160,27 @@
 }
 
 .paper-plain {
-  background-color: #fffdf9;
+  background-color: #FFFFFF;
 }
 
 .dark .paper-plain {
-  background-color: #121214;
+  background-color: #111827;
 }
 
-/* Global Dark Mode Semantic Fallbacks (Zero Purple/Navy Tint, Zero Bright White Glare) */
+/* Global Dark Mode Semantic Fallbacks */
 .dark .bg-white,
 .dark .bg-white\/95,
 .dark .bg-white\/90 {
-  background-color: #121214;
+  background-color: #111827;
 }
 
 .dark .bg-slate-950 {
-  background-color: #09090B;
+  background-color: #070B14;
 }
 
 .dark .bg-slate-900,
 .dark .bg-slate-900\/95 {
-  background-color: #121214;
+  background-color: #111827;
 }
 
 .dark .bg-slate-50,
@@ -187,7 +194,7 @@
 .dark .bg-slate-800\/60,
 .dark .bg-slate-800\/50,
 .dark .bg-slate-800\/40 {
-  background-color: #1A1A1D;
+  background-color: #1E293B;
 }
 
 .dark .border-slate-200,
@@ -209,17 +216,17 @@
 
 .dark .text-slate-900,
 .dark .text-slate-800 {
-  color: #F5F0E6;
+  color: #F8FAFC;
 }
 
 .dark .text-slate-700,
 .dark .text-slate-600 {
-  color: #A1A1AA;
+  color: #94A3B8;
 }
 
 .dark .text-slate-500,
 .dark .text-slate-400 {
-  color: #71717A;
+  color: #64748B;
 }
 
 /* Custom subtle scrollbars for study panes */
@@ -233,10 +240,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(113, 113, 122, 0.35);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(161, 161, 170, 0.55);
+  background: rgba(148, 163, 184, 0.55);
 }

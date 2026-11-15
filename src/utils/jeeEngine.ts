@@ -2285,7 +2285,77 @@ export function resolveCbtSessionInit<
       : defaultDurationSeconds,
   };
 }
+export interface CustomTestFilterOptions {
+  basePool: CBTQuestion[];
+  mistakesPool?: CBTQuestion[];
+  selectedSubjects: ('Physics' | 'Chemistry' | 'Mathematics')[];
+  selectedChapters?: string[];
+  difficultyFilter?:
+    | 'All'
+    | 'Easy'
+    | 'Moderate'
+    | 'Tough'
+    | 'Beginner'
+    | 'Must-Do'
+    | 'Advanced Climb';
+  questionTypeFilter?:
+    | 'All'
+    | 'MCQ'
+    | 'Numerical'
+    | 'Multi-Correct'
+    | 'Previously Incorrect Only';
+}
 
+/**
+ * Strictly filters custom test question candidates without any silent fallbacks.
+ * Returns [] whenever the intersection of subject, chapter, difficulty, and format is empty.
+ */
+export function filterCustomTestQuestions(opts: CustomTestFilterOptions): CBTQuestion[] {
+  const {
+    basePool,
+    mistakesPool = [],
+    selectedSubjects,
+    selectedChapters = [],
+    difficultyFilter = 'All',
+    questionTypeFilter = 'All',
+  } = opts;
 
+  if (!Array.isArray(selectedSubjects) || selectedSubjects.length === 0) {
+    return [];
+  }
 
+  let pool: CBTQuestion[] =
+    questionTypeFilter === 'Previously Incorrect Only' ? [...mistakesPool] : [...basePool];
 
+  pool = pool.filter((q) => selectedSubjects.includes(q.subject));
+
+  if (selectedChapters.length > 0) {
+    pool = pool.filter((q) => {
+      const qNorm = q.chapter.trim().toLowerCase();
+      return selectedChapters.some((ch) => {
+        const selNorm = ch.trim().toLowerCase();
+        return qNorm === selNorm || qNorm.includes(selNorm) || selNorm.includes(qNorm);
+      });
+    });
+  }
+
+  if (difficultyFilter !== 'All') {
+    const targetBucket =
+      difficultyFilter === 'Easy' || difficultyFilter === 'Beginner'
+        ? 'Beginner'
+        : difficultyFilter === 'Moderate' || difficultyFilter === 'Must-Do'
+        ? 'Must-Do'
+        : 'Advanced Climb';
+    pool = pool.filter((q) => (q.difficultyBucket || 'Must-Do') === targetBucket);
+  }
+
+  if (questionTypeFilter === 'MCQ') {
+    pool = pool.filter((q) => q.section === 'Section A' && q.advancedFormat !== 'multiple');
+  } else if (questionTypeFilter === 'Numerical') {
+    pool = pool.filter((q) => q.section === 'Section B' || q.advancedFormat === 'numerical');
+  } else if (questionTypeFilter === 'Multi-Correct') {
+    pool = pool.filter((q) => q.advancedFormat === 'multiple');
+  }
+
+  return pool;
+}

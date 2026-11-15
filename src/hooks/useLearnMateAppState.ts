@@ -189,7 +189,7 @@ export function useLearnMateAppState() {
   const [studentProfile, setStudentProfile] = useState<StudentProfileData>({
     displayName: 'JEE Aspirant',
     email: '',
-    avatarColor: '#D4653B',
+    avatarColor: '#2563EB',
     targetExam: 'JEE Main 2027',
     preferredLanguage: 'English',
     dailyGoalHours: 6,
@@ -198,13 +198,15 @@ export function useLearnMateAppState() {
     targetRankOrPercentile: '',
   });
 
+  const hydratedTasksUidRef = useRef<string | null>(null);
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
     try {
       localStorage.setItem('learnmate_theme', darkMode ? 'dark' : 'light');
       const metaTheme = document.querySelector('meta[name="theme-color"]');
       if (metaTheme) {
-        metaTheme.setAttribute('content', darkMode ? '#09090B' : '#FAF8F5');
+        metaTheme.setAttribute('content', darkMode ? '#070B14' : '#F8FAFF');
       }
     } catch {
       // ignore storage failure
@@ -230,9 +232,11 @@ export function useLearnMateAppState() {
     showToast('Demo mode active (local only). Sign in with Google or Email for cloud sync & live AI.');
   };
 
-  // Load UID-scoped study caches & query server-authoritative subscription entitlements
+  // Load UID-scoped study caches, tasks, profile & query server-authoritative subscription entitlements
   useEffect(() => {
     if (!currentUser) {
+      hydratedTasksUidRef.current = null;
+      setTasks([]);
       setMistakesNotebook([]);
       setSm2Cards([]);
       setSubscriptionTier('free');
@@ -241,15 +245,54 @@ export function useLearnMateAppState() {
       return;
     }
 
-    runOneTimeTenantMigration(currentUser.uid).catch(() => {});
+    const uid = currentUser.uid;
+    runOneTimeTenantMigration(uid).catch(() => {});
 
+    let restoredTasks: StudyTaskItem[] = [];
     try {
-      const mRaw = localStorage.getItem(`learnmate_${currentUser.uid}_mistakes_notebook`);
+      const mRaw = localStorage.getItem(`learnmate_${uid}_mistakes_notebook`);
       if (mRaw) setMistakesNotebook(JSON.parse(mRaw));
-      const cRaw = localStorage.getItem(`learnmate_${currentUser.uid}_sm2_cards`);
+      const cRaw = localStorage.getItem(`learnmate_${uid}_sm2_cards`);
       if (cRaw) setSm2Cards(JSON.parse(cRaw));
+
+      const tRaw = localStorage.getItem(`learnmate_${uid}_tasks`);
+      if (tRaw) {
+        const parsedTasks = JSON.parse(tRaw);
+        if (Array.isArray(parsedTasks)) {
+          restoredTasks = parsedTasks;
+        }
+      }
+
+      const pRaw = localStorage.getItem(`learnmate_profile_${uid}`);
+      if (pRaw) {
+        const parsedProfile = JSON.parse(pRaw);
+        if (parsedProfile && typeof parsedProfile === 'object') {
+          setStudentProfile((prev) => ({
+            ...prev,
+            ...parsedProfile,
+            email: parsedProfile.email || currentUser.email || prev.email,
+          }));
+        }
+      }
     } catch {
       // ignore storage errors
+    }
+
+    setTasks(restoredTasks);
+    hydratedTasksUidRef.current = uid;
+
+    if (!isLocalOrDemoUid(uid) && isFirebaseConfigured && db) {
+      const tasksRef = doc(db, 'users', uid, 'tasks', 'study_tasks');
+      getDoc(tasksRef)
+        .then((snap) => {
+          if (snap.exists()) {
+            const items = snap.data()?.items;
+            if (Array.isArray(items) && restoredTasks.length === 0) {
+              setTasks(items as StudyTaskItem[]);
+            }
+          }
+        })
+        .catch(() => {});
     }
 
     fetchCommercialEntitlements().then((res) => {
@@ -263,6 +306,23 @@ export function useLearnMateAppState() {
       }
     });
   }, [currentUser?.uid]);
+
+  useEffect(() => {
+    if (!currentUser || hydratedTasksUidRef.current !== currentUser.uid) return;
+    const uid = currentUser.uid;
+    try {
+      localStorage.setItem(`learnmate_${uid}_tasks`, JSON.stringify(tasks));
+    } catch {
+      // ignore storage errors
+    }
+    if (!isLocalOrDemoUid(uid) && isFirebaseConfigured && db) {
+      setDoc(
+        doc(db, 'users', uid, 'tasks', 'study_tasks'),
+        { items: tasks, updatedAt: serverTimestamp() },
+        { merge: true }
+      ).catch(() => {});
+    }
+  }, [tasks, currentUser?.uid]);
 
   /**
    * Authoritative Billing Checkout flow: NEVER upgrades tier client-side in localStorage.

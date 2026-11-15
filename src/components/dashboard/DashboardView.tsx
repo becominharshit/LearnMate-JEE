@@ -44,7 +44,7 @@ export const DashboardView: React.FC<DashboardViewProps> = (props) => {
           <button
             type="button"
             onClick={props.onOpenCustomTestGenerator}
-            className="btn-terracotta px-3.5 py-2 rounded-xl font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+            className="btn-brand px-3.5 py-2 rounded-xl font-semibold inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Sliders className="w-3.5 h-3.5" />
             Custom Test Builder
@@ -52,22 +52,22 @@ export const DashboardView: React.FC<DashboardViewProps> = (props) => {
           <button
             type="button"
             onClick={props.onOpenRevise}
-            className="px-3.5 py-2 rounded-xl border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6] font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Brain className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
+            <Brain className="w-3.5 h-3.5 text-[#7C3AED]" />
             <span>Recall Queue</span>
-            <span className="font-mono tabular-nums text-[11px] px-1.5 py-0.5 rounded bg-[#F3EFEA] dark:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6]">
+            <span className="tabular-nums font-semibold text-[11px] px-1.5 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]">
               {props.sm2DueCount ?? 0}
             </span>
           </button>
           <button
             type="button"
             onClick={props.onOpenRevise}
-            className="px-3.5 py-2 rounded-xl border border-rose-500/20 bg-[#FFFFFF] dark:bg-[#121214] hover:bg-rose-500/5 text-rose-700 dark:text-rose-400 font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl border border-rose-500/20 bg-[#FFFFFF] dark:bg-[#111827] hover:bg-rose-500/5 text-rose-700 dark:text-rose-400 font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Zap className="w-3.5 h-3.5" />
             <span>Mistake Book</span>
-            <span className="font-mono tabular-nums text-[11px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 dark:text-rose-300">
+            <span className="tabular-nums font-semibold text-[11px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 dark:text-rose-300">
               {props.mistakesCount ?? 0}
             </span>
           </button>

@@ -22,7 +22,7 @@ export const ALLOWED_GEMINI_MODELS = {
   intermediate: 'gemini-3.6-flash',
   image: 'gemini-3-pro-image',
   imageEdit: 'gemini-nano-banana-2.1',
-  video: 'gemini-omni-1.2-flash',
+  video: 'gemini-3.5-flash-lite',
   transcribe: 'gemini-3.5-transcribe',
   tts: 'gemini-3.8-flash-tts',
   live: 'gemini-3.8-live',

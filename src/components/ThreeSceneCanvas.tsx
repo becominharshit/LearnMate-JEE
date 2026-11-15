@@ -879,15 +879,15 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
         : `Angle / Param (${angleDeg}°)`;
 
     return (
-      <div className="relative w-full h-[420px] rounded-xl overflow-hidden border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#09090b]">
+      <div className="relative w-full h-[420px] rounded-xl overflow-hidden border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14]">
         <div
           ref={canvasMountRef}
           data-testid="three-diagram-canvas"
           className="w-full h-full"
         />
 
-        <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg bg-white/95 dark:bg-[#111113]/95 border border-zinc-200 dark:border-white/[0.08] text-xs font-medium text-zinc-700 dark:text-zinc-200 pointer-events-none flex flex-wrap items-center gap-2 max-w-[92%]">
-          <span className="font-mono tabular-nums">
+        <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg bg-white/95 dark:bg-[#111827]/95 border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] pointer-events-none flex flex-wrap items-center gap-2 max-w-[92%]">
+          <span className="tabular-nums">
             3D Simulation · {preset}
             {lensReadout
               ? lensReadout.isAtFocus
@@ -896,7 +896,7 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
               : ` (θ = ${angleDeg}°)`}
           </span>
           {animateMotion && (
-            <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold">
+            <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/20 text-[#00A86B] dark:text-emerald-400 text-[10px] font-semibold">
               Live Physics Motion
             </span>
           )}
@@ -906,14 +906,14 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
           <button
             type="button"
             onClick={() => setDockCollapsed((v) => !v)}
-            className="px-3 py-1 rounded-t-lg bg-zinc-900 dark:bg-[#18181b] text-white dark:text-zinc-200 text-[11px] font-medium border border-b-0 border-zinc-700 dark:border-white/[0.1] hover:bg-zinc-800 dark:hover:bg-[#1f1f23] transition-colors cursor-pointer"
+            className="px-3 py-1 rounded-t-lg bg-[#0F172A] dark:bg-[#1E293B] text-white text-[11px] font-medium border border-b-0 border-[#E2E8F0]/20 hover:bg-[#1E293B] transition-colors cursor-pointer"
           >
             {dockCollapsed ? '▴ Show 3D Controls' : '▾ Hide Controls'}
           </button>
           {!dockCollapsed && (
-            <div className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.08] shadow-md flex flex-wrap items-center justify-between gap-3 text-xs">
-              <label className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 font-medium">
-                <span className="font-mono tabular-nums">{sliderPrimaryLabel}:</span>
+            <div className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] shadow-md flex flex-wrap items-center justify-between gap-3 text-xs">
+              <label className="flex items-center gap-2 text-[#0F172A] dark:text-[#F8FAFC] font-medium">
+                <span className="tabular-nums">{sliderPrimaryLabel}:</span>
                 <input
                   type="range"
                   min={15}
@@ -921,11 +921,11 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
                   value={angleDeg}
                   onChange={(e) => setAngleDeg(Number(e.target.value))}
                   aria-label="Primary 3D physics parameter"
-                  className="w-24 accent-[#D4653B]"
+                  className="w-24 accent-[#2563EB]"
                 />
               </label>
-              <label className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 font-medium">
-                <span className="font-mono tabular-nums">Scale ({paramSecondary.toFixed(1)}x):</span>
+              <label className="flex items-center gap-2 text-[#0F172A] dark:text-[#F8FAFC] font-medium">
+                <span className="tabular-nums">Scale ({paramSecondary.toFixed(1)}x):</span>
                 <input
                   type="range"
                   min={0.8}
@@ -934,10 +934,10 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
                   value={paramSecondary}
                   onChange={(e) => setParamSecondary(Number(e.target.value))}
                   aria-label="Scale factor"
-                  className="w-20 accent-[#D4653B]"
+                  className="w-20 accent-[#2563EB]"
                 />
               </label>
-              <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] p-1 rounded-lg">
+              <div className="flex items-center gap-1 bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.07] p-1 rounded-lg">
                 {(['iso', 'front', 'top'] as const).map((view) => (
                   <button
                     key={view}
@@ -945,8 +945,8 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
                     onClick={() => setCameraPreset(view)}
                     className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize transition-colors cursor-pointer ${
                       cameraPreset === view
-                        ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                        ? 'btn-brand'
+                        : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                     }`}
                   >
                     {view}

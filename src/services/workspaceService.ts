@@ -585,13 +585,15 @@ export async function apiFetchWithAuth<T = any>(
 
     return { ok: true, data: json as T };
   } catch (err: any) {
+    const isTimeout = err?.name === 'AbortError' || err?.name === 'TimeoutError';
     const errObj: StructuredUpstreamError = {
-      errorCode: 'NETWORK_ERROR',
-      message:
-        err?.message ||
-        'Network error communicating with LearnMate JEE backend. Check your connection and retry.',
-      retryAfterSeconds: 5,
-      status: 503,
+      errorCode: isTimeout ? 'REQUEST_TIMEOUT' : 'NETWORK_ERROR',
+      message: isTimeout
+        ? 'Request timed out after 30s. Please click Retry.'
+        : err?.message ||
+          'Network error communicating with LearnMate JEE backend. Check your connection and retry.',
+      retryAfterSeconds: isTimeout ? 3 : 5,
+      status: isTimeout ? 504 : 503,
     };
     return {
       ok: false,

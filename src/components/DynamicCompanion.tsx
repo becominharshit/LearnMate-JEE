@@ -115,10 +115,10 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
           onClick={() => setIsOpen((v) => !v)}
           title="Study Companion"
           aria-label="Open Companion"
-          className="lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#1C1917] dark:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+          className="lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] transition-colors duration-150 cursor-pointer shrink-0"
         >
-          <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348] shrink-0" />
-          <span className="font-mono tabular-nums text-[11px]">{clueCoins}</span>
+          <Sparkles className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400 shrink-0" />
+          <span className="tabular-nums text-[11px]">{clueCoins}</span>
         </button>
       ) : (
         <button
@@ -128,14 +128,14 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
           title={`Companion · ${clueCoins} Clue Coins`}
           className={`w-full flex items-center ${
             sidebarCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-2'
-          } rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#F3EFEA] dark:bg-[#1A1A1D] hover:bg-[#EAE4DC] dark:hover:bg-[#222226] text-[#1C1917] dark:text-[#F5F0E6] text-xs font-medium transition-colors duration-150 cursor-pointer`}
+          } rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F1F5F9] dark:bg-[#1E293B] hover:bg-[#E2E8F0] dark:hover:bg-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-medium transition-colors duration-150 cursor-pointer`}
         >
           <span className="inline-flex items-center gap-2 min-w-0">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348] shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400 shrink-0" />
             {!sidebarCollapsed && <span className="truncate">Companion</span>}
           </span>
           {!sidebarCollapsed && (
-            <span className="font-mono tabular-nums text-[11px] text-[#57534E] dark:text-[#A1A1AA] shrink-0">
+            <span className="tabular-nums text-[11px] text-[#475569] dark:text-[#94A3B8] shrink-0">
               {clueCoins} coins
             </span>
           )}
@@ -147,28 +147,28 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
           data-testid="companion-popover"
           className={`fixed bottom-16 left-4 lg:bottom-12 ${
             sidebarCollapsed ? 'lg:left-20' : 'lg:left-[16.75rem]'
-          } z-50 w-96 max-w-[calc(100vw-2rem)] bg-[#FFFFFF] dark:bg-[#121214] rounded-2xl border border-[#E7E2DA] dark:border-white/[0.08] shadow-2xl overflow-hidden text-[#1C1917] dark:text-[#F5F0E6]`}
+          } z-50 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl overflow-hidden text-[#0F172A] dark:text-[#F8FAFC]`}
         >
           {/* Header */}
-          <div className="px-4 py-3 border-b border-[#E7E2DA] dark:border-white/[0.08] bg-[#F3EFEA] dark:bg-[#1A1A1D] flex items-center justify-between gap-2">
+          <div className="px-4 py-3 border-b border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <Sparkles className="w-4 h-4 text-[#D4653B] dark:text-[#E07348] shrink-0" />
+              <Sparkles className="w-4 h-4 text-[#2563EB] dark:text-blue-400 shrink-0" />
               <div className="min-w-0">
                 <div className="text-xs font-semibold truncate">Study Companion</div>
-                <div className="text-[11px] text-[#57534E] dark:text-[#A1A1AA] truncate">
+                <div className="text-[11px] text-[#475569] dark:text-[#94A3B8] truncate">
                   {matchedChapter.subject} · {matchedChapter.chapterName}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="inline-flex items-center gap-1 font-mono tabular-nums text-[11px] text-[#D4653B] dark:text-[#E07348]">
+              <span className="inline-flex items-center gap-1 tabular-nums text-[11px] font-semibold text-[#7C3AED] dark:text-violet-400">
                 <Coins className="w-3 h-3" />
                 {clueCoins}/3
               </span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg text-[#57534E] hover:text-[#1C1917] dark:text-[#A1A1AA] dark:hover:text-[#F5F0E6] cursor-pointer transition-colors duration-150"
+                className="p-1 rounded-lg text-[#475569] hover:text-[#0F172A] dark:text-[#94A3B8] dark:hover:text-[#F8FAFC] cursor-pointer transition-colors duration-150"
                 aria-label="Close Companion"
               >
                 <X className="w-4 h-4" />
@@ -177,8 +177,8 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
           </div>
 
           {/* Language Selector & Mode Tabs */}
-          <div className="px-3 py-2 border-b border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] flex items-center justify-between gap-2">
-            <div className="inline-flex rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] p-0.5 text-[11px] font-medium">
+          <div className="px-3 py-2 border-b border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] flex items-center justify-between gap-2">
+            <div className="inline-flex rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] p-0.5 text-[11px] font-medium">
               {(
                 [
                   { id: 'socratic', label: '3-Hint' },
@@ -192,8 +192,8 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                   onClick={() => setModeTab(t.id)}
                   className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors duration-150 ${
                     modeTab === t.id
-                      ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.15] text-[#D4653B] dark:text-[#E07348] font-semibold'
-                      : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
+                      ? 'btn-brand font-semibold'
+                      : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                   }`}
                 >
                   {t.label}
@@ -202,14 +202,14 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
             </div>
 
             <div className="inline-flex items-center gap-1 text-[11px] font-medium">
-              <Globe className="w-3 h-3 text-zinc-400" />
+              <Globe className="w-3 h-3 text-[#475569] dark:text-[#94A3B8]" />
               <select
                 aria-label="Select AI Tutor Language"
                 value={language}
                 onChange={(e) =>
                   setLanguage(e.target.value as 'English' | 'Hinglish' | 'Hindi')
                 }
-                className="bg-transparent text-zinc-700 dark:text-zinc-200 font-medium focus:outline-none cursor-pointer"
+                className="bg-transparent text-[#0F172A] dark:text-[#F8FAFC] font-medium focus:outline-none cursor-pointer"
               >
                 <option value="English">English</option>
                 <option value="Hinglish">Hinglish</option>
@@ -222,15 +222,15 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
           <div className="p-3.5 max-h-80 overflow-y-auto space-y-3 text-xs">
             {modeTab === 'socratic' && (
               <div className="space-y-2.5">
-                <label className="flex items-center justify-between bg-zinc-50 dark:bg-[#18181b] px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] cursor-pointer">
-                  <span className="font-medium text-zinc-700 dark:text-zinc-300 text-[11px]">
+                <label className="flex items-center justify-between bg-[#F8FAFF] dark:bg-[#1E293B] px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.07] cursor-pointer">
+                  <span className="font-medium text-[#0F172A] dark:text-[#F8FAFC] text-[11px]">
                     Guide with hints first
                   </span>
                   <input
                     type="checkbox"
                     checked={socraticMode}
                     onChange={(e) => setSocraticMode(e.target.checked)}
-                    className="accent-zinc-900 dark:accent-[#fafafa] cursor-pointer"
+                    className="accent-[#2563EB] cursor-pointer"
                   />
                 </label>
 
@@ -239,7 +239,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                   value={questionInput}
                   onChange={(e) => setQuestionInput(e.target.value)}
                   placeholder={`Ask about ${matchedChapter.chapterName}...`}
-                  className="w-full rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#18181b] p-2.5 text-xs text-zinc-900 dark:text-[#fafafa] placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
+                  className="w-full rounded-xl border border-[#E2E8F0] dark:border-white/[0.07] bg-white dark:bg-[#1E293B] p-2.5 text-xs text-[#0F172A] dark:text-[#F8FAFC] placeholder:text-[#475569] dark:placeholder:text-[#94A3B8] focus:outline-none focus:border-[#2563EB]"
                 />
 
                 <div className="flex items-center gap-1.5">
@@ -247,7 +247,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                     type="button"
                     disabled={loading || clueCoins < 1}
                     onClick={() => handleAskSocratic(1)}
-                    className="flex-1 py-1.5 px-2 rounded-lg bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 border border-zinc-200 dark:border-white/[0.07] font-medium text-[11px] cursor-pointer disabled:opacity-50 transition-colors duration-150"
+                    className="flex-1 py-1.5 px-2 rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] hover:bg-[#E2E8F0] dark:hover:bg-white/[0.1] text-[#2563EB] dark:text-blue-400 border border-[#E2E8F0] dark:border-white/[0.07] font-medium text-[11px] cursor-pointer disabled:opacity-50 transition-colors duration-150"
                   >
                     Hint 1
                   </button>
@@ -255,7 +255,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                     type="button"
                     disabled={loading || clueCoins < 1}
                     onClick={() => handleAskSocratic(2)}
-                    className="flex-1 py-1.5 px-2 rounded-lg bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 border border-zinc-200 dark:border-white/[0.07] font-medium text-[11px] cursor-pointer disabled:opacity-50 transition-colors duration-150"
+                    className="flex-1 py-1.5 px-2 rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] hover:bg-[#E2E8F0] dark:hover:bg-white/[0.1] text-[#7C3AED] dark:text-violet-400 border border-[#E2E8F0] dark:border-white/[0.07] font-medium text-[11px] cursor-pointer disabled:opacity-50 transition-colors duration-150"
                   >
                     Hint 2
                   </button>
@@ -263,7 +263,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                     type="button"
                     disabled={loading}
                     onClick={() => handleAskSocratic(undefined)}
-                    className="btn-terracotta py-1.5 px-3 rounded-lg font-semibold text-[11px] inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                    className="btn-brand py-1.5 px-3 rounded-lg font-semibold text-[11px] inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
                   >
                     <Send className="w-3 h-3" />
                     Ask
@@ -271,10 +271,10 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                 </div>
 
                 {aiReply && (
-                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-[11px] leading-relaxed space-y-2">
+                  <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.07] text-[11px] leading-relaxed space-y-2">
                     <MathRichText content={aiReply} />
                     {aiCitations.length > 0 && (
-                      <div className="flex flex-wrap gap-2 pt-1.5 border-t border-zinc-200 dark:border-white/[0.07] text-[10px] font-mono text-zinc-500">
+                      <div className="flex flex-wrap gap-2 pt-1.5 border-t border-[#E2E8F0] dark:border-white/[0.07] text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8]">
                         {aiCitations.map((cit) => (
                           <span key={cit.chunkId} title={cit.snippet}>
                             p.{cit.pageNumber}
@@ -290,7 +290,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
 
             {modeTab === 'shardz' && (
               <div className="space-y-2">
-                <div className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                <div className="text-[11px] font-medium text-[#475569] dark:text-[#94A3B8]">
                   15m Sprints · {matchedChapter.chapterName}
                 </div>
                 {shards.map((shard) => {
@@ -298,22 +298,22 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                   return (
                     <div
                       key={shard.id}
-                      className="p-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-1.5"
+                      className="p-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.07] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-1.5"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-zinc-900 dark:text-[#fafafa] flex items-center gap-1.5">
-                          <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-[#7C3AED] shrink-0" />
                           {shard.title}
                         </span>
-                        <span className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
+                        <span className="tabular-nums text-[10px] text-[#475569] dark:text-[#94A3B8]">
                           {shard.durationMinutes}m
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                      <p className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                         {shard.activeRecallPrompt}
                       </p>
                       <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 truncate max-w-[180px]">
+                        <span className="text-[10px] text-[#2563EB] dark:text-blue-400 truncate max-w-[180px]">
                           {matchedChapter.keyFormulasLatex[0] || matchedChapter.unitName}
                         </span>
                         <button
@@ -324,8 +324,8 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                           }}
                           className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors duration-150 ${
                             done
-                              ? 'bg-emerald-600 text-white'
-                              : 'btn-terracotta'
+                              ? 'btn-brand-secondary'
+                              : 'btn-brand'
                           }`}
                         >
                           {done ? (
@@ -357,9 +357,9 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-3 px-3 rounded-xl border border-dashed border-zinc-300 dark:border-white/[0.14] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-[#fafafa] font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors duration-150"
+                  className="w-full py-3 px-3 rounded-xl border border-dashed border-[#E2E8F0] dark:border-white/[0.14] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors duration-150"
                 >
-                  <Camera className="w-4 h-4 text-zinc-400" />
+                  <Camera className="w-4 h-4 text-[#2563EB]" />
                   <span>Upload Question Image</span>
                 </button>
                 {ocrPreviewDataUrl && (
@@ -367,20 +367,20 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
                     <img
                       src={ocrPreviewDataUrl}
                       alt="Uploaded Doubt OCR Preview"
-                      className="max-h-32 rounded-lg border border-zinc-200 dark:border-white/[0.07] mx-auto object-contain"
+                      className="max-h-32 rounded-lg border border-[#E2E8F0] dark:border-white/[0.07] mx-auto object-contain"
                     />
                     <button
                       type="button"
                       disabled={loading}
                       onClick={() => handleAskSocratic(undefined)}
-                      className="w-full py-2 rounded-lg btn-terracotta font-semibold cursor-pointer transition-colors duration-150"
+                      className="w-full py-2 rounded-lg btn-brand font-semibold cursor-pointer transition-colors duration-150"
                     >
                       {loading ? 'Scanning...' : `Solve in ${language}`}
                     </button>
                   </div>
                 )}
                 {aiReply && (
-                  <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.07] text-[11px]">
                     <MathRichText content={aiReply} />
                   </div>
                 )}

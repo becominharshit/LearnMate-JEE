@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { ThinkingLevel, Type } from '@google/genai';
 import { AuthenticatedRequest } from '../middleware/authAndSecurity';
 import {
+  ALLOWED_GEMINI_MODELS,
   buildThinkingFallbackChain,
   generateWithModelFallback,
   getModelRoutingConfig,
@@ -9,7 +10,7 @@ import {
   sendStructuredUpstreamError,
 } from '../coreStudyEngine';
 import { retrieveTopKChunksForStudentPersistent } from '../../services/ingestionJobsService';
-import { sanitizeSvgMarkup } from '../../utils/svgSanitizer';
+import { escapeXmlText, sanitizeSvgMarkup } from '../../utils/svgSanitizer';
 
 export const aiTutorRouter = Router();
 
@@ -620,72 +621,154 @@ aiTutorRouter.post('/image-edit', async (req: AuthenticatedRequest, res: Respons
   }
 });
 
-// 7. Animated Concept Lesson Video Generation (gemini-omni-1.2-flash Interactions API)
-export function buildGeminiVideoInteractionRequest(params: {
+// 7. Interactive Animated Concept Lesson Generation (GEMINI_MODEL_FAST + SMIL Animated SVG)
+export interface AnimatedLessonKeyframe {
+  timeSec: number;
+  title: string;
+  formula: string;
+  visualCue: string;
+  caption: string;
+}
+
+export interface AnimatedConceptLessonPlan {
+  lessonTitle: string;
+  durationSec: number;
+  summary: string;
+  keyframes: AnimatedLessonKeyframe[];
+}
+
+export function buildAnimatedLessonPromptRequest(params: {
   prompt: string;
   aspectRatio?: string;
   imageBase64?: string;
   imageMimeType?: string;
 }) {
+  const models = getModelRoutingConfig();
   const allowedAspectRatios = new Set(['16:9', '9:16', '1:1', '4:3', '3:4']);
   const safeAspect = allowedAspectRatios.has(String(params.aspectRatio || ''))
     ? String(params.aspectRatio)
     : '16:9';
-  const promptText = `Create a concise 8-second scientifically accurate educational STEM animation for an IIT-JEE aspirant showing clearly: ${String(
+  const promptText = `Design an interactive 12-second animated IIT-JEE concept lesson for: "${String(
     params.prompt
-  ).slice(0, 600)}`;
+  ).slice(0, 600)}". Return a structured lesson title, concise summary, and 4 sequential animation keyframes (t = 0s, 4s, 8s, 12s) with exact physics/chemistry/math formulas, visual motion cues, and classroom captions. Aspect ratio context: ${safeAspect}.`;
 
   const cleanedImg =
     typeof params.imageBase64 === 'string'
       ? params.imageBase64.replace(/^data:[^;]+;base64,/, '').trim()
       : '';
 
-  const input = cleanedImg
-    ? [
-        {
-          type: 'image',
-          mime_type: String(params.imageMimeType || 'image/png'),
-          data: cleanedImg,
-        },
-        { type: 'text', text: promptText },
-      ]
-    : promptText;
+  const parts: any[] = [];
+  if (cleanedImg) {
+    parts.push({
+      inlineData: {
+        mimeType: String(params.imageMimeType || 'image/png'),
+        data: cleanedImg,
+      },
+    });
+  }
+  parts.push({ text: promptText });
 
   return {
-    model: 'gemini-omni-1.2-flash',
-    input,
-    background: false,
-    store: false,
-    stream: false,
-    response_format: {
-      type: 'video',
-      aspect_ratio: safeAspect,
-      duration: '8s',
-      resolution: '720p',
-    },
+    model: models.fast,
+    aspectRatio: safeAspect,
+    contents: { parts },
   };
 }
 
-export function extractVideoOutputFromInteraction(interaction: any): string | null {
-  const directVideo = interaction?.output_video;
-  if (directVideo?.data) {
-    const mime = directVideo.mime_type || 'video/mp4';
-    return `data:${mime};base64,${directVideo.data}`;
-  }
-  if (directVideo?.uri) {
-    return String(directVideo.uri);
-  }
-  const outputs = Array.isArray(interaction?.outputs) ? interaction.outputs : [];
-  for (const output of outputs) {
-    if (output?.type === 'video' && output?.data) {
-      const mime = output.mime_type || 'video/mp4';
-      return `data:${mime};base64,${output.data}`;
-    }
-    if (output?.type === 'video' && output?.uri) {
-      return String(output.uri);
-    }
-  }
-  return null;
+export function synthesizeAnimatedLessonSvg(plan: AnimatedConceptLessonPlan): string {
+  const safeTitle = escapeXmlText((plan.lessonTitle || 'JEE Animated Concept Lesson').slice(0, 68));
+  const safeSummary = escapeXmlText((plan.summary || 'Step-by-step animated visual derivation').slice(0, 120));
+  const frames = (Array.isArray(plan.keyframes) && plan.keyframes.length > 0
+    ? plan.keyframes
+    : [
+        {
+          timeSec: 0,
+          title: 'Setup & Initial State',
+          formula: 'ΣF = ma',
+          visualCue: 'Define axes and initial variables',
+          caption: 'Establish coordinate frame and boundary conditions.',
+        },
+        {
+          timeSec: 4,
+          title: 'Vector Decomposition',
+          formula: 'F_∥ = mg sin θ, N = mg cos θ',
+          visualCue: 'Resolve vectors along trajectory',
+          caption: 'Split governing components along orthogonal axes.',
+        },
+        {
+          timeSec: 8,
+          title: 'Dynamic Evolution',
+          formula: 'v(t) = u + at',
+          visualCue: 'Animate displacement over time',
+          caption: 'Track state transition across the interval.',
+        },
+        {
+          timeSec: 12,
+          title: 'JEE Key Takeaway',
+          formula: 'ΔK + ΔU = W_nc',
+          visualCue: 'Highlight conserved invariant',
+          caption: 'Verify units, limits, and sign convention.',
+        },
+      ]
+  ).slice(0, 4);
+
+  const stageCards = frames
+    .map((kf, idx) => {
+      const x = 32 + idx * 158;
+      const delaySec = idx * 2.4;
+      return `
+        <g transform="translate(${x}, 276)">
+          <rect x="0" y="0" width="144" height="104" rx="10" fill="#111827" stroke="#334155" stroke-width="1.5">
+            <animate attributeName="stroke" values="#334155;#2563EB;#00A86B;#334155" keyTimes="0;0.25;0.65;1" dur="9.6s" begin="${delaySec}s" repeatCount="indefinite" />
+          </rect>
+          <text x="10" y="20" font-size="11" font-weight="700" fill="#60A5FA">t = ${Math.round(Number(kf.timeSec) || idx * 4)}s</text>
+          <text x="10" y="39" font-size="11" font-weight="700" fill="#F8FAFC">${escapeXmlText(String(kf.title || '').slice(0, 20))}</text>
+          <text x="10" y="61" font-size="11" font-weight="600" fill="#34D399">${escapeXmlText(String(kf.formula || '').slice(0, 20))}</text>
+          <text x="10" y="83" font-size="10" fill="#94A3B8">${escapeXmlText(String(kf.visualCue || '').slice(0, 22))}</text>
+        </g>`;
+    })
+    .join('');
+
+  const rawSvg = `<svg viewBox="0 0 680 420" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+    <defs>
+      <linearGradient id="anim-bg" x1="0" y1="0" x2="680" y2="420" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#070B14" />
+        <stop offset="100%" stop-color="#0F172A" />
+      </linearGradient>
+      <linearGradient id="anim-flow" x1="60" y1="0" x2="620" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#2563EB" />
+        <stop offset="50%" stop-color="#7C3AED" />
+        <stop offset="100%" stop-color="#00A86B" />
+      </linearGradient>
+    </defs>
+    <rect width="680" height="420" rx="14" fill="url(#anim-bg)" />
+    <text x="32" y="38" font-size="17" font-weight="700" fill="#F8FAFC">${safeTitle}</text>
+    <text x="32" y="59" font-size="12" fill="#94A3B8">${safeSummary}</text>
+
+    <!-- Interactive Physics / Concept Motion Stage -->
+    <rect x="32" y="76" width="616" height="178" rx="12" fill="#111827" stroke="rgba(255,255,255,0.10)" stroke-width="1.5" />
+    <line x1="64" y1="210" x2="616" y2="210" stroke="#334155" stroke-width="2" stroke-dasharray="6 5" />
+    <path d="M 76 196 Q 210 92, 340 156 T 604 128" fill="none" stroke="url(#anim-flow)" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="stroke-dasharray" values="0,800;800,0" dur="4.8s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Animated Particle / State Pulse -->
+    <circle cx="80" cy="186" r="10" fill="#00A86B" stroke="#F8FAFC" stroke-width="2">
+      <animateMotion path="M 0 10 Q 134 -94, 264 -30 T 528 -58" dur="4.8s" repeatCount="indefinite" />
+      <animate attributeName="r" values="9;13;9" dur="1.6s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Progress Scrub Bar -->
+    <rect x="64" y="232" width="552" height="6" rx="3" fill="#1E293B" />
+    <rect x="64" y="232" width="0" height="6" rx="3" fill="url(#anim-flow)">
+      <animate attributeName="width" values="0;552;0" dur="9.6s" repeatCount="indefinite" />
+    </rect>
+
+    ${stageCards}
+    <text x="32" y="402" font-size="11" fill="#64748B">Interactive Animated Concept Lesson · ${Math.max(4, Number(plan.durationSec) || 12)}s loop</text>
+  </svg>`;
+
+  return sanitizeSvgMarkup(rawSvg);
 }
 
 aiTutorRouter.post('/video', async (req: AuthenticatedRequest, res: Response) => {
@@ -694,38 +777,84 @@ aiTutorRouter.post('/video', async (req: AuthenticatedRequest, res: Response) =>
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
       res.status(400).json({
         errorCode: 'INVALID_REQUEST',
-        message: 'Prompt is required for video generation.',
+        message: 'Prompt is required for animated concept lesson generation.',
         retryAfterSeconds: 0,
         requestId: req.requestId,
       });
       return;
     }
 
+    const models = getModelRoutingConfig();
     const ai = getValidatedGenAIClient();
-    const requestPayload = buildGeminiVideoInteractionRequest({
+    const requestSpec = buildAnimatedLessonPromptRequest({
       prompt,
       aspectRatio,
       imageBase64,
       imageMimeType,
     });
-    const interaction = await (ai.interactions.create as any)(requestPayload, {
-      timeout: 300000,
-    });
 
-    const videoUrl = extractVideoOutputFromInteraction(interaction);
-    if (videoUrl) {
-      res.json({
-        videoUrl,
-        modelUsed: 'gemini-omni-1.2-flash',
-      });
-      return;
-    }
+    const { result: response, modelUsed, fallbackUsed } = await generateWithModelFallback(
+      [models.fast, ALLOWED_GEMINI_MODELS.intermediate, models.thinking],
+      (model) =>
+        ai.models.generateContent({
+          model,
+          contents: requestSpec.contents,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                lessonTitle: { type: Type.STRING },
+                durationSec: { type: Type.NUMBER },
+                summary: { type: Type.STRING },
+                keyframes: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      timeSec: { type: Type.NUMBER },
+                      title: { type: Type.STRING },
+                      formula: { type: Type.STRING },
+                      visualCue: { type: Type.STRING },
+                      caption: { type: Type.STRING },
+                    },
+                    required: ['timeSec', 'title', 'formula', 'visualCue', 'caption'],
+                  },
+                },
+              },
+              required: ['lessonTitle', 'durationSec', 'summary', 'keyframes'],
+            },
+          },
+        })
+    );
 
-    res.status(503).json({
-      errorCode: 'VIDEO_GENERATION_EMPTY',
-      message: 'No video output returned from gemini-omni-1.2-flash. Please retry.',
-      retryAfterSeconds: 5,
-      requestId: req.requestId,
+    const parsed = JSON.parse(response.text || '{}') as Partial<AnimatedConceptLessonPlan>;
+    const normalizedPlan: AnimatedConceptLessonPlan = {
+      lessonTitle: String(parsed.lessonTitle || prompt).slice(0, 100),
+      durationSec: Number(parsed.durationSec) > 0 ? Math.min(60, Number(parsed.durationSec)) : 12,
+      summary: String(parsed.summary || `Visual step-by-step concept walkthrough for ${prompt}`).slice(0, 260),
+      keyframes:
+        Array.isArray(parsed.keyframes) && parsed.keyframes.length > 0
+          ? parsed.keyframes.slice(0, 6).map((kf, idx) => ({
+              timeSec: Number.isFinite(Number(kf?.timeSec)) ? Number(kf.timeSec) : idx * 4,
+              title: String(kf?.title || `Step ${idx + 1}`).slice(0, 60),
+              formula: String(kf?.formula || '').slice(0, 80),
+              visualCue: String(kf?.visualCue || '').slice(0, 100),
+              caption: String(kf?.caption || '').slice(0, 220),
+            }))
+          : [],
+    };
+
+    const animatedSvg = synthesizeAnimatedLessonSvg(normalizedPlan);
+    const videoUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(animatedSvg)}`;
+
+    res.json({
+      ...normalizedPlan,
+      animatedSvg,
+      videoUrl,
+      aspectRatio: requestSpec.aspectRatio,
+      modelUsed,
+      fallbackUsed,
     });
   } catch (error: any) {
     sendStructuredUpstreamError(res, error, '/api/ai/video', req.requestId);

@@ -71,10 +71,10 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
     <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-semibold tracking-[-0.02em] text-2xl text-zinc-900 dark:text-zinc-50">
+          <h1 className="font-semibold tracking-[-0.02em] text-2xl text-[#0F172A] dark:text-[#F8FAFC]">
             Progress
           </h1>
-          <p className="text-xs font-mono tabular-nums text-zinc-500 mt-0.5">
+          <p className="text-xs tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">
             JEE Main 2027 · {masteryStats.daysToExam}d left · {masteryStats.weightedMasteryPct}% mastery
           </p>
         </div>
@@ -83,7 +83,7 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
             <button
               type="button"
               onClick={onOpenCustomTestGenerator}
-              className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-800 dark:text-zinc-200 text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
+              className="px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-slate-800 dark:text-slate-200 text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
             >
               <Sliders className="w-4 h-4" />
               Build Custom Test
@@ -92,7 +92,7 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
           <button
             type="button"
             onClick={() => onStartCBTMock('JEE Main')}
-            className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
+            className="px-4 py-2 rounded-lg btn-brand text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
           >
             <Play className="w-4 h-4" />
             75-Q CBT Mock
@@ -100,31 +100,31 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
         </div>
       </div>
 
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-12 p-5 rounded-2xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] flex flex-col justify-between space-y-4">
+      <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-12 p-5 rounded-2xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] flex flex-col justify-between space-y-4">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
               Mastery &amp; Error Bleed
             </h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-0.5">
               Chapters, SM-2 recall, and mistake rechecks
             </p>
           </div>
 
           <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]">
-              <span className="font-medium text-zinc-600 dark:text-zinc-300">Syllabus ({completedChapterIds.length}/{JEE_SYLLABUS_DATA.length})</span>
-              <span className="font-mono font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">{masteryStats.syllabusCoveragePct}% · {sm2CardsCount} cards</span>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08]">
+              <span className="font-medium text-slate-600 dark:text-slate-300">Syllabus ({completedChapterIds.length}/{JEE_SYLLABUS_DATA.length})</span>
+              <span className="font-semibold tabular-nums text-[#00A86B] dark:text-emerald-400">{masteryStats.syllabusCoveragePct}% · {sm2CardsCount} cards</span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]">
-              <span className="font-medium text-zinc-600 dark:text-zinc-300">Rechecks Passed</span>
-              <span className="font-mono font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08]">
+              <span className="font-medium text-slate-600 dark:text-slate-300">Rechecks Passed</span>
+              <span className="font-semibold tabular-nums text-[#0F172A] dark:text-[#F8FAFC]">
                 {masteryStats.recheckedPassed}/{mistakesNotebook.length} ({masteryStats.recheckResolutionPct}%)
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]">
-              <span className="font-medium text-zinc-600 dark:text-zinc-300">Negative Bleed · {materialsCount} sets</span>
-              <span className="font-mono font-semibold tabular-nums text-rose-600 dark:text-rose-400">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08]">
+              <span className="font-medium text-slate-600 dark:text-slate-300">Negative Bleed · {materialsCount} sets</span>
+              <span className="font-semibold tabular-nums text-rose-600 dark:text-rose-400">
                 {mistakesCount} logged · −{masteryStats.netNegativeBleed}
               </span>
             </div>
@@ -133,20 +133,20 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
           <button
             type="button"
             onClick={() => onStartCBTMock('JEE Advanced')}
-            className="w-full py-2.5 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors duration-150"
+            className="w-full py-2.5 rounded-lg btn-brand text-xs font-semibold cursor-pointer transition-colors duration-150"
           >
             JEE Advanced Paper 1 (+4/−2)
           </button>
         </div>
       </div>
 
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-4">
+      <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+            <h2 className="text-base font-semibold tracking-[-0.02em] text-[#0F172A] dark:text-[#F8FAFC]">
               58-Chapter Syllabus Heatmap
             </h2>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
               Select a chapter to start a targeted drill
             </p>
           </div>
@@ -158,8 +158,8 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
                 onClick={() => setHeatmapSubject(subj)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150 ${
                   heatmapSubject === subj
-                    ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                    : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-[#1f1f23]'
+                    ? 'btn-brand font-semibold'
+                    : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
                 {subj}
@@ -178,32 +178,32 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
                 onClick={() => onPracticeWeakTopic(ch.chapter)}
                 className={`p-3 rounded-xl border text-left transition-colors duration-150 cursor-pointer flex flex-col justify-between gap-2 ${
                   isDone
-                    ? 'border-emerald-500/40 bg-zinc-50 dark:bg-[#18181b]'
-                    : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
+                    ? 'border-emerald-500/40 bg-[#F8FAFF] dark:bg-[#1E293B]'
+                    : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700/80'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between gap-1 text-[10px] font-mono uppercase text-zinc-500">
+                  <div className="flex items-center justify-between gap-1 text-[10px] font-medium uppercase text-[#475569] dark:text-[#94A3B8]">
                     <span>{ch.subject} · {ch.classLevel}</span>
                     <span
                       className={
                         isDone
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-[#00A86B] dark:text-emerald-400 tabular-nums'
                           : ch.weightageTier === 'High'
-                          ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-zinc-500'
+                          ? 'text-amber-600 dark:text-amber-400 tabular-nums'
+                          : 'text-[#475569] dark:text-[#94A3B8] tabular-nums'
                       }
                     >
                       {ch.weightageTier} ({ch.expectedQs})
                     </span>
                   </div>
-                  <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 mt-1 line-clamp-1">
+                  <div className="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mt-1 line-clamp-1">
                     {ch.chapter}
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-[11px] font-medium">
-                  <span className="text-zinc-500">{ch.examScope}</span>
-                  <span className="text-zinc-900 dark:text-zinc-200">Drill →</span>
+                  <span className="text-[#475569] dark:text-[#94A3B8]">{ch.examScope}</span>
+                  <span className="text-[#2563EB] dark:text-blue-400 font-semibold">Drill →</span>
                 </div>
               </button>
             );

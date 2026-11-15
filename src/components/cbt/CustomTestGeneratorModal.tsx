@@ -7,10 +7,13 @@ import {
   Layers,
   Clock,
   Hash,
-  Sparkles,
-  Filter,
+  AlertCircle,
 } from 'lucide-react';
-import { CBTQuestion, buildBalancedCustomTestQuestions } from '../../utils/jeeEngine';
+import {
+  CBTQuestion,
+  buildBalancedCustomTestQuestions,
+  filterCustomTestQuestions,
+} from '../../utils/jeeEngine';
 import {
   JEE_SYLLABUS_DATA,
   CBT_MOCK_QUESTIONS,
@@ -60,6 +63,23 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
     return JEE_SYLLABUS_DATA.filter((ch) => ch.subject === subjectTab);
   }, [subjectTab]);
 
+  const matchedPool = useMemo(() => {
+    return filterCustomTestQuestions({
+      basePool: [...CBT_MOCK_QUESTIONS, ...JEE_ADVANCED_PAPER_QUESTIONS],
+      mistakesPool: mistakesNotebook.map((m) => m.question),
+      selectedSubjects,
+      selectedChapters,
+      difficultyFilter,
+      questionTypeFilter,
+    });
+  }, [
+    mistakesNotebook,
+    selectedSubjects,
+    selectedChapters,
+    difficultyFilter,
+    questionTypeFilter,
+  ]);
+
   if (!isOpen) return null;
 
   const toggleSubject = (subj: 'Physics' | 'Chemistry' | 'Mathematics') => {
@@ -81,65 +101,12 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
   };
 
   const handleBuildAndLaunch = () => {
-    let pool: CBTQuestion[] = [];
-
-    if (questionTypeFilter === 'Previously Incorrect Only' && mistakesNotebook.length > 0) {
-      pool = mistakesNotebook.map((m) => m.question);
-    } else if (questionTypeFilter === 'Multi-Correct') {
-      pool = [...JEE_ADVANCED_PAPER_QUESTIONS, ...CBT_MOCK_QUESTIONS];
-    } else {
-      pool = [...CBT_MOCK_QUESTIONS, ...JEE_ADVANCED_PAPER_QUESTIONS];
+    if (matchedPool.length === 0) {
+      return;
     }
 
-    // Filter by selected subjects
-    pool = pool.filter((q) => selectedSubjects.includes(q.subject));
-
-    // Filter by selected chapters if any explicitly chosen
-    if (selectedChapters.length > 0) {
-      const chapterMatched = pool.filter((q) =>
-        selectedChapters.some(
-          (ch) =>
-            ch.toLowerCase().includes(q.chapter.toLowerCase()) ||
-            q.chapter.toLowerCase().includes(ch.split(' ')[0].toLowerCase())
-        )
-      );
-      if (chapterMatched.length > 0) {
-        pool = chapterMatched;
-      }
-    }
-
-    // Filter by difficulty
-    if (difficultyFilter !== 'All') {
-      const targetBucket =
-        difficultyFilter === 'Easy'
-          ? 'Beginner'
-          : difficultyFilter === 'Moderate'
-          ? 'Must-Do'
-          : 'Advanced Climb';
-      const diffMatched = pool.filter((q) => q.difficultyBucket === targetBucket);
-      if (diffMatched.length > 0) pool = diffMatched;
-    }
-
-    // Filter by question type
-    if (questionTypeFilter === 'MCQ') {
-      pool = pool.filter((q) => q.section === 'Section A' && q.advancedFormat !== 'multiple');
-    } else if (questionTypeFilter === 'Numerical') {
-      pool = pool.filter((q) => q.section === 'Section B' || q.advancedFormat === 'numerical');
-    } else if (questionTypeFilter === 'Multi-Correct') {
-      const multi = pool.filter((q) => q.advancedFormat === 'multiple');
-      if (multi.length > 0) pool = multi;
-    }
-
-    if (pool.length === 0) {
-      pool = CBT_MOCK_QUESTIONS.filter((q) => selectedSubjects.includes(q.subject));
-      if (pool.length === 0) {
-        pool = CBT_MOCK_QUESTIONS.slice(0, questionCount);
-      }
-    }
-
-    // Build exact requested questionCount distributed evenly (round-robin) across selected subjects
     const finalQuestions = buildBalancedCustomTestQuestions({
-      pool,
+      pool: matchedPool,
       selectedSubjects,
       questionCount,
       groupBySubject: true,
@@ -157,21 +124,21 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="MARKS Custom Test Generator"
+      aria-label="Custom Test Builder"
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-zinc-900 dark:text-zinc-100">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-[#0F172A] dark:text-[#F8FAFC]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-200 dark:border-white/[0.07] flex items-center justify-between bg-zinc-50 dark:bg-[#141417]">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between bg-[#F8FAFF] dark:bg-[#070B14]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#D4653B]/10 text-[#D4653B] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-[#2563EB]/10 text-[#2563EB] flex items-center justify-center">
               <Sliders className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-base font-semibold tracking-[-0.02em]">
                 Custom Test Builder
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
                 Configure subjects, chapters, difficulty &amp; duration
               </p>
             </div>
@@ -180,7 +147,7 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
             type="button"
             aria-label="Close Custom Test Builder"
             onClick={onClose}
-            className="p-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors duration-150 cursor-pointer"
+            className="p-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-colors duration-150 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -190,7 +157,7 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* 1. Subject Multi-Select */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#475569] dark:text-[#94A3B8] mb-2">
               1. Subjects · {selectedSubjects.length}/3 Active
             </label>
             <div className="grid grid-cols-3 gap-2.5">
@@ -203,12 +170,12 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                     onClick={() => toggleSubject(subj)}
                     className={`p-3 rounded-xl border text-left text-xs transition-colors duration-150 cursor-pointer flex items-center justify-between ${
                       active
-                        ? 'border-zinc-900 dark:border-white/30 bg-zinc-100 dark:bg-[#1f1f23] text-zinc-900 dark:text-white font-semibold'
-                        : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] font-medium'
+                        ? 'border-[#2563EB] bg-[#EFF6FF] dark:bg-[#2563EB]/15 text-[#0F172A] dark:text-white font-semibold'
+                        : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] font-medium'
                     }`}
                   >
                     <span>{subj}</span>
-                    {active && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                    {active && <CheckCircle2 className="w-4 h-4 text-[#00A86B]" />}
                   </button>
                 );
               })}
@@ -218,10 +185,10 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
           {/* 2. Difficulty & Question Format Filters */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-2">
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#475569] dark:text-[#94A3B8] mb-2">
                 2. Difficulty
               </label>
-              <div className="grid grid-cols-4 gap-1 bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] p-1 rounded-xl">
+              <div className="grid grid-cols-4 gap-1 bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] p-1 rounded-xl">
                 {(['All', 'Easy', 'Moderate', 'Tough'] as const).map((diff) => (
                   <button
                     key={diff}
@@ -229,8 +196,8 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                     onClick={() => setDifficultyFilter(diff)}
                     className={`py-2 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                       difficultyFilter === diff
-                        ? 'bg-white dark:bg-[#27272a] text-zinc-900 dark:text-white font-semibold'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        ? 'btn-brand text-white font-semibold'
+                        : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white'
                     }`}
                   >
                     {diff}
@@ -240,7 +207,7 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 mb-2">
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#475569] dark:text-[#94A3B8] mb-2">
                 3. Format
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -259,8 +226,8 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                     onClick={() => setQuestionTypeFilter(qType)}
                     className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors duration-150 cursor-pointer ${
                       questionTypeFilter === qType
-                        ? 'border-[#1C1917] bg-[#1C1917] text-[#FAF8F5] dark:border-white/20 dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
-                        : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
+                        ? 'btn-brand border-transparent text-white font-semibold'
+                        : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#283548]'
                     }`}
                   >
                     {qType}
@@ -271,14 +238,14 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
           </div>
 
           {/* 4. Question Count (10 to 75) & Duration (15 to 180 mins) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
             <div>
               <div className="flex items-center justify-between text-xs font-semibold mb-2">
-                <span className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-200">
-                  <Hash className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                <span className="flex items-center gap-1.5 text-[#0F172A] dark:text-[#F8FAFC]">
+                  <Hash className="w-3.5 h-3.5 text-[#2563EB]" />
                   Total Questions
                 </span>
-                <span className="font-mono tabular-nums text-xs text-zinc-900 dark:text-zinc-100">
+                <span className="tabular-nums text-xs text-[#0F172A] dark:text-[#F8FAFC]">
                   {questionCount} Qs · {questionCount * 4} Marks
                 </span>
               </div>
@@ -289,9 +256,9 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                 step={5}
                 value={questionCount}
                 onChange={(e) => setQuestionCount(Number(e.target.value))}
-                className="w-full accent-[#D4653B] cursor-pointer"
+                className="w-full accent-[#2563EB] cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mt-1 font-mono tabular-nums">
+              <div className="flex justify-between text-[10px] font-medium text-[#475569] dark:text-[#94A3B8] mt-1 tabular-nums">
                 <span>10 Qs</span>
                 <span>30 Qs</span>
                 <span>75 Qs</span>
@@ -300,11 +267,11 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
 
             <div>
               <div className="flex items-center justify-between text-xs font-semibold mb-2">
-                <span className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-200">
-                  <Clock className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                <span className="flex items-center gap-1.5 text-[#0F172A] dark:text-[#F8FAFC]">
+                  <Clock className="w-3.5 h-3.5 text-[#00A86B]" />
                   Exam Duration
                 </span>
-                <span className="font-mono tabular-nums text-xs text-emerald-600 dark:text-emerald-400">
+                <span className="tabular-nums text-xs text-[#00A86B]">
                   {durationMinutes} Mins
                 </span>
               </div>
@@ -315,9 +282,9 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                 step={15}
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full accent-[#D4653B] cursor-pointer"
+                className="w-full accent-[#7C3AED] cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mt-1 font-mono tabular-nums">
+              <div className="flex justify-between text-[10px] font-medium text-[#475569] dark:text-[#94A3B8] mt-1 tabular-nums">
                 <span>15m</span>
                 <span>90m</span>
                 <span>180m</span>
@@ -328,8 +295,8 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
           {/* 5. 58-Chapter Selector */}
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-              <label className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-zinc-400" />
+              <label className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#475569] dark:text-[#94A3B8] flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#7C3AED]" />
                 4. Chapters · {selectedChapters.length === 0 ? 'All 58 Included' : `${selectedChapters.length} Selected`}
               </label>
               <div className="flex items-center gap-1.5">
@@ -340,8 +307,8 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                     onClick={() => setSubjectTab(tab)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                       subjectTab === tab
-                        ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
-                        : 'bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                        ? 'btn-brand text-white font-semibold'
+                        : 'bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white'
                     }`}
                   >
                     {tab}
@@ -359,7 +326,7 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50/50 dark:bg-[#09090b]/40">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-52 overflow-y-auto p-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14]/60">
               {availableChapters.map((ch) => {
                 const isPicked = selectedChapters.includes(ch.chapter);
                 return (
@@ -369,41 +336,63 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
                     onClick={() => toggleChapter(ch.chapter)}
                     className={`p-2.5 rounded-xl border text-left text-xs transition-colors duration-150 cursor-pointer flex items-start justify-between gap-2 ${
                       isPicked
-                        ? 'border-zinc-900 dark:border-white/30 bg-zinc-100 dark:bg-[#1f1f23] font-semibold text-zinc-900 dark:text-white'
-                        : 'border-zinc-200 dark:border-white/[0.06] bg-white dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-700 dark:text-zinc-300'
+                        ? 'border-[#2563EB] bg-[#EFF6FF] dark:bg-[#2563EB]/15 font-semibold text-[#0F172A] dark:text-white'
+                        : 'border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]'
                     }`}
                   >
                     <div>
                       <div className="line-clamp-1">{ch.chapter}</div>
-                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                      <div className="text-[10px] text-[#475569] dark:text-[#94A3B8] mt-0.5">
                         Class {ch.classLevel} · {ch.weightageTier}
                       </div>
                     </div>
-                    {isPicked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />}
+                    {isPicked && <CheckCircle2 className="w-3.5 h-3.5 text-[#00A86B] shrink-0 mt-0.5" />}
                   </button>
                 );
               })}
             </div>
           </div>
+
+          {matchedPool.length === 0 && (
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>
+                No questions match these filters. Adjust your selected subjects, chapters, difficulty, or format.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#141417] flex items-center justify-between gap-3">
-          <div className="text-xs text-zinc-500 dark:text-zinc-400">
-            NTA Marking <span className="font-mono tabular-nums font-semibold text-zinc-900 dark:text-zinc-200">+4 / -1</span>
+        <div className="px-6 py-4 border-t border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-xs text-[#475569] dark:text-[#94A3B8]">
+            <span>
+              NTA Marking <span className="tabular-nums font-semibold text-[#0F172A] dark:text-[#F8FAFC]">+4 / -1</span>
+            </span>
+            <span className="text-[#CBD5E1] dark:text-white/15">·</span>
+            <span
+              className={`tabular-nums font-semibold ${
+                matchedPool.length === 0
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-[#00A86B]'
+              }`}
+            >
+              {matchedPool.length} matching questions
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] transition-colors duration-150 cursor-pointer"
+              className="px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#1E293B] text-xs font-medium text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] transition-colors duration-150 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="button"
+              disabled={matchedPool.length === 0}
               onClick={handleBuildAndLaunch}
-              className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-2 transition-colors duration-150 cursor-pointer"
+              className="px-4 py-2 rounded-lg btn-brand disabled:opacity-45 disabled:cursor-not-allowed text-xs font-semibold inline-flex items-center gap-2 transition-colors duration-150 cursor-pointer"
             >
               <Play className="w-3.5 h-3.5" />
               Launch Custom CBT Test ({questionCount} Qs)

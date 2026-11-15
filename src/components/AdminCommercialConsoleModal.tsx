@@ -83,48 +83,48 @@ export const AdminCommercialConsoleModal: React.FC<
       aria-label="LearnMate Plans and Billing"
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl w-full max-w-4xl p-6 space-y-5 text-zinc-900 dark:text-zinc-100 my-8">
-        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 dark:border-white/[0.07] pb-4">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-4xl p-6 space-y-5 text-[#0F172A] dark:text-[#F8FAFC] my-8">
+        <div className="flex items-start justify-between gap-4 border-b border-[#E2E8F0] dark:border-white/[0.08] pb-4">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-amber-600 dark:text-amber-400 inline-flex items-center gap-1.5">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#2563EB] dark:text-blue-400 inline-flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               {paymentsConfigured ? 'Plans & Billing' : 'Early Access Preview'}
             </div>
             <h2 className="text-xl font-semibold tracking-[-0.02em] mt-1">
-              LearnMate JEE Plans · <span className="font-mono text-sm uppercase">{subscriptionTier}</span> ({subscriptionStatus})
+              LearnMate JEE Plans · <span className="text-sm uppercase font-bold">{subscriptionTier}</span> ({subscriptionStatus})
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close Pro Modal"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Billing Cycle Toggle */}
-        <div className="flex items-center justify-between flex-wrap gap-3 bg-zinc-50 dark:bg-[#18181b] p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07]">
-          <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+        <div className="flex items-center justify-between flex-wrap gap-3 bg-[#F8FAFF] dark:bg-[#1E293B] p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08]">
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#00A86B] shrink-0" />
             <span>
               Plan Availability:{' '}
-              <strong className={paymentsConfigured ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-900 dark:text-zinc-100'}>
+              <strong className={paymentsConfigured ? 'text-[#00A86B] dark:text-emerald-400' : 'text-[#0F172A] dark:text-[#F8FAFC]'}>
                 {paymentsConfigured
                   ? 'Live Checkout Ready'
                   : 'Early Access Preview · Pro Launching Soon'}
               </strong>
             </span>
           </div>
-          <div className="inline-flex rounded-xl bg-white dark:bg-[#111113] p-1 border border-zinc-200 dark:border-white/[0.07] text-xs font-medium">
+          <div className="inline-flex rounded-xl bg-white dark:bg-[#111827] p-1 border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium">
             <button
               type="button"
               onClick={() => onChangeBillingCycle('monthly')}
               className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 billingCycle === 'monthly'
-                  ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'btn-brand font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
               }`}
             >
               Monthly
@@ -134,8 +134,8 @@ export const AdminCommercialConsoleModal: React.FC<
               onClick={() => onChangeBillingCycle('annual')}
               className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 billingCycle === 'annual'
-                  ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B] font-semibold'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'btn-brand font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
               }`}
             >
               Annual Exam Pass (Save 50%)
@@ -145,7 +145,7 @@ export const AdminCommercialConsoleModal: React.FC<
 
         {waitlistBanner && (
           <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 text-[#00A86B] shrink-0 mt-0.5" />
             <div>
               <div className="font-semibold">Early Access Waitlist Confirmed</div>
               <p className="mt-0.5">{waitlistBanner}</p>
@@ -165,37 +165,37 @@ export const AdminCommercialConsoleModal: React.FC<
 
         {/* Free vs Pro vs Institute Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-3 flex flex-col justify-between">
+          <div className="p-5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-3 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-sm">Free Aspirant</span>
-                <span className="font-mono tabular-nums font-bold text-base text-zinc-800 dark:text-zinc-100">
+                <span className="tabular-nums font-bold text-base text-[#0F172A] dark:text-[#F8FAFC]">
                   ₹0
                 </span>
               </div>
-              <ul className="space-y-2 text-zinc-600 dark:text-zinc-300">
+              <ul className="space-y-2 text-slate-600 dark:text-slate-300">
                 <li>· 20 AI Tutor queries / day</li>
                 <li>· Official PYQ Bank &amp; Notes</li>
                 <li>· 2 Full CBT Mock Tests / mo</li>
                 <li>· Local Storage &amp; Mistake Book</li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-zinc-200 dark:border-white/[0.07] text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+            <div className="pt-3 border-t border-[#E2E8F0] dark:border-white/[0.08] text-[11px] font-medium text-[#475569] dark:text-[#94A3B8]">
               {subscriptionTier === 'free' ? 'Current Active Tier' : 'Included in account'}
             </div>
           </div>
 
-          <div className="p-5 rounded-xl border border-zinc-900 dark:border-white/25 bg-zinc-100/80 dark:bg-[#18181b] obsidian-sheen space-y-3 flex flex-col justify-between">
+          <div className="p-5 rounded-xl border border-[#2563EB]/40 dark:border-blue-500/40 bg-blue-50/50 dark:bg-[#1E293B] space-y-3 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-sm text-zinc-900 dark:text-white">
+                <span className="font-semibold text-sm text-[#0F172A] dark:text-[#F8FAFC]">
                   Pro Aspirant
                 </span>
-                <span className="font-mono tabular-nums font-bold text-base text-zinc-900 dark:text-white">
+                <span className="tabular-nums font-bold text-base text-[#2563EB] dark:text-blue-400">
                   {billingCycle === 'annual' ? '₹2,999 / yr' : '₹499 / mo'}
                 </span>
               </div>
-              <ul className="space-y-2 text-zinc-700 dark:text-zinc-200 font-medium">
+              <ul className="space-y-2 text-slate-700 dark:text-slate-200 font-medium">
                 <li>· 250 AI Tutor queries / day · 60+ pg PDFs</li>
                 <li>· Unlimited Proctored CBT Mocks</li>
                 <li>· Live Voice AI Tutor</li>
@@ -203,7 +203,7 @@ export const AdminCommercialConsoleModal: React.FC<
               </ul>
             </div>
             {subscriptionTier === 'pro' ? (
-              <div className="w-full py-2.5 rounded-lg bg-emerald-600 text-white text-center font-semibold inline-flex items-center justify-center gap-1.5">
+              <div className="w-full py-2.5 rounded-lg bg-[#00A86B] text-white text-center font-semibold inline-flex items-center justify-center gap-1.5">
                 <Check className="w-3.5 h-3.5" /> Pro Aspirant Active
               </div>
             ) : !paymentsConfigured ? (
@@ -213,8 +213,8 @@ export const AdminCommercialConsoleModal: React.FC<
                 onClick={() => triggerCheckout('pro_aspirant')}
                 className={`w-full py-2.5 px-3 rounded-lg font-semibold transition-colors cursor-pointer disabled:opacity-75 inline-flex items-center justify-center gap-1.5 ${
                   waitlistJoined.pro_aspirant
-                    ? 'bg-emerald-600 text-white'
-                    : 'btn-terracotta'
+                    ? 'bg-[#00A86B] text-white'
+                    : 'btn-brand'
                 }`}
               >
                 {submittingPlan === 'pro_aspirant' ? (
@@ -232,7 +232,7 @@ export const AdminCommercialConsoleModal: React.FC<
                 type="button"
                 disabled={submittingPlan !== null}
                 onClick={() => triggerCheckout('pro_aspirant')}
-                className="w-full py-2.5 rounded-lg btn-terracotta disabled:opacity-60 font-semibold transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-lg btn-brand disabled:opacity-60 font-semibold transition-colors cursor-pointer"
               >
                 {submittingPlan === 'pro_aspirant'
                   ? 'Contacting Billing Server...'
@@ -241,25 +241,25 @@ export const AdminCommercialConsoleModal: React.FC<
             )}
           </div>
 
-          <div className="p-5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-3 flex flex-col justify-between">
+          <div className="p-5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-3 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-sm flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                  <Building2 className="w-4 h-4 text-[#7C3AED] dark:text-violet-400" />
                   Institute Seat
                 </span>
-                <span className="font-mono tabular-nums font-bold text-base text-zinc-900 dark:text-white">
+                <span className="tabular-nums font-bold text-base text-[#0F172A] dark:text-[#F8FAFC]">
                   {billingCycle === 'annual' ? '₹14,999 / yr' : '₹1,999 / mo'}
                 </span>
               </div>
-              <ul className="space-y-2 text-zinc-600 dark:text-zinc-300">
+              <ul className="space-y-2 text-slate-600 dark:text-slate-300">
                 <li>· 1,000 AI queries / day per seat</li>
                 <li>· Multi-batch analytics &amp; shared banks</li>
                 <li>· Priority ingestion queue &amp; exports</li>
               </ul>
             </div>
             {subscriptionTier === 'institute' ? (
-              <div className="w-full py-2.5 rounded-lg bg-emerald-600 text-white text-center font-semibold inline-flex items-center justify-center gap-1.5">
+              <div className="w-full py-2.5 rounded-lg bg-[#00A86B] text-white text-center font-semibold inline-flex items-center justify-center gap-1.5">
                 <Check className="w-3.5 h-3.5" /> Institute Seat Active
               </div>
             ) : !paymentsConfigured ? (
@@ -269,8 +269,8 @@ export const AdminCommercialConsoleModal: React.FC<
                 onClick={() => triggerCheckout('institute_cohort')}
                 className={`w-full py-2.5 px-3 rounded-lg font-semibold transition-colors cursor-pointer disabled:opacity-75 inline-flex items-center justify-center gap-1.5 ${
                   waitlistJoined.institute_cohort
-                    ? 'bg-emerald-600 text-white'
-                    : 'border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#111113] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-900 dark:text-white'
+                    ? 'bg-[#00A86B] text-white'
+                    : 'border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-[#0F172A] dark:text-[#F8FAFC]'
                 }`}
               >
                 {submittingPlan === 'institute_cohort' ? (
@@ -288,7 +288,7 @@ export const AdminCommercialConsoleModal: React.FC<
                 type="button"
                 disabled={submittingPlan !== null}
                 onClick={() => triggerCheckout('institute_cohort')}
-                className="w-full py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#111113] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] disabled:opacity-60 text-zinc-900 dark:text-white font-semibold transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 disabled:opacity-60 text-[#0F172A] dark:text-[#F8FAFC] font-semibold transition-colors cursor-pointer"
               >
                 {submittingPlan === 'institute_cohort'
                   ? 'Contacting Billing Server...'
@@ -299,21 +299,21 @@ export const AdminCommercialConsoleModal: React.FC<
         </div>
 
         {/* Verified Invoices */}
-        <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-2 text-xs">
-          <div className="font-semibold flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
-            <Receipt className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+        <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-2 text-xs">
+          <div className="font-semibold flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+            <Receipt className="w-4 h-4 text-[#475569] dark:text-[#94A3B8]" />
             <span>Invoices ({invoices.length})</span>
           </div>
           {invoices.length === 0 ? (
-            <div className="text-zinc-500 dark:text-zinc-400">
+            <div className="text-[#475569] dark:text-[#94A3B8]">
               No paid invoices on file yet.
             </div>
           ) : (
-            <div className="divide-y divide-zinc-200 dark:divide-white/[0.07]">
+            <div className="divide-y divide-[#E2E8F0] dark:divide-white/[0.08]">
               {invoices.map((inv) => (
                 <div key={inv.invoiceId} className="py-1.5 flex items-center justify-between">
-                  <span className="font-mono font-semibold">{inv.invoiceId}</span>
-                  <span className="font-mono tabular-nums">
+                  <span className="font-semibold">{inv.invoiceId}</span>
+                  <span className="tabular-nums">
                     {inv.planId} · ₹{inv.amountInr} ({inv.status})
                   </span>
                 </div>
@@ -322,12 +322,12 @@ export const AdminCommercialConsoleModal: React.FC<
           )}
         </div>
 
-        <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400">
+        <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between text-[11px] text-[#475569] dark:text-[#94A3B8]">
           <span className="inline-flex items-center gap-1.5 font-medium">
-            <Server className="w-3.5 h-3.5 text-zinc-400" />
+            <Server className="w-3.5 h-3.5 text-slate-400" />
             Protected by Firebase Auth &amp; Verified Account Entitlements
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-200">LearnMate JEE</span>
+          <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">LearnMate JEE</span>
         </div>
       </div>
     </div>

@@ -107,16 +107,16 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
   return (
     <div
       className={`min-h-screen transition-colors duration-150 ${
-        darkMode ? 'bg-[#09090B] text-[#F5F0E6]' : 'bg-[#FAF8F5] text-[#1C1917]'
+        darkMode ? 'bg-[#070B14] text-[#F8FAFC]' : 'bg-[#F8FAFF] text-[#0F172A]'
       }`}
     >
       {/* STREAMLINED TOP NAVBAR */}
-      <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#121214] border-b border-[#E7E2DA] dark:border-white/[0.08] px-3 sm:px-4 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4 w-full">
+      <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#111827] border-b border-[#E2E8F0] dark:border-white/[0.08] px-3 sm:px-4 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4 w-full">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="hidden lg:inline-flex p-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#1C1917] dark:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            className="hidden lg:inline-flex p-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-[#0F172A] dark:text-[#F8FAFC] transition-colors duration-150 cursor-pointer shrink-0"
             title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             aria-label="Toggle Left Navigation Sidebar"
           >
@@ -149,13 +149,13 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             onClick={onOpenProModal}
             className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors duration-150 cursor-pointer ${
               subscriptionTier === 'pro' || subscriptionTier === 'institute'
-                ? 'border-[#D4653B]/35 bg-[#D4653B]/10 text-[#D4653B] dark:text-[#E07348]'
-                : 'border-[#E7E2DA] dark:border-white/[0.08] bg-[#F3EFEA] dark:bg-[#1A1A1D] text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
+                ? 'border-[#2563EB]/35 bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA]'
+                : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
             }`}
             title="Plans"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348] shrink-0" />
-            <span className="font-mono tabular-nums text-[11px]">
+            <Sparkles className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#7C3AED] shrink-0" />
+            <span className="tabular-nums text-[11px] font-semibold">
               {subscriptionTier === 'institute'
                 ? 'INSTITUTE'
                 : subscriptionTier === 'pro'
@@ -168,7 +168,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenAddMaterial}
             aria-label="Add Material"
-            className="btn-terracotta inline-flex items-center gap-1.5 p-1.5 sm:px-3 lg:px-3.5 sm:py-2 rounded-lg text-xs font-semibold cursor-pointer shrink-0"
+            className="btn-brand inline-flex items-center gap-1.5 p-1.5 sm:px-3 lg:px-3.5 sm:py-2 rounded-lg text-xs font-semibold cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden lg:inline">Add Material</span>
@@ -179,10 +179,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={() => onSetSearchModalOpen(true)}
             aria-label="Search"
-            className="inline-flex items-center gap-1.5 p-1.5 sm:p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 p-1.5 sm:p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-xs font-medium text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] transition-colors duration-150 cursor-pointer shrink-0"
             title="Search (Cmd+K)"
           >
-            <Search className="w-3.5 h-3.5 text-[#57534E] dark:text-[#A1A1AA]" />
+            <Search className="w-3.5 h-3.5 text-[#475569] dark:text-[#94A3B8]" />
             <span className="hidden lg:inline">Search</span>
           </button>
 
@@ -190,19 +190,19 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenStudyTools}
             aria-label="Study Tools"
-            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-xs font-medium text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] transition-colors duration-150 cursor-pointer shrink-0"
           >
-            <Grid className="w-3.5 h-3.5 text-[#57534E] dark:text-[#A1A1AA]" />
+            <Grid className="w-3.5 h-3.5 text-[#475569] dark:text-[#94A3B8]" />
             <span className="hidden lg:inline">Tools</span>
           </button>
 
           <button
             type="button"
             onClick={onToggleFocusTimer}
-            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-mono tabular-nums font-medium transition-colors duration-150 cursor-pointer ${
+            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs tabular-nums font-medium transition-colors duration-150 cursor-pointer ${
               focusTimerOpen || focusRunning
-                ? 'border-[#D4653B]/40 bg-[#D4653B]/10 text-[#D4653B] dark:text-[#E07348]'
-                : 'border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA]'
+                ? 'border-[#2563EB]/40 bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA]'
+                : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-[#475569] dark:text-[#94A3B8]'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -213,10 +213,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onToggleDarkMode}
             aria-label="Toggle Theme"
-            className="p-1.5 sm:p-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA] transition-colors duration-150 cursor-pointer shrink-0"
+            className="p-1.5 sm:p-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-[#475569] dark:text-[#94A3B8] transition-colors duration-150 cursor-pointer shrink-0"
             title="Toggle Theme"
           >
-            {darkMode ? <Sun className="w-4 h-4 text-[#E07348]" /> : <Moon className="w-4 h-4" />}
+            {darkMode ? <Sun className="w-4 h-4 text-[#00A86B]" /> : <Moon className="w-4 h-4 text-[#2563EB]" />}
           </button>
 
           <div className="relative hidden sm:block">
@@ -224,19 +224,19 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
               type="button"
               onClick={onToggleNotifications}
               aria-label="Notifications"
-              className="relative p-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA] transition-colors duration-150 cursor-pointer"
+              className="relative p-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-[#475569] dark:text-[#94A3B8] transition-colors duration-150 cursor-pointer"
               title="Alerts"
             >
               <Bell className="w-4 h-4" />
               {materials.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#D4653B] text-[#FAF8F5] text-[9px] font-mono font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2563EB] text-white text-[9px] tabular-nums font-bold flex items-center justify-center">
                   {materials.length}
                 </span>
               )}
             </button>
 
             {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] shadow-2xl p-4 z-50 text-zinc-900 dark:text-[#fafafa]">
+              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl p-4 z-50 text-[#0F172A] dark:text-[#F8FAFC]">
                 <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-zinc-200 dark:border-white/[0.07]">
                   <span className="text-xs font-semibold">Alerts</span>
                   <button
@@ -254,10 +254,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                         onCloseNotifications();
                         onOpenAddMaterial();
                       }}
-                      className="w-full text-left p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
+                      className="w-full text-left p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] cursor-pointer transition-colors duration-150"
                     >
                       <div className="font-semibold">No materials uploaded</div>
-                      <div className="text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      <div className="text-[#475569] dark:text-[#94A3B8] mt-0.5">
                         Upload PDF, photo, or lecture link →
                       </div>
                     </button>
@@ -268,12 +268,12 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                         onCloseNotifications();
                         onSelectTab('Revise');
                       }}
-                      className="w-full text-left p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors duration-150"
+                      className="w-full text-left p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] cursor-pointer transition-colors duration-150"
                     >
                       <div className="font-semibold">
                         {materials.length} {materials.length === 1 ? 'material' : 'materials'} ready
                       </div>
-                      <div className="text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      <div className="text-[#475569] dark:text-[#94A3B8] mt-0.5">
                         Open Revise →
                       </div>
                     </button>
@@ -287,10 +287,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             type="button"
             onClick={onOpenVoiceTutor}
             aria-label="Voice Tutor"
-            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] hover:bg-[#F3EFEA] dark:hover:bg-[#222226] text-xs font-medium text-[#1C1917] dark:text-[#F5F0E6] transition-colors duration-150 cursor-pointer shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 p-2 lg:px-3 lg:py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] transition-colors duration-150 cursor-pointer shrink-0"
             title="Voice Tutor"
           >
-            <Mic className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
+            <Mic className="w-3.5 h-3.5 text-[#00A86B]" />
             <span className="hidden lg:inline">Voice Tutor</span>
           </button>
 
@@ -301,7 +301,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-label="Open Mobile Study Menu"
             aria-expanded={mobileMenuOpen}
-            className="md:hidden inline-flex items-center justify-center p-1.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6] cursor-pointer shrink-0"
+            className="md:hidden inline-flex items-center justify-center p-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer shrink-0"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
@@ -309,7 +309,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           <button
             type="button"
             onClick={onOpenProfileModal}
-            style={{ backgroundColor: avatarColor || '#D4653B' }}
+            style={{ backgroundColor: avatarColor || '#2563EB' }}
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white font-semibold text-xs flex items-center justify-center transition-opacity cursor-pointer border border-white/15 hover:opacity-90 shrink-0"
             title="Profile & Settings"
           >
@@ -320,17 +320,17 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
 
       {/* MOBILE (<768px) MENU */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-white dark:bg-[#111113] border-b border-zinc-200 dark:border-white/[0.07] shadow-2xl p-4 space-y-2.5">
+        <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-white dark:bg-[#111827] border-b border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl p-4 space-y-2.5">
           <button
             type="button"
             onClick={() => {
               setMobileMenuOpen(false);
               onOpenProModal();
             }}
-            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] text-xs font-medium text-zinc-800 dark:text-[#fafafa] cursor-pointer"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F1F5F9] dark:bg-[#1E293B] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
           >
             <span className="inline-flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
+              <Sparkles className="w-4 h-4 text-[#2563EB]" />
               <span>
                 {subscriptionTier === 'institute'
                   ? 'Institute Seat'
@@ -349,9 +349,9 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onOpenStudyTools();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
             >
-              <Grid className="w-4 h-4 text-zinc-400" />
+              <Grid className="w-4 h-4 text-[#475569] dark:text-[#94A3B8]" />
               <span>Study Tools</span>
             </button>
             <button
@@ -360,10 +360,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onToggleFocusTimer();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
             >
-              <Clock className="w-4 h-4 text-zinc-400" />
-              <span className="font-mono tabular-nums">{focusClockLabel}</span>
+              <Clock className="w-4 h-4 text-[#475569] dark:text-[#94A3B8]" />
+              <span className="tabular-nums">{focusClockLabel}</span>
             </button>
             <button
               type="button"
@@ -371,9 +371,9 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onOpenVoiceTutor();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-800 dark:text-[#fafafa] cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
             >
-              <Mic className="w-4 h-4 text-emerald-500" />
+              <Mic className="w-4 h-4 text-[#00A86B]" />
               <span>Voice Tutor</span>
             </button>
             <button
@@ -382,9 +382,9 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                 setMobileMenuOpen(false);
                 onToggleNotifications();
               }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs font-medium text-zinc-700 dark:text-zinc-200 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
             >
-              <Bell className="w-4 h-4 text-zinc-400" />
+              <Bell className="w-4 h-4 text-[#475569] dark:text-[#94A3B8]" />
               <span>Alerts ({materials.length})</span>
             </button>
           </div>
@@ -395,14 +395,14 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
       <div className="flex min-h-[calc(100vh-4rem)] w-full">
         <aside
           data-testid="desktop-sidebar"
-          className={`hidden lg:flex shrink-0 bg-[#FFFFFF] dark:bg-[#121214] border-r border-[#E7E2DA] dark:border-white/[0.08] transition-all duration-150 flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto ${
+          className={`hidden lg:flex shrink-0 bg-[#FFFFFF] dark:bg-[#111827] border-r border-[#E2E8F0] dark:border-white/[0.08] transition-all duration-150 flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto ${
             sidebarCollapsed ? 'w-[72px] px-2.5 py-4' : 'w-64 px-3.5 py-5'
           }`}
         >
           <div className="space-y-6">
             <div>
               {!sidebarCollapsed && (
-                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA]">
+                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94A3B8]">
                   Workspace
                 </div>
               )}
@@ -427,8 +427,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                         sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2'
                       } rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                         isActive
-                          ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] text-[#D4653B] dark:text-[#E07348] font-semibold'
-                          : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D]'
+                          ? 'bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] dark:text-[#60A5FA] font-semibold'
+                          : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                       }`}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
@@ -441,7 +441,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
 
             {!sidebarCollapsed && (
               <div>
-                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA]">
+                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94A3B8]">
                   Study
                 </div>
                 <div className="space-y-0.5">
@@ -466,8 +466,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                         }}
                         className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                           isSubActive
-                            ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] text-[#D4653B] dark:text-[#E07348] font-semibold'
-                            : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D]'
+                            ? 'bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] dark:text-[#60A5FA] font-semibold'
+                            : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                         }`}
                       >
                         <SubIcon className="w-3.5 h-3.5 shrink-0" />
@@ -481,7 +481,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
 
             {!sidebarCollapsed && materials.length > 0 && (
               <div>
-                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA]">
+                <div className="px-2.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94A3B8]">
                   Recent ({materials.length})
                 </div>
                 <div className="space-y-1">
@@ -497,12 +497,12 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                         }}
                         className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors duration-150 cursor-pointer ${
                           isSelected
-                            ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] text-[#1C1917] dark:text-[#F5F0E6] border border-[#D4653B]/25 font-semibold'
-                            : 'text-[#57534E] dark:text-[#A1A1AA] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] font-medium'
+                            ? 'bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#0F172A] dark:text-[#F8FAFC] border border-[#2563EB]/25 font-semibold'
+                            : 'text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] font-medium'
                         }`}
                       >
                         <div className="truncate">{mat.title}</div>
-                        <div className="text-[10px] text-[#57534E] dark:text-[#A1A1AA] truncate">
+                        <div className="text-[10px] text-[#475569] dark:text-[#94A3B8] truncate">
                           {mat.subject} · {mat.chapter}
                         </div>
                       </button>
@@ -513,13 +513,13 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
             )}
           </div>
 
-          <div className="pt-4 pb-10 border-t border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+          <div className="pt-4 pb-6 border-t border-[#E2E8F0] dark:border-white/[0.08] space-y-2">
             {companionSlot}
             <button
               onClick={onToggleSidebar}
               className={`w-full flex items-center ${
                 sidebarCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-2'
-              } rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] hover:bg-[#EAE4DC] dark:hover:bg-[#222226] text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6] text-xs font-medium transition-colors duration-150 cursor-pointer`}
+              } rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] hover:bg-[#E2E8F0] dark:hover:bg-[#283548] text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] text-xs font-medium transition-colors duration-150 cursor-pointer`}
               title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
               {!sidebarCollapsed && <span>Collapse</span>}
@@ -532,14 +532,14 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 w-full pb-28">{children}</main>
+        <main className="flex-1 min-w-0 w-full pb-20 lg:pb-10">{children}</main>
       </div>
 
       {/* MOBILE & TABLET (<1024px) 5-TAB BOTTOM BAR */}
       <nav
         aria-label="Primary Mobile Navigation"
         data-testid="mobile-bottom-nav"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#FFFFFF] dark:bg-[#121214] border-t border-[#E7E2DA] dark:border-white/[0.08] px-1.5 py-1 flex items-center justify-around"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#FFFFFF] dark:bg-[#111827] border-t border-[#E2E8F0] dark:border-white/[0.08] px-1.5 py-1 flex items-center justify-around"
       >
         {(
           [
@@ -560,8 +560,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
               aria-current={isActive ? 'page' : undefined}
               className={`min-h-[44px] min-w-[44px] flex-1 flex flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 text-[11px] font-medium transition-colors duration-150 cursor-pointer ${
                 isActive
-                  ? 'text-[#D4653B] dark:text-[#E07348] bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12] font-semibold'
-                  : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
+                  ? 'text-[#2563EB] dark:text-[#60A5FA] bg-[#2563EB]/10 dark:bg-[#2563EB]/15 font-semibold'
+                  : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -579,7 +579,7 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
           aria-label="Global Search"
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-start justify-center pt-20 p-4"
         >
-          <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.07] shadow-2xl w-full max-w-xl overflow-hidden text-zinc-900 dark:text-[#fafafa]">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-xl overflow-hidden text-[#0F172A] dark:text-[#F8FAFC]">
             <div className="p-4 border-b border-zinc-200 dark:border-white/[0.07] flex items-center gap-3">
               <Search className="w-4 h-4 text-zinc-400" />
               <input
@@ -644,10 +644,10 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
                       item.action();
                       onSetSearchModalOpen(false);
                     }}
-                    className="w-full p-2.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-[#18181b] text-left font-medium flex items-center justify-between cursor-pointer transition-colors duration-150"
+                    className="w-full p-2.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-left font-medium flex items-center justify-between cursor-pointer transition-colors duration-150"
                   >
                     <span>{item.label}</span>
-                    <span className="text-zinc-400">→</span>
+                    <span className="text-[#475569] dark:text-[#94A3B8]">→</span>
                   </button>
                 ))}
             </div>
@@ -656,8 +656,8 @@ export const AppShellFrame: React.FC<AppShellFrameProps> = ({
       )}
 
       {toastMessage && (
-        <div className="fixed bottom-28 md:bottom-14 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-auto max-w-md px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-[#18181b] text-[#fafafa] text-xs font-medium shadow-2xl flex items-center gap-2 border border-zinc-800 dark:border-white/[0.1]">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+        <div className="fixed bottom-28 md:bottom-14 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-auto max-w-md px-4 py-2.5 rounded-xl bg-[#0F172A] dark:bg-[#1E293B] text-[#F8FAFC] text-xs font-medium shadow-2xl flex items-center gap-2 border border-white/[0.1]">
+          <CheckCircle2 className="w-4 h-4 text-[#00A86B] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}

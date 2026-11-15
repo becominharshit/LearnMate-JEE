@@ -444,13 +444,13 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
       aria-label="Add Material"
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-5">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-display font-bold tracking-[-0.02em] text-xl text-zinc-900 dark:text-zinc-50">
+            <h2 className="font-display font-bold tracking-[-0.02em] text-xl text-[#0F172A] dark:text-[#F8FAFC]">
               Add Study Material
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-0.5">
               PDFs, note photos (OCR), or YouTube lectures — subject &amp; chapter auto-detected.
             </p>
           </div>
@@ -458,14 +458,14 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Add Material modal"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
+            className="p-1.5 rounded-lg text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Auto-Subject & Chapter Identification Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-zinc-50 dark:bg-[#18181b] p-3 rounded-xl border border-zinc-200 dark:border-white/[0.08]">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-[#F8FAFF] dark:bg-[#1E293B] p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08]">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
@@ -479,7 +479,7 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
             value={titleInput}
             onChange={(e) => setTitleInput(e.target.value)}
             placeholder="Optional: Custom title or topic hint"
-            className="flex-1 min-w-[220px] px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#111113] text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
+            className="flex-1 min-w-[220px] px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#111827] text-xs text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
           />
         </div>
 
@@ -487,7 +487,7 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         <div
           role="tablist"
           aria-label="Material upload sources"
-          className="flex flex-wrap items-center gap-1.5 border-b border-zinc-200 dark:border-white/[0.07] pb-2"
+          className="flex flex-wrap items-center gap-1.5 border-b border-[#E2E8F0] dark:border-white/[0.07] pb-2"
         >
           {[
             { id: 'pdf', label: 'PDF Document', icon: FileText },
@@ -507,8 +507,8 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-colors cursor-pointer ${
                   active
-                    ? 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] dark:bg-[#F5F0E6] dark:text-[#09090B] dark:border-[#F5F0E6]'
-                    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:bg-zinc-100 dark:hover:bg-[#18181b] hover:text-zinc-900 dark:hover:text-zinc-200'
+                    ? 'btn-brand border-transparent'
+                    : 'text-[#475569] dark:text-[#94A3B8] border-transparent hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -523,20 +523,20 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
           <div className="space-y-3.5">
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
               <div className="relative flex-1 min-w-[220px]">
-                <Link2 className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
+                <Link2 className="w-4 h-4 text-[#475569] dark:text-[#94A3B8] absolute left-3.5 top-3" />
                 <input
                   type="url"
                   value={youtubeUrl}
                   onChange={(e) => setYoutubeUrl(e.target.value)}
                   placeholder="Paste YouTube lecture or marathon URL"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-sm text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleAnalyzeYouTube}
                 disabled={analyzing}
-                className="px-5 py-2.5 rounded-xl btn-terracotta disabled:opacity-50 font-semibold text-sm transition-colors cursor-pointer shrink-0"
+                className="px-5 py-2.5 rounded-xl btn-brand disabled:opacity-50 font-semibold text-sm transition-colors cursor-pointer shrink-0"
               >
                 {analyzing ? 'Extracting...' : 'Extract Lecture'}
               </button>
@@ -562,7 +562,7 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     className={`px-2.5 py-1 rounded-lg font-semibold border cursor-pointer transition-colors ${
                       lectureDurationHours === d.hrs
                         ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                        : 'border-zinc-200 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-[#18181b]'
+                        : 'border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                     }`}
                   >
                     {d.label}
@@ -576,19 +576,19 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
               value={transcriptOrOutline}
               onChange={(e) => setTranscriptOrOutline(e.target.value)}
               placeholder="Optional: Paste lecture chapters, timestamps, or key topics covered..."
-              className="w-full p-3 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-zinc-50/60 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="w-full p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-[#F8FAFF] dark:bg-[#1E293B] text-xs text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
             />
           </div>
         )}
 
         {activeTab === 'pdf' && (
           <div className="space-y-3">
-            <label className="flex flex-col items-center justify-center p-8 border border-dashed border-zinc-300 dark:border-white/[0.15] rounded-xl hover:border-zinc-500 dark:hover:border-white/[0.3] transition-colors cursor-pointer bg-zinc-50/60 dark:bg-[#18181b]/60">
-              <FileText className="w-8 h-8 text-zinc-700 dark:text-zinc-300 mb-2" />
-              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <label className="flex flex-col items-center justify-center p-8 border border-dashed border-[#CBD5E1] dark:border-white/[0.15] rounded-xl hover:border-[#2563EB] dark:hover:border-[#60A5FA] transition-colors cursor-pointer bg-[#F8FAFF] dark:bg-[#1E293B]/60">
+              <FileText className="w-8 h-8 text-[#2563EB] dark:text-[#60A5FA] mb-2" />
+              <span className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                 Upload JEE Chapter PDF or Scan (up to 60 pages)
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 text-center">
+              <span className="text-xs text-[#475569] dark:text-[#94A3B8] mt-1 text-center">
                 Generates Detailed Notes, Original PDF Viewer, Mind Map, Flashcards, Formula Book &amp; Quiz
               </span>
               <input
@@ -604,12 +604,12 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
         {activeTab === 'photo' && (
           <div className="space-y-3">
-            <label className="flex flex-col items-center justify-center p-8 border border-dashed border-zinc-300 dark:border-white/[0.15] rounded-xl hover:border-zinc-500 dark:hover:border-white/[0.3] transition-colors cursor-pointer bg-zinc-50/60 dark:bg-[#18181b]/60">
-              <ImageIcon className="w-8 h-8 text-zinc-700 dark:text-zinc-300 mb-2" />
-              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <label className="flex flex-col items-center justify-center p-8 border border-dashed border-[#CBD5E1] dark:border-white/[0.15] rounded-xl hover:border-[#2563EB] dark:hover:border-[#60A5FA] transition-colors cursor-pointer bg-[#F8FAFF] dark:bg-[#1E293B]/60">
+              <ImageIcon className="w-8 h-8 text-[#7C3AED] dark:text-[#A78BFA] mb-2" />
+              <span className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                 Upload Handwritten Notes Photo for OCR
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 text-center">
+              <span className="text-xs text-[#475569] dark:text-[#94A3B8] mt-1 text-center">
                 Extracts handwriting, formats LaTeX equations, and enables 4 handwriting styles
               </span>
               <input
@@ -650,13 +650,13 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               placeholder="Paste your JEE notes, reactions, or derivations ($...$ equations supported)..."
-              className="w-full p-3.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-zinc-50/60 dark:bg-[#18181b] text-xs text-zinc-900 dark:text-zinc-100 leading-relaxed focus:outline-none focus:border-zinc-400"
+              className="w-full p-3.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-[#F8FAFF] dark:bg-[#1E293B] text-xs text-[#0F172A] dark:text-[#F8FAFC] leading-relaxed focus:outline-none focus:border-[#2563EB]"
             />
             <button
               type="button"
               onClick={handlePasteSubmit}
               disabled={analyzing}
-              className="px-5 py-2.5 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
+              className="px-5 py-2.5 rounded-lg btn-brand text-xs font-semibold cursor-pointer transition-colors"
             >
               Generate Study Bundle (Notes, Mind Map &amp; Flashcards)
             </button>
@@ -666,32 +666,32 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         {activeTab === 'drive' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-600 dark:text-zinc-400">
+              <span className="text-xs text-[#475569] dark:text-[#94A3B8]">
                 Import PDFs and Google Docs directly from Google Drive:
               </span>
               <button
                 type="button"
                 onClick={handleLoadDriveFiles}
                 disabled={driveLoading}
-                className="px-3.5 py-1.5 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
+                className="px-3.5 py-1.5 rounded-lg btn-brand text-xs font-semibold cursor-pointer transition-colors"
               >
                 {driveLoading ? 'Loading Drive...' : 'Browse Google Drive'}
               </button>
             </div>
             {driveFiles.length > 0 ? (
-              <div className="max-h-44 overflow-y-auto divide-y divide-zinc-200 dark:divide-white/[0.06] border border-zinc-200 dark:border-white/[0.08] rounded-xl">
+              <div className="max-h-44 overflow-y-auto divide-y divide-[#E2E8F0] dark:divide-white/[0.06] border border-[#E2E8F0] dark:border-white/[0.08] rounded-xl">
                 {driveFiles.map((df) => (
                   <div
                     key={df.id}
-                    className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-zinc-50 dark:hover:bg-[#18181b]"
+                    className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]"
                   >
-                    <span className="font-medium text-zinc-800 dark:text-zinc-200 truncate max-w-[320px]">
+                    <span className="font-medium text-[#0F172A] dark:text-[#F8FAFC] truncate max-w-[320px]">
                       {df.name}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleImportDriveFile(df)}
-                      className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-[#1f1f23] border border-zinc-200 dark:border-white/[0.08] text-zinc-800 dark:text-zinc-200 font-semibold hover:bg-zinc-200 dark:hover:bg-[#27272a] cursor-pointer"
+                      className="px-2.5 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] font-semibold hover:bg-[#E2E8F0] dark:hover:bg-white/[0.1] cursor-pointer"
                     >
                       Import
                     </button>
@@ -699,7 +699,7 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 py-4 text-center">
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8] py-4 text-center">
                 Click “Browse Google Drive” to list your study PDFs and Google Docs.
               </p>
             )}
@@ -708,10 +708,10 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
         {/* ONLY show progress bar when analyzing === true */}
         {analyzing && (
-          <div className="px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] flex items-center justify-between">
+          <div className="px-4 py-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full border-2 border-[#D4653B] border-t-transparent animate-spin shrink-0" />
-              <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+              <div className="w-5 h-5 rounded-full border-2 border-[#2563EB] border-t-transparent animate-spin shrink-0" />
+              <span className="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                 {statusMessage || 'Analyzing material...'}
               </span>
             </div>
@@ -723,7 +723,7 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                 setAnalyzing(false);
                 setStatusMessage('');
               }}
-              className="px-3 py-1 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.1] text-xs font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              className="px-3 py-1 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.1] text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
             >
               Cancel
             </button>
@@ -757,7 +757,7 @@ interface GraphEquationItem {
   showDerivative: boolean;
 }
 
-const GRAPH_COLORS = ['#D4653B', '#3B82F6', '#10B981', '#EF4444', '#F59E0B'];
+const GRAPH_COLORS = ['#2563EB', '#7C3AED', '#00A86B', '#EF4444', '#F59E0B'];
 
 export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
   isOpen,
@@ -942,14 +942,14 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
       aria-label="Study Tools"
       className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex justify-end"
     >
-      <div className="w-full max-w-[700px] bg-white dark:bg-[#111113] h-full border-l border-zinc-200 dark:border-white/[0.08] flex flex-col overflow-hidden">
+      <div className="w-full max-w-[700px] bg-white dark:bg-[#111827] h-full border-l border-[#E2E8F0] dark:border-white/[0.08] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 shrink-0 flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.07]">
+        <div className="px-6 py-4 shrink-0 flex items-center justify-between border-b border-[#E2E8F0] dark:border-white/[0.07]">
           <div>
-            <h2 className="font-display font-bold tracking-[-0.02em] text-xl text-zinc-900 dark:text-zinc-50">
+            <h2 className="font-display font-bold tracking-[-0.02em] text-xl text-[#0F172A] dark:text-[#F8FAFC]">
               Study Tools &amp; Graphing Lab
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
               Sliders, roots/extrema, and offline scientific calculator.
             </p>
           </div>
@@ -957,14 +957,14 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Study Tools"
-            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
+            className="p-1.5 rounded-lg text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 5 Tabs */}
-        <div className="px-6 pt-2.5 shrink-0 border-b border-zinc-200 dark:border-white/[0.07] flex items-center justify-between gap-2 overflow-x-auto">
+        <div className="px-6 pt-2.5 shrink-0 border-b border-[#E2E8F0] dark:border-white/[0.07] flex items-center justify-between gap-2 overflow-x-auto">
           {[
             { id: 'Graph', icon: TrendingUp },
             { id: 'Calculator', icon: Calculator },
@@ -981,8 +981,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-4 py-2.5 rounded-t-lg text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
                   active
-                    ? 'bg-zinc-100 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-50 border-zinc-900 dark:border-zinc-100'
-                    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-200'
+                    ? 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] border-[#2563EB]'
+                    : 'text-[#475569] dark:text-[#94A3B8] border-transparent hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -999,19 +999,19 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
               {/* Desmos Presets & Actions Bar */}
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                  <span className="font-semibold text-zinc-500 dark:text-zinc-400">Presets:</span>
+                  <span className="font-semibold text-[#475569] dark:text-[#94A3B8]">Presets:</span>
                   {[
                     {
                       label: 'Parabola + Line',
                       eqs: [
-                        { id: 'eq-1', expr: 'y = a * x^2 - 4', color: '#3B82F6', visible: true, showDerivative: false },
-                        { id: 'eq-2', expr: 'y = m * x + c', color: '#10B981', visible: true, showDerivative: false },
+                        { id: 'eq-1', expr: 'y = a * x^2 - 4', color: '#2563EB', visible: true, showDerivative: false },
+                        { id: 'eq-2', expr: 'y = m * x + c', color: '#00A86B', visible: true, showDerivative: false },
                       ],
                     },
                     {
                       label: 'SHM Wave y = a·sin(k·x)',
                       eqs: [
-                        { id: 'eq-1', expr: 'y = a * sin(k * x)', color: '#3B82F6', visible: true, showDerivative: true },
+                        { id: 'eq-1', expr: 'y = a * sin(k * x)', color: '#7C3AED', visible: true, showDerivative: true },
                       ],
                     },
                     {
@@ -1028,7 +1028,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                         setEquations(p.eqs);
                         setSelectedPoint(null);
                       }}
-                      className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#18181b] font-semibold cursor-pointer transition-colors"
+                      className="px-2.5 py-1 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] font-semibold cursor-pointer transition-colors"
                     >
                       {p.label}
                     </button>
@@ -1041,8 +1041,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                     onClick={() => setShowTableOfValues((v) => !v)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 border cursor-pointer transition-colors ${
                       showTableOfValues
-                        ? 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] dark:bg-[#F5F0E6] dark:text-[#09090B] dark:border-[#F5F0E6]'
-                        : 'border-zinc-200 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181b]'
+                        ? 'btn-brand border-transparent'
+                        : 'border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                     }`}
                   >
                     <Table className="w-3.5 h-3.5" />
@@ -1063,7 +1063,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                         },
                       ]);
                     }}
-                    className="px-3 py-1.5 rounded-lg btn-terracotta text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                    className="px-3 py-1.5 rounded-lg btn-brand text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Equation</span>
@@ -1078,9 +1078,9 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                   return (
                     <div
                       key={eq.id}
-                      className={`p-2 rounded-xl border bg-zinc-50/70 dark:bg-[#18181b] space-y-1 ${
+                      className={`p-2 rounded-xl border bg-[#F8FAFF] dark:bg-[#1E293B] space-y-1 ${
                         syntax.valid
-                          ? 'border-zinc-200 dark:border-white/[0.08]'
+                          ? 'border-[#E2E8F0] dark:border-white/[0.08]'
                           : 'border-rose-500/40 bg-rose-500/10'
                       }`}
                     >
@@ -1112,7 +1112,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                             )
                           }
                           placeholder="e.g., y = a * x^2 - 4"
-                          className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#111113] text-xs font-mono font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
+                          className="flex-1 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#111827] text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
                         />
 
                         <button
@@ -1127,10 +1127,10 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                             )
                           }
                           title="Toggle d/dx Derivative Curve Overlay"
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold border cursor-pointer transition-colors ${
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border cursor-pointer transition-colors ${
                             eq.showDerivative
                               ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
-                              : 'border-zinc-200 dark:border-white/[0.08] text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
+                              : 'border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                           }`}
                         >
                           d/dx
@@ -1143,7 +1143,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                               setEquations((prev) => prev.filter((item) => item.id !== eq.id))
                             }
                             aria-label="Remove equation"
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 cursor-pointer"
+                            className="p-1.5 rounded-lg text-[#475569] hover:text-rose-500 cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1161,8 +1161,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
 
               {/* Interactive Parameter Sliders */}
               {activeParamNames.length > 0 && (
-                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] space-y-2.5">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                <div className="p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2.5">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94A3B8]">
                     Parameter Sliders ({activeParamNames.join(', ')})
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1172,13 +1172,13 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                       return (
                         <div
                           key={param}
-                          className="p-2.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.08] flex items-center gap-2.5 text-xs"
+                          className="p-2.5 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] flex items-center gap-2.5 text-xs"
                         >
                           <button
                             type="button"
                             onClick={() => setAnimatingParam(isPlaying ? null : param)}
                             aria-label={`Animate parameter ${param}`}
-                            className="w-6 h-6 rounded-md bg-zinc-100 dark:bg-[#1f1f23] text-zinc-800 dark:text-zinc-200 flex items-center justify-center cursor-pointer shrink-0"
+                            className="w-6 h-6 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] flex items-center justify-center cursor-pointer shrink-0"
                           >
                             {isPlaying ? (
                               <Pause className="w-3 h-3" />
@@ -1186,7 +1186,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                               <Play className="w-3 h-3" />
                             )}
                           </button>
-                          <span className="font-mono tabular-nums font-semibold text-zinc-800 dark:text-zinc-200 w-16">
+                          <span className="tabular-nums font-semibold text-[#0F172A] dark:text-[#F8FAFC] w-16">
                             {param} = {val}
                           </span>
                           <input
@@ -1201,7 +1201,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                                 [param]: Number(e.target.value),
                               }))
                             }
-                            className="flex-1 accent-[#D4653B]"
+                            className="flex-1 accent-[#2563EB]"
                           />
                         </div>
                       );
@@ -1212,9 +1212,9 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
 
               {/* Dynamic x vs f(x) Table of Values */}
               {showTableOfValues && (
-                <div className="p-3.5 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-[#18181b] space-y-2">
+                <div className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                    <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                       Table: x vs f(x) &amp; f&apos;(x)
                     </span>
                     <button
@@ -1225,22 +1225,22 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                           (prev[prev.length - 1] ?? 2) + 1,
                         ])
                       }
-                      className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                      className="text-[11px] font-semibold text-[#2563EB] dark:text-blue-400 hover:underline cursor-pointer"
                     >
                       + Add x Row
                     </button>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-xs font-mono tabular-nums border-collapse">
+                    <table className="w-full text-xs tabular-nums border-collapse">
                       <thead>
-                        <tr className="border-b border-zinc-200 dark:border-white/[0.08] text-left text-zinc-500 dark:text-zinc-400">
+                        <tr className="border-b border-[#E2E8F0] dark:border-white/[0.08] text-left text-[#475569] dark:text-[#94A3B8]">
                           <th className="py-1.5 px-2">x</th>
                           <th className="py-1.5 px-2">f₁(x)</th>
                           <th className="py-1.5 px-2">f₁&apos;(x)</th>
                           {equations[1] && <th className="py-1.5 px-2">f₂(x)</th>}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-200/70 dark:divide-white/[0.06]">
+                      <tbody className="divide-y divide-[#E2E8F0] dark:divide-white/[0.06]">
                         {tableXValues.map((xv, rIdx) => {
                           const y1 = evaluateMathFunction(
                             equations[0]?.expr || 'x',
@@ -1273,17 +1273,17 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                                     next[rIdx] = Number(e.target.value);
                                     setTableXValues(next);
                                   }}
-                                  className="w-14 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#111113] text-center text-zinc-900 dark:text-zinc-100"
+                                  className="w-14 px-1.5 py-0.5 rounded border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#111827] text-center text-[#0F172A] dark:text-[#F8FAFC]"
                                 />
                               </td>
-                              <td className="py-1 px-2 font-semibold text-blue-600 dark:text-blue-400">
+                              <td className="py-1 px-2 font-semibold text-[#2563EB] dark:text-blue-400">
                                 {y1 !== null ? Number(y1.toFixed(4)) : 'undef'}
                               </td>
                               <td className="py-1 px-2 text-amber-600 dark:text-amber-400">
                                 {dy1 !== null ? Number(dy1.toFixed(4)) : 'undef'}
                               </td>
                               {equations[1] && (
-                                <td className="py-1 px-2 font-semibold text-emerald-600 dark:text-emerald-400">
+                                <td className="py-1 px-2 font-semibold text-[#00A86B] dark:text-emerald-400">
                                   {y2 !== null ? Number(y2.toFixed(4)) : 'undef'}
                                 </td>
                               )}
@@ -1299,36 +1299,36 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
               {/* Range Controls */}
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-zinc-500 dark:text-zinc-400 font-medium">x:</span>
+                  <span className="text-[#475569] dark:text-[#94A3B8] font-medium">x:</span>
                   <input
                     type="number"
                     value={xMin}
                     onChange={(e) => setXMin(Number(e.target.value))}
-                    className="w-14 px-2 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-center font-mono tabular-nums"
+                    className="w-14 px-2 py-1 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-center tabular-nums"
                   />
-                  <span className="text-zinc-400">to</span>
+                  <span className="text-[#475569]">to</span>
                   <input
                     type="number"
                     value={xMax}
                     onChange={(e) => setXMax(Number(e.target.value))}
-                    className="w-14 px-2 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-center font-mono tabular-nums"
+                    className="w-14 px-2 py-1 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-center tabular-nums"
                   />
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-zinc-500 dark:text-zinc-400 font-medium">y:</span>
+                  <span className="text-[#475569] dark:text-[#94A3B8] font-medium">y:</span>
                   <input
                     type="number"
                     value={yMin}
                     onChange={(e) => setYMin(Number(e.target.value))}
-                    className="w-14 px-2 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-center font-mono tabular-nums"
+                    className="w-14 px-2 py-1 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-center tabular-nums"
                   />
-                  <span className="text-zinc-400">to</span>
+                  <span className="text-[#475569]">to</span>
                   <input
                     type="number"
                     value={yMax}
                     onChange={(e) => setYMax(Number(e.target.value))}
-                    className="w-14 px-2 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 text-center font-mono tabular-nums"
+                    className="w-14 px-2 py-1 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-center tabular-nums"
                   />
                 </div>
 
@@ -1338,20 +1338,20 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                     setZoomPct(100);
                     setSelectedPoint(null);
                   }}
-                  className="px-3 py-1 rounded-lg border border-zinc-200 dark:border-white/[0.1] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181b] cursor-pointer"
+                  className="px-3 py-1 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer"
                 >
                   Reset View
                 </button>
               </div>
 
               {/* Coordinate Graph Canvas */}
-              <div className="rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#09090b] p-4 space-y-3">
+              <div className="rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#070B14] p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-[#475569] dark:text-[#94A3B8]">
                     Click any key-point dot to inspect <strong>Roots</strong>, <strong>Extrema</strong>, or <strong>Intersections</strong>:
                   </span>
                   {selectedPoint && (
-                    <span className="px-2.5 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono tabular-nums font-semibold">
+                    <span className="px-2.5 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-[#2563EB] dark:text-blue-400 tabular-nums font-semibold">
                       {selectedPoint.label}
                     </span>
                   )}
@@ -1512,7 +1512,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                         key={i}
                         type="button"
                         onClick={() => setSelectedPoint(pt)}
-                        className="px-2 py-1 rounded-md bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200 dark:hover:bg-[#1f1f23] text-[10px] font-mono tabular-nums font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                        className="px-2 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] hover:bg-[#E2E8F0] dark:hover:bg-white/[0.1] text-[10px] tabular-nums font-semibold text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
                       >
                         {pt.label}
                       </button>
@@ -1520,23 +1520,23 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="inline-flex items-center rounded-lg border border-zinc-200 dark:border-white/[0.1] text-xs text-zinc-700 dark:text-zinc-300">
+                    <div className="inline-flex items-center rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] text-xs text-[#0F172A] dark:text-[#F8FAFC]">
                       <button
                         type="button"
                         onClick={() => setZoomPct((z) => Math.max(50, z - 25))}
                         aria-label="Zoom out graph"
-                        className="px-2.5 py-1.5 hover:bg-zinc-100 dark:hover:bg-[#18181b] cursor-pointer"
+                        className="px-2.5 py-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer"
                       >
                         <ZoomOut className="w-3.5 h-3.5" />
                       </button>
-                      <span className="px-3 py-1.5 border-x border-zinc-200 dark:border-white/[0.1] font-mono tabular-nums font-medium">
+                      <span className="px-3 py-1.5 border-x border-[#E2E8F0] dark:border-white/[0.1] tabular-nums font-medium">
                         {zoomPct}%
                       </span>
                       <button
                         type="button"
                         onClick={() => setZoomPct((z) => Math.min(200, z + 25))}
                         aria-label="Zoom in graph"
-                        className="px-2.5 py-1.5 hover:bg-zinc-100 dark:hover:bg-[#18181b] cursor-pointer"
+                        className="px-2.5 py-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer"
                       >
                         <ZoomIn className="w-3.5 h-3.5" />
                       </button>
@@ -1546,8 +1546,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                       onClick={() => setPanMode((v) => !v)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border transition-colors ${
                         panMode
-                          ? 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] dark:bg-[#F5F0E6] dark:text-[#09090B] dark:border-[#F5F0E6]'
-                          : 'border-zinc-200 dark:border-white/[0.1] text-zinc-600 dark:text-zinc-400'
+                          ? 'btn-brand border-transparent'
+                          : 'border-[#E2E8F0] dark:border-white/[0.1] text-[#475569] dark:text-[#94A3B8]'
                       }`}
                     >
                       <Hand className="w-3.5 h-3.5" />
@@ -1578,8 +1578,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                       onClick={() => setCalcSubMode(m.id)}
                       className={`px-3 py-1.5 rounded-lg font-semibold cursor-pointer transition-colors ${
                         calcSubMode === m.id
-                          ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                          : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-[#1f1f23]'
+                          ? 'btn-brand'
+                          : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#E2E8F0] dark:hover:bg-white/[0.1]'
                       }`}
                     >
                       {m.label}
@@ -1587,16 +1587,16 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                   ))}
                 </div>
 
-                <div className="inline-flex rounded-lg border border-zinc-200 dark:border-white/[0.1] p-0.5 text-xs">
+                <div className="inline-flex rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] p-0.5 text-xs">
                   {(['RAD', 'DEG'] as const).map((mode) => (
                     <button
                       key={mode}
                       type="button"
                       onClick={() => setAngleMode(mode)}
-                      className={`px-2.5 py-1 rounded-md font-mono font-bold cursor-pointer transition-colors ${
+                      className={`px-2.5 py-1 rounded-md font-bold cursor-pointer transition-colors ${
                         angleMode === mode
-                          ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                          : 'text-zinc-600 dark:text-zinc-400'
+                          ? 'btn-brand'
+                          : 'text-[#475569] dark:text-[#94A3B8]'
                       }`}
                     >
                       {mode}
@@ -1612,25 +1612,25 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                       type="text"
                       value={calcExpr}
                       onChange={(e) => setCalcExpr(e.target.value)}
-                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono text-sm focus:outline-none focus:border-zinc-400"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-sm focus:outline-none focus:border-[#2563EB]"
                     />
                     <button
                       type="button"
                       onClick={() => evaluateScientificExpr(calcExpr)}
-                      className="px-4 py-2.5 rounded-xl btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
+                      className="px-4 py-2.5 rounded-xl btn-brand text-xs font-semibold cursor-pointer transition-colors"
                     >
                       Evaluate
                     </button>
                   </div>
-                  <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] flex items-center justify-between">
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <div className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between">
+                    <span className="text-xs text-[#475569] dark:text-[#94A3B8]">
                       Result ({angleMode}):
                     </span>
-                    <span className="font-mono font-bold text-xl text-zinc-900 dark:text-zinc-50 tabular-nums">
+                    <span className="font-bold text-xl text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
                       {calcResult}
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-2 text-xs font-mono">
+                  <div className="grid grid-cols-4 gap-2 text-xs tabular-nums">
                     {[
                       'sin(pi/6)',
                       'cos(pi/3)',
@@ -1652,7 +1652,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                           setCalcExpr(preset);
                           evaluateScientificExpr(preset);
                         }}
-                        className="p-2.5 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors"
+                        className="p-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-white/[0.1] cursor-pointer transition-colors font-medium"
                       >
                         {preset}
                       </button>
@@ -1662,10 +1662,10 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
               )}
 
               {calcSubMode === 'combinatorics' && (
-                <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.08] space-y-4 text-xs">
+                <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] space-y-4 text-xs">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                      <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                         n (Total items)
                       </label>
                       <input
@@ -1674,11 +1674,11 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                         max={170}
                         value={combN}
                         onChange={(e) => setCombN(Number(e.target.value))}
-                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono tabular-nums"
+                        className="w-full px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums"
                       />
                     </div>
                     <div>
-                      <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                      <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                         r (Selected items)
                       </label>
                       <input
@@ -1687,32 +1687,32 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                         max={170}
                         value={combR}
                         onChange={(e) => setCombR(Number(e.target.value))}
-                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono tabular-nums"
+                        className="w-full px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                         Combination (^nC_r)
                       </div>
-                      <div className="font-mono tabular-nums font-bold text-base text-blue-600 dark:text-blue-400 mt-0.5">
+                      <div className="tabular-nums font-bold text-base text-[#2563EB] dark:text-blue-400 mt-0.5">
                         {computeCombination(combN, combR)}
                       </div>
                     </div>
                     <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                         Permutation (^nP_r)
                       </div>
-                      <div className="font-mono tabular-nums font-bold text-base text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      <div className="tabular-nums font-bold text-base text-[#00A86B] dark:text-emerald-400 mt-0.5">
                         {computePermutation(combN, combR)}
                       </div>
                     </div>
                     <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                         Factorial (n!)
                       </div>
-                      <div className="font-mono tabular-nums font-bold text-base text-amber-700 dark:text-amber-300 mt-0.5">
+                      <div className="tabular-nums font-bold text-base text-amber-700 dark:text-amber-300 mt-0.5">
                         {computeFactorial(Math.min(20, combN))}
                       </div>
                     </div>
@@ -1721,8 +1721,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
               )}
 
               {calcSubMode === 'matrix' && (
-                <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.08] space-y-4 text-xs">
-                  <div className="font-semibold text-zinc-800 dark:text-zinc-200">
+                <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] space-y-4 text-xs">
+                  <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                     3×3 Matrix Determinant (|A|)
                   </div>
                   <div className="grid grid-cols-3 gap-2 max-w-xs">
@@ -1737,16 +1737,16 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                             copy[r][c] = Number(e.target.value);
                             setMatrix3x3(copy);
                           }}
-                          className="px-2.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono tabular-nums text-center font-semibold"
+                          className="px-2.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums text-center font-semibold"
                         />
                       ))
                     )}
                   </div>
-                  <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] flex items-center justify-between">
-                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                  <div className="p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between">
+                    <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                       Determinant det(A):
                     </span>
-                    <span className="font-mono tabular-nums font-bold text-lg text-blue-600 dark:text-blue-400">
+                    <span className="tabular-nums font-bold text-lg text-[#2563EB] dark:text-blue-400">
                       {detValue}
                     </span>
                   </div>
@@ -1754,10 +1754,10 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
               )}
 
               {calcSubMode === 'vectors' && (
-                <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.08] space-y-4 text-xs">
+                <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] space-y-4 text-xs">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <div className="font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                      <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                         Vector A (Aₓ, Aᵧ, A_z)
                       </div>
                       <div className="grid grid-cols-3 gap-1.5">
@@ -1771,13 +1771,13 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                               next[i] = Number(e.target.value);
                               setVecA(next);
                             }}
-                            className="px-2 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono tabular-nums text-center"
+                            className="px-2 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums text-center"
                           />
                         ))}
                       </div>
                     </div>
                     <div>
-                      <div className="font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                      <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                         Vector B (Bₓ, Bᵧ, B_z)
                       </div>
                       <div className="grid grid-cols-3 gap-1.5">
@@ -1791,26 +1791,26 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                               next[i] = Number(e.target.value);
                               setVecB(next);
                             }}
-                            className="px-2 py-1.5 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono tabular-nums text-center"
+                            className="px-2 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums text-center"
                           />
                         ))}
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 font-mono tabular-nums">
-                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  <div className="grid grid-cols-2 gap-3 tabular-nums">
+                    <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+                      <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                         Dot Product (A · B)
                       </div>
-                      <div className="font-bold text-base text-blue-600 dark:text-blue-400">
+                      <div className="font-bold text-base text-[#2563EB] dark:text-blue-400">
                         {vecOps.dot}
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                    <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+                      <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                         Cross Product (A × B)
                       </div>
-                      <div className="font-bold text-base text-emerald-600 dark:text-emerald-400">
+                      <div className="font-bold text-base text-[#00A86B] dark:text-emerald-400">
                         ({vecOps.cross.join(', ')})
                       </div>
                     </div>
@@ -1830,8 +1830,8 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                     onClick={() => setUnitCategory(cat)}
                     className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                       unitCategory === cat
-                        ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                        : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300'
+                        ? 'btn-brand'
+                        : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]'
                     }`}
                   >
                     {cat}
@@ -1839,7 +1839,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                 ))}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
+                <label className="block text-xs font-semibold text-[#475569] dark:text-[#94A3B8] mb-1">
                   Input Value (
                   {unitCategory === 'Energy'
                     ? 'Electron-Volts (eV)'
@@ -1852,10 +1852,10 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                   type="number"
                   value={unitInputVal}
                   onChange={(e) => setUnitInputVal(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono tabular-nums text-sm"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums text-sm"
                 />
               </div>
-              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] space-y-2 text-xs font-mono tabular-nums text-zinc-800 dark:text-zinc-200">
+              <div className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2 text-xs tabular-nums text-[#0F172A] dark:text-[#F8FAFC]">
                 {unitCategory === 'Energy' && (
                   <>
                     <div>Joules (J): {(unitInputVal * 1.60218e-19).toExponential(4)} J</div>
@@ -1882,37 +1882,37 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
 
           {activeTab === 'Statistics' && (
             <div className="space-y-4">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                 Dataset (comma-separated numbers)
               </label>
               <input
                 type="text"
                 value={statsRaw}
                 onChange={(e) => setStatsRaw(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-mono text-sm"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] tabular-nums text-sm"
               />
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400">Mean (x̄)</div>
-                  <div className="font-mono font-bold text-base tabular-nums text-zinc-900 dark:text-zinc-100">
+                <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+                  <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">Mean (x̄)</div>
+                  <div className="font-bold text-base tabular-nums text-[#0F172A] dark:text-[#F8FAFC]">
                     {statsSummary.mean}
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400">Median</div>
-                  <div className="font-mono font-bold text-base tabular-nums text-zinc-900 dark:text-zinc-100">
+                <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+                  <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">Median</div>
+                  <div className="font-bold text-base tabular-nums text-[#0F172A] dark:text-[#F8FAFC]">
                     {statsSummary.median}
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400">Variance (σ²)</div>
-                  <div className="font-mono font-bold text-base tabular-nums text-zinc-900 dark:text-zinc-100">
+                <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+                  <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">Variance (σ²)</div>
+                  <div className="font-bold text-base tabular-nums text-[#0F172A] dark:text-[#F8FAFC]">
                     {statsSummary.variance}
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400">Std Dev (σ)</div>
-                  <div className="font-mono font-bold text-base tabular-nums text-zinc-900 dark:text-zinc-100">
+                <div className="p-3 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+                  <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">Std Dev (σ)</div>
+                  <div className="font-bold text-base tabular-nums text-[#0F172A] dark:text-[#F8FAFC]">
                     {statsSummary.stdDev}
                   </div>
                 </div>
@@ -1954,7 +1954,7 @@ export const StudyToolsDrawer: React.FC<StudyToolsDrawerProps> = ({
                   <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                     {f.title}
                   </div>
-                  <div className="text-xs text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-[#18181b] px-3 py-2 rounded-lg">
+                  <div className="text-xs text-[#0F172A] dark:text-[#F8FAFC] bg-[#F8FAFF] dark:bg-[#1E293B] px-3 py-2 rounded-lg">
                     <MathRichText content={f.eq} />
                   </div>
                 </div>
@@ -2030,11 +2030,11 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
       aria-label="Focus Timer and Study Music"
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] w-full max-w-md p-6 space-y-5">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] w-full max-w-md p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
-            <h3 className="font-display font-bold tracking-[-0.02em] text-lg text-zinc-900 dark:text-zinc-50">
+            <Clock className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="font-display font-bold tracking-[-0.02em] text-lg text-[#0F172A] dark:text-[#F8FAFC]">
               Pomodoro Focus Session
             </h3>
           </div>
@@ -2042,21 +2042,21 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Focus Timer"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+            className="p-1.5 rounded-lg text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="py-6 rounded-2xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] text-center space-y-3">
-          <div className="font-mono font-bold text-5xl text-zinc-900 dark:text-zinc-50 tabular-nums">
+        <div className="py-6 rounded-2xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-center space-y-3">
+          <div className="font-bold text-5xl text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
             {mins}:{secs}
           </div>
           <div className="flex items-center justify-center gap-3">
             <button
               type="button"
               onClick={onToggleRun}
-              className="px-5 py-2 rounded-lg btn-terracotta text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-5 py-2 rounded-lg btn-brand text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               {running ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               <span>{running ? 'Pause Focus' : 'Start 25m Focus'}</span>
@@ -2064,7 +2064,7 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
             <button
               type="button"
               onClick={onReset}
-              className="px-3.5 py-2 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.1] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-3.5 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-white/[0.08] text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>
@@ -2073,20 +2073,20 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
         </div>
 
         {/* Lyria 3 Focus Music Generator */}
-        <div className="pt-3 border-t border-zinc-200 dark:border-white/[0.07] space-y-3">
+        <div className="pt-3 border-t border-[#E2E8F0] dark:border-white/[0.07] space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-              <Music className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+              <Music className="w-4 h-4 text-[#7C3AED]" />
               <span>Focus Music Generator (Lyria 3)</span>
             </div>
-            <div className="flex gap-1 bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] p-0.5 rounded-lg text-[11px]">
+            <div className="flex gap-1 bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] p-0.5 rounded-lg text-[11px]">
               <button
                 type="button"
                 onClick={() => setDurationType('clip')}
                 className={`px-2 py-0.5 rounded-md font-medium cursor-pointer transition-colors ${
                   durationType === 'clip'
-                    ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-500 dark:text-zinc-400'
+                    ? 'bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC]'
+                    : 'text-[#475569] dark:text-[#94A3B8]'
                 }`}
               >
                 30s Clip
@@ -2096,8 +2096,8 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
                 onClick={() => setDurationType('full')}
                 className={`px-2 py-0.5 rounded-md font-medium cursor-pointer transition-colors ${
                   durationType === 'full'
-                    ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-500 dark:text-zinc-400'
+                    ? 'bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC]'
+                    : 'text-[#475569] dark:text-[#94A3B8]'
                 }`}
               >
                 Full Track
@@ -2109,7 +2109,7 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
             type="text"
             value={musicPrompt}
             onChange={(e) => setMusicPrompt(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-xs text-zinc-900 dark:text-zinc-100"
+            className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-xs text-[#0F172A] dark:text-[#F8FAFC]"
             placeholder="Describe your study soundtrack..."
           />
 
@@ -2117,7 +2117,7 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
             type="button"
             disabled={generatingMusic}
             onClick={handleGenerateMusic}
-            className="w-full py-2.5 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
+            className="w-full py-2.5 rounded-lg btn-brand text-xs font-semibold cursor-pointer transition-colors"
           >
             {generatingMusic
               ? 'Composing with Lyria 3...'
@@ -2250,7 +2250,7 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
   const [retryNonce, setRetryNonce] = useState(0);
   const reconnectTimerRef = useRef<number | null>(null);
 
-  // Connect to /api/live authenticated WebSocket with exponential backoff
+  // Connect to /api/live authenticated WebSocket with bounded 1-retry resilience
   useEffect(() => {
     if (!isOpen) return;
     let cancelled = false;
@@ -2262,7 +2262,7 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
       const token = await getFirebaseIdToken();
       if (cancelled) return;
       if (!token) {
-        setStatusError('Sign in required to connect authenticated Live Voice Tutor.');
+        setStatusError('Live audio requires sign-in; text tutor ready.');
         setConnected(false);
         return;
       }
@@ -2277,6 +2277,9 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
+          if (msg.error || msg.errorCode) {
+            setStatusError(msg.error || 'Live audio unavailable; text tutor ready.');
+          }
           if (msg.status === 'connected') {
             attempt = 0;
             setConnected(true);
@@ -2298,27 +2301,25 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
 
       ws.onerror = () => {
         setConnected(false);
-        setStatusError('Authenticated Live Voice connection interrupted.');
       };
 
       ws.onclose = (event) => {
         setConnected(false);
         if (cancelled) return;
-        if (event.code !== 1000 && event.code !== 1005) {
-          if (attempt < 3) {
-            const delayMs = 1000 * Math.pow(2, attempt);
-            attempt += 1;
-            setStatusError(
-              `Live Voice reconnecting in ${delayMs / 1000}s (attempt ${attempt}/3)...`
-            );
-            reconnectTimerRef.current = window.setTimeout(() => {
-              void connectSocket();
-            }, delayMs);
-          } else {
-            setStatusError(
-              `Live Voice closed (${event.reason || `code ${event.code}`}). Click Retry Connection below.`
-            );
+        const terminalCodes = new Set([1000, 1005, 1008, 4401]);
+        if (terminalCodes.has(event.code)) {
+          if (event.code === 1008 || event.code === 4401) {
+            setStatusError('Live audio unavailable; text tutor ready.');
           }
+          return;
+        }
+        if (attempt < 1) {
+          attempt += 1;
+          reconnectTimerRef.current = window.setTimeout(() => {
+            void connectSocket();
+          }, 1200);
+        } else {
+          setStatusError('Live audio unavailable; text tutor ready.');
         }
       };
     };
@@ -2438,7 +2439,7 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
     let replyText = '';
     try {
       const res = await apiFetchWithAuth<{ text?: string }>(
-        '/api/ai/think',
+        '/api/ai/tutor',
         {
           prompt: spokenUserText,
           teacherPersona,
@@ -2451,19 +2452,21 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
               : 'English',
           context: materialContext || `Active Chapter: ${chapterTitle}`,
           contextMode: materialContext ? 'strict_material' : 'open_jee',
-        }
+        },
+        'POST',
+        { signal: AbortSignal.timeout(30_000) }
       );
       if (!res.ok || !res.data.text) {
         setStatusError(
           (!res.ok ? res.error.message : '') ||
-            `[${(!res.ok ? res.error.errorCode : undefined) || 'AI_SERVICE_UNAVAILABLE'}] Live AI Teacher is temporarily unavailable. Please click Retry.`
+            'AI teacher could not answer right now. Try again.'
         );
         setAiSpeaking(false);
         return;
       }
       replyText = res.data.text;
     } catch (err: any) {
-      setStatusError(err?.message || 'Network error reaching AI Voice Teacher.');
+      setStatusError(err?.message || 'Request timed out. Click Retry or ask again.');
       setAiSpeaking(false);
       return;
     }
@@ -2612,266 +2615,263 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
   return (
     <div
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label="Live Voice Tutor"
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-24px)] sm:w-[380px] max-w-[calc(100vw-24px)] h-[420px] sm:h-[400px] flex flex-col rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.1] shadow-2xl overflow-hidden"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] w-full max-w-3xl p-6 space-y-4 flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 dark:border-white/[0.07] pb-3.5">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
-                aiSpeaking
-                  ? 'bg-emerald-600 border-emerald-500 text-white animate-pulse'
-                  : micActive
-                  ? 'bg-rose-600 border-rose-500 text-white animate-pulse'
-                  : 'bg-zinc-900 dark:bg-[#18181b] border-zinc-800 dark:border-white/[0.1] text-white dark:text-zinc-100'
-              }`}
-            >
-              <Mic className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-display font-bold tracking-[-0.02em] text-base sm:text-lg text-zinc-900 dark:text-zinc-50">
-                Live Voice Teacher · {chapterTitle}
+      {/* Compact Header */}
+      <div className="px-3.5 py-2.5 shrink-0 flex items-center justify-between gap-2 border-b border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14]">
+        <div className="flex items-center gap-2 min-w-0">
+          <div
+            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+              aiSpeaking
+                ? 'bg-[#00A86B] text-white animate-pulse'
+                : micActive
+                ? 'bg-rose-600 text-white animate-pulse'
+                : 'btn-brand'
+            }`}
+          >
+            <Mic className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-display font-bold text-xs text-[#0F172A] dark:text-[#F8FAFC] truncate">
+                Voice Tutor · {chapterTitle}
               </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                {aiSpeaking
-                  ? `${activePersonaObj.label} is speaking (click Interrupt or Mic to barge in)`
-                  : micActive
-                  ? 'Listening to your question...'
-                  : `${activePersonaObj.label} — ${activePersonaObj.subtitle}`}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-lg bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] p-0.5 text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveView('live')}
-                className={`px-3 py-1 rounded-md font-semibold cursor-pointer transition-colors ${
-                  activeView === 'live'
-                    ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-600 dark:text-zinc-400'
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  connected ? 'bg-[#00A86B]' : 'bg-amber-500'
                 }`}
-              >
-                Live Class
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveView('history')}
-                className={`px-3 py-1 rounded-md font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors font-mono tabular-nums ${
-                  activeView === 'history'
-                    ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-600 dark:text-zinc-400'
-                }`}
-              >
-                <History className="w-3.5 h-3.5" />
-                <span>History ({turns.length})</span>
-              </button>
+                title={connected ? 'Live audio connected' : 'Text tutor mode'}
+              />
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setVoiceMuted((m) => !m);
-                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-              }}
-              aria-label="Toggle voice audio"
-              className="p-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
-            >
-              {voiceMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close Voice Tutor"
-              className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <p className="text-[10px] text-[#475569] dark:text-[#94A3B8] truncate">
+              {aiSpeaking
+                ? 'Speaking...'
+                : micActive
+                ? 'Listening...'
+                : activePersonaObj.label}
+            </p>
           </div>
         </div>
 
-        {/* 4-Way Classroom Teacher Persona & Accent Selector */}
-        <div className="flex flex-wrap items-center justify-between gap-2 bg-zinc-50 dark:bg-[#18181b] p-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.08] text-xs">
-          <span className="font-semibold text-zinc-600 dark:text-zinc-300 px-1">
-            Voice &amp; Language:
-          </span>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {PERSONA_OPTIONS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setTeacherPersona(p.id)}
-                className={`px-3 py-1.5 rounded-lg font-semibold border transition-colors cursor-pointer ${
-                  teacherPersona === p.id
-                    ? 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] dark:bg-[#F5F0E6] dark:text-[#09090B] dark:border-[#F5F0E6]'
-                    : 'bg-white dark:bg-[#111113] text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/[0.08] hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Voice Controls & Barge-In Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1 shrink-0">
+          <div className="inline-flex rounded-md bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] p-0.5 text-[10px]">
             <button
               type="button"
-              onClick={toggleMicrophone}
-              className={`px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 cursor-pointer transition-colors ${
-                micActive
-                  ? 'bg-rose-600 hover:bg-rose-500 text-white'
-                  : 'btn-terracotta'
+              onClick={() => setActiveView('live')}
+              className={`px-2 py-0.5 rounded font-semibold cursor-pointer transition-colors ${
+                activeView === 'live'
+                  ? 'btn-brand'
+                  : 'text-[#475569] dark:text-[#94A3B8]'
               }`}
             >
-              {micActive ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              <span>{micActive ? 'Stop Listening' : 'Speak to Teacher (Start Talking)'}</span>
+              Live
             </button>
-
-            {aiSpeaking && (
-              <button
-                type="button"
-                onClick={handleInterruptSpeech}
-                className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors"
-              >
-                <Square className="w-3.5 h-3.5 fill-current" />
-                <span>Interrupt / Ask Follow-Up</span>
-              </button>
-            )}
-          </div>
-
-          {/* Quick Classroom Doubt Starters */}
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-            {[
-              `Walk me through ${chapterTitle} step by step`,
-              'Solve a numerical example with me',
-              'What exam trap should I avoid here?',
-            ].map((q, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => streamUserAndTutorConversation(q)}
-                className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors"
-              >
-                “{q}”
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Live Word-by-Word Paragraph Transcript Stream */}
-        <div className="flex-1 min-h-[260px] max-h-[360px] overflow-y-auto rounded-xl bg-zinc-50 dark:bg-[#09090b] border border-zinc-200 dark:border-white/[0.07] p-4 space-y-3.5 text-xs">
-          {liveUserDraft && (
-            <div className="p-3.5 rounded-xl bg-zinc-900 dark:bg-[#18181b] border border-zinc-800 dark:border-white/[0.1] text-white ml-8">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-                You (Speaking Live...)
-              </div>
-              <p className="text-xs sm:text-sm leading-relaxed">{liveUserDraft} ▍</p>
-            </div>
-          )}
-
-          {turns.length === 0 && !liveUserDraft ? (
-            <div className="text-center py-12 space-y-2 text-zinc-400">
-              <Sparkles className="w-6 h-6 mx-auto text-zinc-500" />
-              <p className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Ask your teacher by voice or text
-              </p>
-              <p className="text-[11px] max-w-md mx-auto text-zinc-500 dark:text-zinc-400">
-                Step-by-step explanations in Hindi, Hinglish, or Indian English.
-              </p>
-            </div>
-          ) : (
-            turns.map((turn) => (
-              <div
-                key={turn.id}
-                className={`p-4 rounded-xl leading-relaxed ${
-                  turn.speaker === 'You'
-                    ? 'bg-blue-500/10 border border-blue-500/20 text-zinc-900 dark:text-zinc-100 ml-8'
-                    : 'bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-zinc-800 dark:text-zinc-100 mr-6'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span
-                    className={`text-[11px] font-semibold uppercase tracking-wider ${
-                      turn.speaker === 'You'
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-emerald-600 dark:text-emerald-400'
-                    }`}
-                  >
-                    {turn.speaker === 'You'
-                      ? 'You (Student)'
-                      : `Classroom Teacher (${turn.personaLabel || activePersonaObj.label})`}
-                    {turn.streaming ? ' · Explaining...' : ''}
-                  </span>
-                  <span className="text-[10px] font-mono tabular-nums text-zinc-400">
-                    {turn.timestamp}
-                  </span>
-                </div>
-                <div className="text-xs sm:text-sm leading-relaxed">
-                  <MathRichText content={turn.text} />
-                  {turn.streaming && (
-                    <span className="inline-block w-1.5 h-3.5 bg-blue-500 ml-1 animate-pulse" />
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-          <div ref={transcriptEndRef} />
-        </div>
-
-        {/* Bottom Voice / Text Input + Clear History */}
-        <div className="flex flex-wrap items-center gap-2">
-          <form onSubmit={handleFormSubmit} className="flex-1 flex gap-2">
-            <input
-              type="text"
-              value={voicePromptInput}
-              onChange={(e) => setVoicePromptInput(e.target.value)}
-              placeholder="Speak via mic or type a question..."
-              className="flex-1 px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
-            >
-              Ask Voice Tutor
-            </button>
-          </form>
-
-          {turns.length > 0 && (
             <button
               type="button"
-              onClick={() => {
-                handleInterruptSpeech();
-                setTurns([]);
-                localStorage.removeItem(storageKey);
-              }}
-              className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-rose-500 cursor-pointer transition-colors"
+              onClick={() => setActiveView('history')}
+              className={`px-2 py-0.5 rounded font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors tabular-nums ${
+                activeView === 'history'
+                  ? 'btn-brand'
+                  : 'text-[#475569] dark:text-[#94A3B8]'
+              }`}
             >
-              Clear History
-            </button>
-          )}
-        </div>
-
-        {statusError && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-rose-500/10 border border-rose-500/25 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
-            <span>{statusError}</span>
-            <button
-              type="button"
-              onClick={() => {
-                setStatusError(null);
-                setRetryNonce((n) => n + 1);
-              }}
-              className="px-3 py-1 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-500 cursor-pointer transition-colors"
-            >
-              Retry Connection
+              <span>History ({turns.length})</span>
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setVoiceMuted((m) => !m);
+              if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }}
+            aria-label="Toggle voice audio"
+            className="p-1.5 rounded-md text-[#475569] dark:text-[#94A3B8] hover:bg-white dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
+          >
+            {voiceMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close Voice Tutor"
+            className="p-1.5 rounded-md text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Compact 4-Persona Pills */}
+      <div className="px-3 py-1.5 shrink-0 grid grid-cols-2 gap-1 bg-[#F8FAFF] dark:bg-[#070B14] border-b border-[#E2E8F0] dark:border-white/[0.08] text-[10px]">
+        {PERSONA_OPTIONS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => setTeacherPersona(p.id)}
+            className={`px-2 py-1 rounded-md font-semibold border truncate transition-colors cursor-pointer ${
+              teacherPersona === p.id
+                ? 'btn-brand border-transparent'
+                : 'bg-white dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] border-[#E2E8F0] dark:border-white/[0.08] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Compact Voice Action Row */}
+      <div className="px-3 py-2 shrink-0 flex items-center gap-1.5 border-b border-[#E2E8F0] dark:border-white/[0.08]">
+        <button
+          type="button"
+          onClick={toggleMicrophone}
+          className={`px-2.5 py-1.5 rounded-lg font-semibold text-[11px] flex items-center gap-1.5 cursor-pointer transition-colors shrink-0 ${
+            micActive
+              ? 'bg-rose-600 hover:bg-rose-500 text-white'
+              : 'btn-brand'
+          }`}
+        >
+          {micActive ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+          <span>{micActive ? 'Stop' : 'Speak'}</span>
+        </button>
+
+        {aiSpeaking && (
+          <button
+            type="button"
+            onClick={handleInterruptSpeech}
+            className="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-[#0F172A] text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+          >
+            <Square className="w-3 h-3 fill-current" />
+            <span>Interrupt</span>
+          </button>
+        )}
+
+        <div className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {[
+            { label: 'Step-by-step', prompt: `Walk me through ${chapterTitle} step by step` },
+            { label: 'Numerical', prompt: 'Solve a numerical example with me' },
+            { label: 'Exam trap', prompt: 'What exam trap should I avoid here?' },
+          ].map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => streamUserAndTutorConversation(item.prompt)}
+              className="px-2 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] text-[10px] font-medium whitespace-nowrap cursor-pointer shrink-0"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Transcript Stream */}
+      <div className="flex-1 min-h-0 overflow-y-auto bg-[#F8FAFF] dark:bg-[#070B14] p-3 space-y-2.5 text-xs">
+        {liveUserDraft && (
+          <div className="p-2.5 rounded-xl bg-[#2563EB] text-white ml-6">
+            <div className="text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-0.5">
+              You (Speaking...)
+            </div>
+            <p className="text-xs leading-relaxed">{liveUserDraft} ▍</p>
+          </div>
+        )}
+
+        {turns.length === 0 && !liveUserDraft ? (
+          <div className="text-center py-6 space-y-1.5 text-[#475569] dark:text-[#94A3B8]">
+            <Sparkles className="w-5 h-5 mx-auto text-[#7C3AED]" />
+            <p className="font-semibold text-xs text-[#0F172A] dark:text-[#F8FAFC]">
+              Ask by voice or text
+            </p>
+            <p className="text-[11px] max-w-[260px] mx-auto">
+              Step-by-step JEE explanations in Hindi, Hinglish, or English.
+            </p>
+          </div>
+        ) : (
+          turns.map((turn) => (
+            <div
+              key={turn.id}
+              className={`p-2.5 rounded-xl leading-relaxed ${
+                turn.speaker === 'You'
+                  ? 'bg-blue-500/10 border border-blue-500/20 text-[#0F172A] dark:text-[#F8FAFC] ml-6'
+                  : 'bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] mr-4'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span
+                  className={`text-[10px] font-semibold uppercase tracking-wider ${
+                    turn.speaker === 'You'
+                      ? 'text-[#2563EB] dark:text-blue-400'
+                      : 'text-[#00A86B] dark:text-emerald-400'
+                  }`}
+                >
+                  {turn.speaker === 'You' ? 'You' : turn.personaLabel || activePersonaObj.label}
+                  {turn.streaming ? ' · Explaining...' : ''}
+                </span>
+                <span className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8]">
+                  {turn.timestamp}
+                </span>
+              </div>
+              <div className="text-xs leading-relaxed">
+                <MathRichText content={turn.text} />
+                {turn.streaming && (
+                  <span className="inline-block w-1.5 h-3 bg-[#2563EB] ml-1 animate-pulse" />
+                )}
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={transcriptEndRef} />
+      </div>
+
+      {/* Subtle Notice Row */}
+      {statusError && (
+        <div className="px-3 py-1.5 shrink-0 flex items-center justify-between gap-2 bg-[#F1F5F9] dark:bg-[#1E293B] border-t border-[#E2E8F0] dark:border-white/[0.08] text-[11px] text-[#475569] dark:text-[#94A3B8]">
+          <span className="truncate">{statusError}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setStatusError(null);
+              setRetryNonce((n) => n + 1);
+            }}
+            className="px-2 py-0.5 rounded bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] font-semibold cursor-pointer shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Compact Bottom Input */}
+      <div className="px-3 py-2 shrink-0 flex items-center gap-1.5 border-t border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827]">
+        <form onSubmit={handleFormSubmit} className="flex-1 flex gap-1.5 min-w-0">
+          <input
+            type="text"
+            value={voicePromptInput}
+            onChange={(e) => setVoicePromptInput(e.target.value)}
+            placeholder="Ask a doubt..."
+            className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-[#F8FAFF] dark:bg-[#1E293B] text-xs text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
+          />
+          <button
+            type="submit"
+            className="px-3 py-1.5 rounded-lg btn-brand text-xs font-semibold cursor-pointer shrink-0"
+          >
+            Send
+          </button>
+        </form>
+
+        {turns.length > 0 && (
+          <button
+            type="button"
+            aria-label="Clear voice history"
+            onClick={() => {
+              handleInterruptSpeech();
+              setTurns([]);
+              localStorage.removeItem(storageKey);
+            }}
+            className="p-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] text-[#475569] dark:text-[#94A3B8] hover:text-rose-500 cursor-pointer shrink-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
     </div>
@@ -2918,16 +2918,16 @@ export const WorkspaceConfirmModal: React.FC<WorkspaceConfirmModalProps> = ({
       aria-label={title}
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] max-w-md w-full p-6 space-y-4">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] max-w-md w-full p-6 space-y-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-display font-bold tracking-[-0.02em] text-base text-zinc-900 dark:text-zinc-50">
+            <h3 className="font-display font-bold tracking-[-0.02em] text-base text-[#0F172A] dark:text-[#F8FAFC]">
               {title}
             </h3>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 leading-relaxed">
+            <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-1 leading-relaxed">
               {description}
             </p>
           </div>
@@ -2936,7 +2936,7 @@ export const WorkspaceConfirmModal: React.FC<WorkspaceConfirmModalProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
           >
             Cancel
           </button>
@@ -2944,7 +2944,7 @@ export const WorkspaceConfirmModal: React.FC<WorkspaceConfirmModalProps> = ({
             type="button"
             disabled={busy}
             onClick={handleConfirm}
-            className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-lg btn-brand text-xs font-semibold cursor-pointer transition-colors"
           >
             {busy ? 'Syncing with Google Workspace...' : confirmLabel}
           </button>
@@ -2998,7 +2998,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onExportUserData,
   onOpenLegalModal,
   onSignOut,
-  onDeleteAccountData,
 }) => {
   const [formState, setFormState] = useState<StudentProfileData>(profile);
   const [saving, setSaving] = useState(false);
@@ -3007,13 +3006,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     Boolean(getWorkspaceAccessToken())
   );
   const [connectingWorkspace, setConnectingWorkspace] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deletingData, setDeletingData] = useState(false);
 
   useEffect(() => {
     setFormState(profile);
     setWorkspaceConnected(Boolean(getWorkspaceAccessToken()));
-    setConfirmDelete(false);
   }, [profile, isOpen]);
 
   if (!isOpen) return null;
@@ -3055,20 +3051,20 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       aria-label="Student Profile & Settings"
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] w-full max-w-2xl p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.07] pb-4">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] w-full max-w-2xl p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-white/[0.07] pb-4">
           <div className="flex items-center gap-3.5">
             <div
               className="w-12 h-12 rounded-xl text-white font-display font-bold text-base flex items-center justify-center border border-white/[0.1]"
-              style={{ backgroundColor: formState.avatarColor || '#18181b' }}
+              style={{ backgroundColor: formState.avatarColor || '#2563EB' }}
             >
               {avatarInitials}
             </div>
             <div>
-              <h2 className="font-display font-bold tracking-[-0.02em] text-lg text-zinc-900 dark:text-zinc-50">
+              <h2 className="font-display font-bold tracking-[-0.02em] text-lg text-[#0F172A] dark:text-[#F8FAFC]">
                 Profile &amp; Settings
               </h2>
-              <p className="text-xs font-mono tabular-nums text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs tabular-nums text-[#475569] dark:text-[#94A3B8]">
                 {formState.email || 'Signed-in Student Account'} · L{level} ({xp} XP · {streakDays}d)
               </p>
             </div>
@@ -3077,7 +3073,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Profile Modal"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
+            className="p-1.5 rounded-lg text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -3085,12 +3081,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           {/* Avatar Color Picker */}
-          <div className="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08]">
-            <span className="font-semibold text-zinc-700 dark:text-zinc-200">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+            <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
               Avatar Theme:
             </span>
             <div className="flex items-center gap-2">
-              {['#D4653B', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#18181B'].map((col) => (
+              {['#2563EB', '#7C3AED', '#00A86B', '#F59E0B', '#EF4444', '#0F172A'].map((col) => (
                 <button
                   key={col}
                   type="button"
@@ -3098,7 +3094,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   aria-label={`Select avatar color ${col}`}
                   className={`w-6 h-6 rounded-full cursor-pointer transition-transform ${
                     formState.avatarColor === col
-                      ? 'scale-115 ring-2 ring-offset-2 ring-zinc-400 dark:ring-zinc-500'
+                      ? 'scale-115 ring-2 ring-offset-2 ring-[#2563EB]'
                       : ''
                   }`}
                   style={{ backgroundColor: col }}
@@ -3109,7 +3105,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Full Name
               </label>
               <input
@@ -3117,12 +3113,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 value={formState.displayName}
                 onChange={(e) => setFormState((s) => ({ ...s, displayName: e.target.value }))}
                 placeholder="e.g., Aniket Sharma"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-medium focus:outline-none focus:border-zinc-400"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] font-medium focus:outline-none focus:border-[#2563EB]"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Target Exam &amp; Year
               </label>
               <select
@@ -3133,7 +3129,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     targetExam: e.target.value as StudentProfileData['targetExam'],
                   }))
                 }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-semibold"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] font-semibold"
               >
                 <option value="JEE Main 2027">JEE Main 2027</option>
                 <option value="JEE Advanced 2027">JEE Advanced 2027</option>
@@ -3144,7 +3140,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Batch / Class Status
               </label>
               <div className="grid grid-cols-3 gap-1.5">
@@ -3155,8 +3151,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onClick={() => setFormState((s) => ({ ...s, batchStatus: b }))}
                     className={`py-2 rounded-lg font-semibold border cursor-pointer transition-colors ${
                       formState.batchStatus === b
-                        ? 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] dark:bg-[#F5F0E6] dark:text-[#09090B] dark:border-[#F5F0E6]'
-                        : 'border-zinc-200 dark:border-white/[0.1] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181b]'
+                        ? 'btn-brand border-transparent'
+                        : 'border-[#E2E8F0] dark:border-white/[0.1] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                     }`}
                   >
                     {b}
@@ -3166,7 +3162,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Preferred AI Tutor Language
               </label>
               <div className="grid grid-cols-3 gap-1.5">
@@ -3177,8 +3173,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onClick={() => setFormState((s) => ({ ...s, preferredLanguage: l }))}
                     className={`py-2 rounded-lg font-semibold border cursor-pointer transition-colors ${
                       formState.preferredLanguage === l
-                        ? 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] dark:bg-[#F5F0E6] dark:text-[#09090B] dark:border-[#F5F0E6]'
-                        : 'border-zinc-200 dark:border-white/[0.1] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181b]'
+                        ? 'btn-brand border-transparent'
+                        : 'border-[#E2E8F0] dark:border-white/[0.1] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                     }`}
                   >
                     {l}
@@ -3188,7 +3184,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Billing Region &amp; Currency
               </label>
               <select
@@ -3199,7 +3195,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     preferredCurrency: e.target.value as SupportedCurrency,
                   }))
                 }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 font-semibold"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] font-semibold"
               >
                 {Object.values(GLOBAL_PPP_PRICING).map((p) => (
                   <option key={p.currency} value={p.currency}>
@@ -3210,7 +3206,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Coaching Institute / School (Optional)
               </label>
               <input
@@ -3218,12 +3214,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 value={formState.coachingName}
                 onChange={(e) => setFormState((s) => ({ ...s, coachingName: e.target.value }))}
                 placeholder="e.g., Allen / FIITJEE / PW / Self-Study"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
                 Personal exam goal
               </label>
               <input
@@ -3233,18 +3229,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   setFormState((s) => ({ ...s, targetRankOrPercentile: e.target.value }))
                 }
                 placeholder="Enter your own goal (optional)"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC]"
               />
             </div>
           </div>
 
           {/* Daily Study Goal Slider */}
-          <div className="p-3.5 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50/50 dark:bg-[#18181b]/60 flex flex-wrap items-center justify-between gap-3">
+          <div className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="font-semibold text-zinc-800 dark:text-zinc-200 font-mono tabular-nums">
+              <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
                 Daily Self-Study Goal: {formState.dailyGoalHours} hrs / day
               </div>
-              <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              <div className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                 Calibrates your {getDaysToJeeMain2027Session1()}-day JEE Main schedule
               </div>
             </div>
@@ -3257,26 +3253,26 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               onChange={(e) =>
                 setFormState((s) => ({ ...s, dailyGoalHours: Number(e.target.value) }))
               }
-              className="w-40 accent-[#D4653B]"
+              className="w-40 accent-[#2563EB]"
             />
           </div>
 
           {/* Google Workspace Connection Status */}
-          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <div className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+              <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-2">
                 <span>Google Workspace</span>
                 <span
                   className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
                     workspaceConnected
-                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                      ? 'bg-emerald-500/10 border-emerald-500/20 text-[#00A86B] dark:text-emerald-400'
                       : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'
                   }`}
                 >
                   {workspaceConnected ? 'Connected' : 'Authorization Needed'}
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+              <p className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
                 Drive, Docs, Slides, Calendar, Tasks &amp; Keep sync.
               </p>
             </div>
@@ -3284,7 +3280,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               type="button"
               disabled={connectingWorkspace}
               onClick={handleConnectWorkspace}
-              className="px-3.5 py-2 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.1] text-zinc-800 dark:text-zinc-200 font-semibold hover:bg-zinc-100 dark:hover:bg-[#1f1f23] cursor-pointer transition-colors"
+              className="px-3.5 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] font-semibold hover:bg-[#F1F5F9] dark:hover:bg-white/[0.08] cursor-pointer transition-colors"
             >
               {connectingWorkspace
                 ? 'Connecting...'
@@ -3295,18 +3291,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
 
           {savedNotice && (
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-semibold text-center">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[#00A86B] dark:text-emerald-300 font-semibold text-center">
               Profile preferences saved and synced to your account!
             </div>
           )}
 
           {/* Save & Data Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-zinc-200 dark:border-white/[0.07]">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E2E8F0] dark:border-white/[0.07]">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={onExportUserData}
-                className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] text-zinc-700 dark:text-zinc-200 font-semibold inline-flex items-center gap-1.5 hover:bg-zinc-50 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
+                className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] font-semibold inline-flex items-center gap-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export My Data (JSON)</span>
@@ -3317,10 +3313,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   onClose();
                   onOpenLegalModal('privacy');
                 }}
-                className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.1] text-zinc-700 dark:text-zinc-200 font-semibold inline-flex items-center gap-1.5 hover:bg-zinc-50 dark:hover:bg-[#18181b] cursor-pointer transition-colors"
+                className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] text-[#0F172A] dark:text-[#F8FAFC] font-semibold inline-flex items-center gap-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] cursor-pointer transition-colors"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Legal, Privacy &amp; Policies</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-[#00A86B]" />
+                <span>Legal, Privacy &amp; Account</span>
               </button>
             </div>
 
@@ -3339,60 +3335,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-2 rounded-lg btn-terracotta font-semibold cursor-pointer transition-colors"
+                className="px-5 py-2 rounded-lg btn-brand font-semibold cursor-pointer transition-colors"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
-
-          {onDeleteAccountData && (
-            <div className="p-3.5 rounded-xl border border-rose-500/25 bg-rose-500/[0.06] flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="font-semibold text-rose-800 dark:text-rose-200">
-                  Right to Erasure (DPDP Act 2023 &amp; GDPR)
-                </div>
-                <p className="text-[11px] text-rose-700/80 dark:text-rose-300/80">
-                  Permanently delete Firestore data, IndexedDB PDFs, and local caches.
-                </p>
-              </div>
-              {!confirmDelete ? (
-                <button
-                  type="button"
-                  onClick={() => setConfirmDelete(true)}
-                  className="px-3.5 py-2 rounded-lg border border-rose-500/30 bg-white dark:bg-[#111113] text-rose-700 dark:text-rose-300 font-semibold hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer transition-colors"
-                >
-                  Delete Account &amp; Data
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={deletingData}
-                    onClick={async () => {
-                      setDeletingData(true);
-                      try {
-                        await onDeleteAccountData();
-                        onClose();
-                      } finally {
-                        setDeletingData(false);
-                      }
-                    }}
-                    className="px-3.5 py-2 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-500 cursor-pointer transition-colors"
-                  >
-                    {deletingData ? 'Erasing...' : 'Confirm Permanent Delete'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(false)}
-                    className="px-3 py-2 rounded-lg border border-zinc-300 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 font-semibold cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </form>
       </div>
     </div>
@@ -3406,12 +3354,14 @@ interface LegalComplianceModalProps {
   isOpen: boolean;
   initialTab: LegalModalTabId;
   onClose: () => void;
+  onDeleteAccountData?: () => Promise<void>;
 }
 
 export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
   isOpen,
   initialTab,
   onClose,
+  onDeleteAccountData,
 }) => {
   const [activeTab, setActiveTab] = useState<LegalModalTabId>(initialTab);
   const [reportCategory, setReportCategory] = useState<
@@ -3425,11 +3375,14 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deletingData, setDeletingData] = useState(false);
 
   useEffect(() => {
     setActiveTab(initialTab);
     setReportSubmitted(false);
     setReportError(null);
+    setConfirmDelete(false);
   }, [initialTab, isOpen]);
 
   if (!isOpen) return null;
@@ -3473,17 +3426,17 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
       aria-label="Legal, Privacy and Compliance Center"
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl w-full max-w-3xl p-6 space-y-5 my-8 max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.07] pb-4">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-3xl p-6 space-y-5 my-8 max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-white/[0.07] pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] text-zinc-900 dark:text-zinc-100 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-[#2563EB] dark:text-blue-400 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-display font-semibold tracking-[-0.02em] text-lg text-zinc-900 dark:text-zinc-100">
+              <h2 className="font-display font-semibold tracking-[-0.02em] text-lg text-[#0F172A] dark:text-[#F8FAFC]">
                 Legal, Privacy &amp; Academic Compliance Center
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
                 Global Commercial Terms · India DPDP Act 2023 &amp; GDPR Compliant
               </p>
             </div>
@@ -3492,14 +3445,14 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Legal Modal"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-[#18181b] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 5 Tabs */}
-        <div className="flex items-center gap-1.5 border-b border-zinc-200 dark:border-white/[0.07] pb-1 overflow-x-auto text-xs">
+        <div className="flex items-center gap-1.5 border-b border-[#E2E8F0] dark:border-white/[0.07] pb-1 overflow-x-auto text-xs">
           {(
             [
               { id: 'privacy', label: 'Privacy Policy' },
@@ -3515,8 +3468,8 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
               onClick={() => setActiveTab(t.id)}
               className={`px-3.5 py-2 rounded-t-lg font-medium border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
                 activeTab === t.id
-                  ? 'bg-zinc-100 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 border-zinc-900 dark:border-white'
-                  : 'text-zinc-500 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] border-[#2563EB]'
+                  : 'text-[#475569] dark:text-[#94A3B8] border-transparent hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
               }`}
             >
               {t.label}
@@ -3525,35 +3478,83 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto space-y-4 text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed pr-1">
+        <div className="flex-1 overflow-y-auto space-y-4 text-xs text-[#475569] dark:text-[#94A3B8] leading-relaxed pr-1">
           {activeTab === 'privacy' && (
             <div className="space-y-3">
-              <h3 className="font-display font-semibold tracking-[-0.01em] text-sm text-zinc-900 dark:text-zinc-100">
+              <h3 className="font-display font-semibold tracking-[-0.01em] text-sm text-[#0F172A] dark:text-[#F8FAFC]">
                 Privacy Policy (India DPDP Act 2023 &amp; EU GDPR Compliance)
               </h3>
               <p>
-                <strong className="text-zinc-900 dark:text-zinc-100">1. Per-User Data Isolation:</strong> Every study material, uploaded PDF,
+                <strong className="text-[#0F172A] dark:text-[#F8FAFC]">1. Per-User Data Isolation:</strong> Every study material, uploaded PDF,
                 handwritten note photo, flashcard, and CBT mock attempt you create in LearnMate JEE
                 is strictly isolated to your authenticated Firebase UID (
-                <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-zinc-100 dark:bg-[#18181b]">request.auth.uid == userId</code>). Other students cannot view, query, or
+                <code className="text-[11px] px-1 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#1E293B]">request.auth.uid == userId</code>). Other students cannot view, query, or
                 access your uploaded notes or test scores.
               </p>
               <p>
-                <strong className="text-zinc-900 dark:text-zinc-100">2. Data Minimization &amp; Purpose Limitation:</strong> We collect only your
+                <strong className="text-[#0F172A] dark:text-[#F8FAFC]">2. Data Minimization &amp; Purpose Limitation:</strong> We collect only your
                 name, email address, target examination preferences, and the study content you
                 explicitly upload or generate. Your uploaded materials are never sold to third-party
                 advertisers or coaching institutes.
               </p>
               <p>
-                <strong className="text-zinc-900 dark:text-zinc-100">3. Student Data Rights (Right to Export &amp; Erasure):</strong> Under the
+                <strong className="text-[#0F172A] dark:text-[#F8FAFC]">3. Student Data Rights (Right to Export &amp; Erasure):</strong> Under the
                 Digital Personal Data Protection Act (DPDP Act 2023, India) and GDPR, you have the
                 right to export a complete machine-readable JSON archive of your study data or trigger
-                full erasure directly from your Profile Modal at any time.
+                full erasure directly from this Privacy Policy section at any time.
               </p>
               <p>
-                <strong className="text-zinc-900 dark:text-zinc-100">4. Minor &amp; Guardian Consent (DPDP Act 2023):</strong> Students under 18
+                <strong className="text-[#0F172A] dark:text-[#F8FAFC]">4. Minor &amp; Guardian Consent (DPDP Act 2023):</strong> Students under 18
                 require parent/guardian consent; zero behavioral ad-tracking or third-party data brokerage is performed.
               </p>
+
+              {onDeleteAccountData && (
+                <div className="mt-4 p-3.5 rounded-xl border border-rose-500/25 bg-rose-500/[0.06] flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="font-semibold text-rose-700 dark:text-rose-200">
+                      Account &amp; Data Deletion (DPDP / GDPR)
+                    </div>
+                    <p className="text-[11px] text-rose-700/80 dark:text-rose-300/80">
+                      Permanently delete Firestore data, IndexedDB PDFs, and local caches.
+                    </p>
+                  </div>
+                  {!confirmDelete ? (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(true)}
+                      className="px-3.5 py-2 rounded-lg border border-rose-500/30 bg-white dark:bg-[#111827] text-rose-700 dark:text-rose-300 font-semibold hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer transition-colors"
+                    >
+                      Delete Account
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={deletingData}
+                        onClick={async () => {
+                          setDeletingData(true);
+                          try {
+                            await onDeleteAccountData();
+                            onClose();
+                          } finally {
+                            setDeletingData(false);
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-500 cursor-pointer transition-colors"
+                      >
+                        {deletingData ? 'Deleting...' : 'Confirm Permanent Delete'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(false)}
+                        className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] font-semibold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -3650,7 +3651,7 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
                   <select
                     value={reportCategory}
                     onChange={(e) => setReportCategory(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400 dark:focus:border-white/25"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
                   >
                     <option value="Wrong AI Answer / Hallucination">
                       Wrong AI Answer / Hallucination
@@ -3661,7 +3662,7 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block font-medium text-[#475569] dark:text-[#94A3B8] mb-1">
                     Chapter / Question / Page Reference
                   </label>
                   <input
@@ -3669,12 +3670,12 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
                     value={reportReference}
                     onChange={(e) => setReportReference(e.target.value)}
                     placeholder="e.g., Rotational Motion Q4 or Mock Q12"
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400 dark:focus:border-white/25"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#2563EB]"
                   />
                 </div>
               </div>
               <div>
-                <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block font-medium text-[#475569] dark:text-[#94A3B8] mb-1">
                   Details of the Discrepancy or Question
                 </label>
                 <textarea
@@ -3682,7 +3683,7 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
                   value={reportDescription}
                   onChange={(e) => setReportDescription(e.target.value)}
                   placeholder="Describe the step, formula, or answer key issue so our academic review engine can verify it..."
-                  className="w-full p-3 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400 dark:focus:border-white/25"
+                  className="w-full p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
               {reportError && (
@@ -3698,7 +3699,7 @@ export const LegalComplianceModal: React.FC<LegalComplianceModalProps> = ({
               <button
                 type="submit"
                 disabled={reportSubmitting}
-                className="px-5 py-2.5 rounded-xl btn-terracotta disabled:opacity-50 font-semibold transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl btn-brand disabled:opacity-50 font-semibold transition-colors cursor-pointer"
               >
                 {reportSubmitting ? 'Submitting...' : 'Submit Report'}
               </button>
@@ -3852,11 +3853,11 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
       aria-label={config.title}
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl w-full max-w-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 dark:border-white/[0.07] pb-3.5">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2E8F0] dark:border-white/[0.07] pb-3.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-200 text-[11px] font-semibold uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] text-[11px] font-semibold uppercase tracking-wider">
                 {config.mode === 'adaptive-drill'
                   ? `Adaptive Drill · ${difficultyLevel}`
                   : config.mode === 'chapter-quiz'
@@ -3864,26 +3865,26 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
                   : 'Instant-Feedback Paper Solver'}
               </span>
               {config.mode === 'adaptive-drill' && (
-                <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-semibold font-mono tabular-nums inline-flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-semibold tabular-nums inline-flex items-center gap-1">
                   <Flame className="w-3 h-3 fill-current" />
                   Streak: {streak}
                 </span>
               )}
             </div>
-            <h3 className="font-display font-semibold tracking-[-0.02em] text-lg text-zinc-900 dark:text-zinc-100 mt-1.5">
+            <h3 className="font-display font-semibold tracking-[-0.02em] text-lg text-[#0F172A] dark:text-[#F8FAFC] mt-1.5">
               {config.title} · {config.chapterOrPaper}
             </h3>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold font-mono tabular-nums text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+            <span className="text-xs font-semibold tabular-nums text-[#00A86B] dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
               Score: {scoreCount} / {questionsPool.length}
             </span>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close Practice Modal"
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-[#18181b] transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -3891,7 +3892,7 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 font-mono tabular-nums">
+          <div className="flex items-center justify-between text-xs text-[#475569] dark:text-[#94A3B8] tabular-nums">
             <span>
               Question {qIndex + 1} of {questionsPool.length} · {currentQ.subject} (
               {currentQ.chapter})
@@ -3899,8 +3900,8 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
             <span>+4 / −1 NTA Check</span>
           </div>
 
-          <div className="text-sm sm:text-base font-medium text-zinc-900 dark:text-zinc-100 leading-relaxed">
-            <span className="mr-1.5 font-mono text-zinc-500 dark:text-zinc-400">Q{qIndex + 1}.</span>
+          <div className="text-sm sm:text-base font-medium text-[#0F172A] dark:text-[#F8FAFC] leading-relaxed">
+            <span className="mr-1.5 tabular-nums text-[#475569] dark:text-[#94A3B8]">Q{qIndex + 1}.</span>
             <MathRichText content={currentQ.stem} inline />
           </div>
 
@@ -3908,14 +3909,14 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedOpt === idx;
               let borderStyle =
-                'border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#18181b] text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-[#1f1f23]';
+                'border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F8FAFF] dark:hover:bg-white/[0.08]';
               if (isSelected && !checked) {
                 borderStyle =
-                  'border-zinc-900 dark:border-white bg-zinc-100 dark:bg-[#27272a] text-zinc-900 dark:text-white';
+                  'border-[#2563EB] bg-blue-500/10 text-[#0F172A] dark:text-[#F8FAFC]';
               } else if (checked) {
                 if (idx === resolvedCorrectIndex) {
                   borderStyle =
-                    'border-emerald-500/50 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200';
+                    'border-[#00A86B]/50 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200';
                 } else if (isSelected && idx !== resolvedCorrectIndex) {
                   borderStyle =
                     'border-rose-500/50 bg-rose-500/10 text-rose-900 dark:text-rose-200';
@@ -3931,11 +3932,11 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
                   className={`w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium flex items-center justify-between transition-colors cursor-pointer ${borderStyle}`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <strong className="font-mono text-xs opacity-75">({['A', 'B', 'C', 'D'][idx]})</strong>
+                    <strong className="tabular-nums text-xs opacity-75">({['A', 'B', 'C', 'D'][idx]})</strong>
                     <MathRichText content={opt} inline />
                   </span>
                   {checked && idx === resolvedCorrectIndex && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#00A86B] dark:text-emerald-400">
                       <Check className="w-3.5 h-3.5" />
                       Correct
                     </span>
@@ -3967,14 +3968,14 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-200 dark:border-white/[0.07]">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#E2E8F0] dark:border-white/[0.07]">
           <button
             type="button"
             onClick={() => {
               onClose();
               onLaunchFullCBT();
             }}
-            className="text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white underline-offset-4 hover:underline cursor-pointer"
+            className="text-xs font-medium text-[#475569] dark:text-[#94A3B8] hover:text-[#2563EB] dark:hover:text-white underline-offset-4 hover:underline cursor-pointer"
           >
             Switch to Full 75-Q NTA CBT Mode →
           </button>
@@ -3985,7 +3986,7 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
                 type="button"
                 disabled={selectedOpt === null || verifying}
                 onClick={handleCheckAnswer}
-                className="px-5 py-2.5 rounded-xl btn-terracotta disabled:opacity-50 text-xs font-semibold transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl btn-brand disabled:opacity-50 text-xs font-semibold transition-colors cursor-pointer"
               >
                 {verifying ? 'Verifying...' : 'Check Answer'}
               </button>
@@ -3993,7 +3994,7 @@ export const InstantPracticeModal: React.FC<InstantPracticeModalProps> = ({
               <button
                 type="button"
                 onClick={handleNext}
-                className="px-5 py-2.5 rounded-xl btn-terracotta text-xs font-semibold transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl btn-brand text-xs font-semibold transition-colors cursor-pointer"
               >
                 Next Question →
               </button>

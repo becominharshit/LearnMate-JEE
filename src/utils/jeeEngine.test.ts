@@ -529,3 +529,54 @@ test('resolveCbtSessionInit prevents custom tests from inheriting interrupted mo
   });
   assert.equal(neetInit.initialSecondsRemaining, 180 * 60);
 });
+
+test('filterCustomTestQuestions enforces strict intersection with zero silent fallbacks', async () => {
+  const { filterCustomTestQuestions } = await import('./jeeEngine.ts');
+  const { JEE_ADVANCED_PAPER_QUESTIONS } = await import('../data/jeeInitialContent.ts');
+  const combinedPool = [...CBT_MOCK_QUESTIONS, ...JEE_ADVANCED_PAPER_QUESTIONS];
+
+  // Impossible combination: Physics chapter selected while only Chemistry subject is selected
+  const emptyCrossSubject = filterCustomTestQuestions({
+    basePool: combinedPool,
+    selectedSubjects: ['Chemistry'],
+    selectedChapters: ['Rotational Motion'],
+  });
+  assert.equal(emptyCrossSubject.length, 0);
+
+  // Empty mistake notebook with Previously Incorrect Only -> strictly returns []
+  const emptyMistakes = filterCustomTestQuestions({
+    basePool: combinedPool,
+    mistakesPool: [],
+    selectedSubjects: ['Physics', 'Chemistry', 'Mathematics'],
+    questionTypeFilter: 'Previously Incorrect Only',
+  });
+  assert.equal(emptyMistakes.length, 0);
+
+  // Strict multi-correct filter returns only JEE Advanced multiple-correct questions
+  const multiOnly = filterCustomTestQuestions({
+    basePool: combinedPool,
+    selectedSubjects: ['Physics'],
+    questionTypeFilter: 'Multi-Correct',
+  });
+  assert.ok(multiOnly.every((q) => q.subject === 'Physics' && q.advancedFormat === 'multiple'));
+
+  // Chapter filter respects partial chapter inclusion without cross-chapter motion leakage
+  const electroMatches = filterCustomTestQuestions({
+    basePool: combinedPool,
+    selectedSubjects: ['Physics'],
+    selectedChapters: ['Electrostatics'],
+  });
+  assert.ok(electroMatches.length > 0);
+  assert.ok(electroMatches.every((q) => q.chapter.toLowerCase().includes('electrostatics')));
+
+  const motionPlaneMatches = filterCustomTestQuestions({
+    basePool: combinedPool,
+    selectedSubjects: ['Physics'],
+    selectedChapters: ['Motion in a Plane'],
+  });
+  assert.equal(
+    motionPlaneMatches.some((q) => q.chapter === 'Laws of Motion' || q.chapter === 'Rotational Motion'),
+    false
+  );
+});
+

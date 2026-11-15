@@ -301,10 +301,10 @@ export function buildGroundedMaterialStudyBundle(params: {
     subtitle: `Source-linked summary (${pg.timestampRange || `Page ${pg.pageNumber}`})`,
     colorClass:
       idx % 3 === 0
-        ? 'bg-zinc-100 dark:bg-[#18181b]'
+        ? 'bg-[#F1F5F9] dark:bg-[#1E293B]'
         : idx % 3 === 1
-        ? 'bg-emerald-500/10 dark:bg-[#111113]'
-        : 'bg-amber-500/10 dark:bg-[#111113]',
+        ? 'bg-emerald-500/10 dark:bg-[#111827]'
+        : 'bg-amber-500/10 dark:bg-[#111827]',
     borderClass:
       idx % 3 === 0
         ? 'border-zinc-300 dark:border-white/[0.12]'

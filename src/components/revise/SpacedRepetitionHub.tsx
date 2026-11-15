@@ -91,15 +91,15 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07]">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08]">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setSubMode('neuronz_queue')}
             className={`px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors duration-150 ${
               subMode === 'neuronz_queue'
-                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-[#1f1f23]'
+                ? 'btn-brand'
+                : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
             <Brain className="w-4 h-4" />
@@ -110,8 +110,8 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
             onClick={() => setSubMode('mistake_book')}
             className={`px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors duration-150 ${
               subMode === 'mistake_book'
-                ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                : 'bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-[#1f1f23]'
+                ? 'btn-brand'
+                : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
             <Zap className="w-4 h-4" />
@@ -119,9 +119,9 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
           </button>
         </div>
 
-        <div className="text-xs font-mono tabular-nums text-zinc-500 flex items-center gap-3">
+        <div className="text-xs tabular-nums text-[#475569] dark:text-[#94A3B8] flex items-center gap-3">
           <span>
-            Reviewed: <strong className="text-zinc-900 dark:text-zinc-100">{reviewedTodayCount}</strong>
+            Reviewed: <strong className="text-[#0F172A] dark:text-[#F8FAFC]">{reviewedTodayCount}</strong>
           </span>
           <span>·</span>
           <span>SM-2</span>
@@ -156,10 +156,10 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
           }}
         />
       ) : activeCard ? (
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-5">
+        <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2 font-mono text-zinc-500">
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+            <div className="flex items-center gap-2 text-[#475569] dark:text-[#94A3B8]">
+              <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                 {activeCard.subject} · {activeCard.chapter}
               </span>
               <span>·</span>
@@ -167,20 +167,20 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
                 {activeCard.intervalDays}d · Rep {activeCard.repetitionCount} · EF {activeCard.easeFactor}
               </span>
             </div>
-            <span className="font-mono tabular-nums text-zinc-500">
+            <span className="tabular-nums text-[#475569] dark:text-[#94A3B8]">
               {(activeIndex % dueCards.length) + 1} / {dueCards.length}
             </span>
           </div>
 
           <div
             onClick={() => setIsFlipped((f) => !f)}
-            className="min-h-60 p-8 rounded-2xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] flex flex-col justify-between cursor-pointer transition-colors duration-150"
+            className="min-h-60 p-8 rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700/70 flex flex-col justify-between cursor-pointer transition-colors duration-150"
           >
-            <div className="text-[11px] font-mono uppercase text-zinc-500">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94A3B8]">
               {isFlipped ? 'Back · Answer & Trap' : 'Front · Tap to Flip'}
             </div>
 
-            <div className="my-4 text-base font-medium text-zinc-900 dark:text-zinc-100 leading-relaxed">
+            <div className="my-4 text-base font-medium text-[#0F172A] dark:text-[#F8FAFC] leading-relaxed">
               {isFlipped ? (
                 <MathRichText content={activeCard.backAnswer} />
               ) : (
@@ -188,7 +188,7 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
               )}
             </div>
 
-            <div className="text-xs font-mono tabular-nums text-zinc-500 flex items-center justify-between">
+            <div className="text-xs tabular-nums text-[#475569] dark:text-[#94A3B8] flex items-center justify-between">
               <span>{isFlipped ? 'Show prompt' : 'Reveal solution'}</span>
               <span>Due {new Date(activeCard.nextReviewIso).toLocaleDateString()}</span>
             </div>
@@ -198,47 +198,47 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
             <button
               type="button"
               onClick={() => handleRateCard(1)}
-              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-rose-600 dark:text-rose-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
+              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Again</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">1d · EF −0.2</div>
+              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">1d · EF −0.2</div>
             </button>
             <button
               type="button"
               onClick={() => handleRateCard(3)}
-              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-amber-600 dark:text-amber-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
+              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Hard</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">Quality 3</div>
+              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">Quality 3</div>
             </button>
             <button
               type="button"
               onClick={() => handleRateCard(4)}
-              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-zinc-900 dark:text-zinc-100 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
+              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-[#0F172A] dark:text-[#F8FAFC] text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Good</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">Quality 4</div>
+              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">Quality 4</div>
             </button>
             <button
               type="button"
               onClick={() => handleRateCard(5)}
-              className="p-3 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23] text-emerald-600 dark:text-emerald-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
+              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-[#00A86B] dark:text-emerald-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
             >
               <div>Easy</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">Quality 5 · EF +0.1</div>
+              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">Quality 5 · EF +0.1</div>
             </button>
           </div>
         </div>
       ) : (
-        <div className="p-10 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-center space-y-2">
-          <Sparkles className="w-6 h-6 text-zinc-400 mx-auto" />
-          <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+        <div className="p-10 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-center space-y-2">
+          <Sparkles className="w-6 h-6 text-[#2563EB] mx-auto" />
+          <div className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
             No cards due today
           </div>
           <button
             type="button"
             onClick={() => setSubMode('mistake_book')}
-            className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:underline cursor-pointer"
+            className="text-xs font-semibold text-[#2563EB] dark:text-blue-400 hover:underline cursor-pointer"
           >
             Start Practice →
           </button>

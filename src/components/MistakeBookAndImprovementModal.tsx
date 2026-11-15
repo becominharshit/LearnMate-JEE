@@ -33,16 +33,16 @@ export const MistakeBookAndImprovementModal: React.FC<
       aria-label="Mistake DNA Notebook & Improvement Plan"
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111113] rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden text-zinc-900 dark:text-zinc-100">
-        <div className="px-6 py-4 border-b border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#141417] flex items-center justify-between">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden text-[#0F172A] dark:text-[#F8FAFC]">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#070B14] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="w-5 h-5 text-rose-500" />
             <div>
               <h2 className="text-base font-semibold tracking-[-0.02em]">
                 Mistake DNA · Learning Loop
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                <span className="font-mono tabular-nums">{mistakes.length}</span> logged · Diagnose → Recheck → Verify
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
+                <span className="tabular-nums font-medium">{mistakes.length}</span> logged · Diagnose → Recheck → Verify
               </p>
             </div>
           </div>
@@ -50,7 +50,7 @@ export const MistakeBookAndImprovementModal: React.FC<
             type="button"
             aria-label="Close Mistake DNA Modal"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -58,10 +58,10 @@ export const MistakeBookAndImprovementModal: React.FC<
 
         <div className="p-6 overflow-y-auto space-y-3 text-xs">
           {mistakes.length === 0 ? (
-            <div className="p-8 text-center rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07]">
-              <CheckCircle2 className="w-7 h-7 text-emerald-500 mx-auto mb-2" />
+            <div className="p-8 text-center rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]">
+              <CheckCircle2 className="w-7 h-7 text-[#00A86B] mx-auto mb-2" />
               <div className="font-semibold text-sm">Zero mistakes logged</div>
-              <div className="text-zinc-500 dark:text-zinc-400 mt-1">
+              <div className="text-[#475569] dark:text-[#94A3B8] mt-1">
                 Incorrect questions from CBT mocks or PYQs appear here automatically.
               </div>
             </div>
@@ -69,10 +69,10 @@ export const MistakeBookAndImprovementModal: React.FC<
             mistakes.map((m) => (
               <div
                 key={m.id}
-                className="p-4 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] space-y-2.5"
+                className="p-4 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] space-y-2.5"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-[#475569] dark:text-[#94A3B8]">
                     <span className="text-rose-600 dark:text-rose-400 font-semibold">
                       {m.question.subject}
                     </span>
@@ -84,9 +84,9 @@ export const MistakeBookAndImprovementModal: React.FC<
                       <>
                         <span>·</span>
                         <span
-                          className={`font-mono tabular-nums font-semibold ${
+                          className={`tabular-nums font-semibold ${
                             m.masteryDelta > 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
+                              ? 'text-[#00A86B] dark:text-emerald-400'
                               : 'text-amber-600 dark:text-amber-400'
                           }`}
                         >
@@ -101,7 +101,7 @@ export const MistakeBookAndImprovementModal: React.FC<
                         <button
                           type="button"
                           onClick={() => onVerifyMistakeRecheck(m.id, true)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#00A86B] hover:bg-emerald-600 text-white font-semibold text-[11px] transition-colors cursor-pointer"
                         >
                           <CheckCircle2 className="w-3 h-3" />
                           Pass (+8%)
@@ -122,18 +122,18 @@ export const MistakeBookAndImprovementModal: React.FC<
                         onClose();
                         onPracticeMistake(m.question);
                       }}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg btn-terracotta font-semibold text-[11px] transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg btn-brand font-semibold text-[11px] transition-colors cursor-pointer"
                     >
                       <Target className="w-3 h-3" />
                       Re-Attempt
                     </button>
                   </div>
                 </div>
-                <div className="font-medium text-zinc-800 dark:text-zinc-100">
+                <div className="font-medium text-[#0F172A] dark:text-[#F8FAFC]">
                   <MathRichText content={m.question.stem} />
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mr-1">Root Cause:</span>
+                  <span className="text-[11px] font-medium text-[#475569] dark:text-[#94A3B8] mr-1">Root Cause:</span>
                   {ROOT_CAUSE_TAGS.map((tag) => (
                     <button
                       key={tag}
@@ -141,8 +141,8 @@ export const MistakeBookAndImprovementModal: React.FC<
                       onClick={() => onTagRootCause(m.id, tag)}
                       className={`px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors cursor-pointer ${
                         m.rootCauseTag === tag
-                          ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40 font-semibold'
-                          : 'bg-white dark:bg-[#111113] text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/[0.07] hover:text-zinc-900 dark:hover:text-zinc-200'
+                          ? 'bg-blue-500/15 text-[#2563EB] dark:text-blue-300 border-blue-500/40 font-semibold'
+                          : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-[#E2E8F0] dark:border-white/[0.08] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                       }`}
                     >
                       {tag}

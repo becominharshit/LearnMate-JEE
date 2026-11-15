@@ -125,20 +125,20 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
   return (
     <div className="space-y-4">
       <div className="w-full px-6 lg:px-10 xl:px-12 pt-4">
-        <div className="p-4 rounded-2xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-3">
+        <div className="p-4 rounded-2xl bg-[#FFFFFF] dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
-              <span className="font-mono font-semibold text-[#57534E] dark:text-[#A1A1AA] uppercase">
+              <span className="font-semibold text-[#475569] dark:text-[#94A3B8] uppercase tracking-wider">
                 15-Min Sprints
               </span>
-              <span className="text-[#57534E] dark:text-[#A1A1AA]">·</span>
-              <span className="font-semibold text-[#1C1917] dark:text-[#F5F0E6]">
+              <span className="text-[#475569] dark:text-[#94A3B8]">·</span>
+              <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
                 {activeChapter} ({completedShardIds.length}/{shards.length})
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] border border-[#E7E2DA] dark:border-white/[0.08] text-[#D4653B] dark:text-[#E07348] text-xs font-mono font-semibold tabular-nums inline-flex items-center gap-1">
+              <span className="px-2.5 py-1 rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-[#2563EB] dark:text-[#60A5FA] text-xs font-semibold tabular-nums inline-flex items-center gap-1">
                 <Coins className="w-3.5 h-3.5" />
                 {clueCoins} Coins
               </span>
@@ -147,8 +147,8 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                 onClick={() => setSocraticOpen((o) => !o)}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors duration-150 ${
                   socraticOpen
-                    ? 'btn-terracotta'
-                    : 'bg-[#F3EFEA] dark:bg-[#1A1A1D] text-[#1C1917] dark:text-[#F5F0E6] border border-[#E7E2DA] dark:border-white/[0.08] hover:bg-[#EAE4DC] dark:hover:bg-[#222226]'
+                    ? 'btn-brand'
+                    : 'bg-[#F1F5F9] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-white/[0.08] hover:bg-[#E2E8F0] dark:hover:bg-[#283548]'
                 }`}
               >
                 <Lightbulb className="w-3.5 h-3.5" />
@@ -168,24 +168,24 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                   onClick={() => setActiveShardIdx(isOpen ? null : idx)}
                   className={`p-3 rounded-xl border text-left transition-colors duration-150 cursor-pointer flex items-center justify-between gap-2 ${
                     isOpen
-                      ? 'border-zinc-900 dark:border-white/30 bg-zinc-100 dark:bg-[#1f1f23]'
+                      ? 'border-[#2563EB]/40 bg-[#EFF6FF] dark:bg-[#2563EB]/15'
                       : isDone
-                      ? 'border-emerald-500/30 bg-zinc-50 dark:bg-[#18181b]'
-                      : 'border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#18181b] hover:bg-zinc-100 dark:hover:bg-[#1f1f23]'
+                      ? 'border-[#00A86B]/30 bg-[#F8FAFF] dark:bg-[#1E293B]'
+                      : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548]'
                   }`}
                 >
                   <div className="min-w-0">
-                    <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                    <div className="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] truncate">
                       {shard.title}
                     </div>
-                    <div className="text-[11px] text-zinc-500 truncate mt-0.5">
+                    <div className="text-[11px] text-[#475569] dark:text-[#94A3B8] truncate mt-0.5">
                       15m sprint · 3 checks
                     </div>
                   </div>
                   {isDone ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#00A86B] shrink-0" />
                   ) : (
-                    <Play className="w-4 h-4 text-zinc-500 dark:text-zinc-400 shrink-0" />
+                    <Play className="w-4 h-4 text-[#475569] dark:text-[#94A3B8] shrink-0" />
                   )}
                 </button>
               );
@@ -193,13 +193,13 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
           </div>
 
           {activeShard && (
-            <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-4">
+            <div className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                  <div className="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                     {activeShard.title} · {activeShard.durationMinutes}m
                   </div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-0.5">
                     {activeShard.focusConcept}
                   </p>
                 </div>
@@ -216,9 +216,9 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                   return (
                     <div
                       key={mq.id}
-                      className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2 text-xs"
+                      className="p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2 text-xs"
                     >
-                      <div className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                         Q{qIdx + 1}. <MathRichText content={mq.prompt} />
                       </div>
                       <div className="space-y-1">
@@ -231,10 +231,10 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                             }
                             className={`w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] font-medium cursor-pointer transition-colors duration-150 ${
                               isAnswered && oIdx === mq.correctIndex
-                                ? 'border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold'
+                                ? 'border-[#00A86B]/40 bg-[#00A86B]/10 text-[#00A86B] font-semibold'
                                 : isAnswered && chosen === oIdx && !isRight
                                 ? 'border-rose-500/40 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300'
-                                : 'border-zinc-200 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1f1f23]'
+                                : 'border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#283548]'
                             }`}
                           >
                             <MathRichText content={opt} />
@@ -242,7 +242,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                         ))}
                       </div>
                       {isAnswered && (
-                        <div className="text-[11px] text-zinc-600 dark:text-zinc-400 pt-1 border-t border-zinc-200 dark:border-white/[0.07]">
+                        <div className="text-[11px] text-[#475569] dark:text-[#94A3B8] pt-1 border-t border-[#E2E8F0] dark:border-white/[0.08]">
                           <MathRichText content={mq.explanation} />
                         </div>
                       )}
@@ -262,7 +262,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                     }
                     setActiveShardIdx(null);
                   }}
-                  className="px-4 py-2 rounded-lg btn-terracotta text-xs font-semibold cursor-pointer transition-colors duration-150"
+                  className="px-4 py-2 rounded-lg btn-brand text-xs font-semibold cursor-pointer transition-colors duration-150"
                 >
                   Complete Sprint (+30 XP · +2 Coins)
                 </button>
@@ -271,9 +271,9 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
           )}
 
           {socraticOpen && (
-            <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-3">
+            <div className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                <div className="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
                   <Lightbulb className="w-4 h-4 text-amber-500" />
                   <span>Progressive Hint Coach</span>
                 </div>
@@ -286,8 +286,8 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                       disabled={socraticLoading}
                       className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
                         hintStep === st
-                          ? 'bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.14] text-[#D4653B] dark:text-[#E07348] border border-[#D4653B]/35'
-                          : 'bg-[#FFFFFF] dark:bg-[#121214] text-[#57534E] dark:text-[#A1A1AA] border border-[#E7E2DA] dark:border-white/[0.08] hover:bg-[#EAE4DC] dark:hover:bg-[#222226]'
+                          ? 'bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/35'
+                          : 'bg-[#FFFFFF] dark:bg-[#111827] text-[#475569] dark:text-[#94A3B8] border border-[#E2E8F0] dark:border-white/[0.08] hover:bg-[#E2E8F0] dark:hover:bg-[#283548]'
                       }`}
                     >
                       {st === 1
@@ -304,7 +304,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
 
               <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-medium text-zinc-500">Depth:</span>
+                  <span className="font-medium text-slate-500">Depth:</span>
                   {(
                     [
                       { id: 'board', label: 'Board' },
@@ -318,8 +318,8 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                       onClick={() => setTutorDifficulty(d.id)}
                       className={`px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-colors duration-150 ${
                         tutorDifficulty === d.id
-                          ? 'bg-[#1C1917] text-[#FAF8F5] dark:bg-[#F5F0E6] dark:text-[#09090B]'
-                          : 'bg-white dark:bg-[#111113] text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-white/[0.07]'
+                          ? 'btn-brand'
+                          : 'bg-white dark:bg-[#111827] text-[#475569] dark:text-[#94A3B8] border border-[#E2E8F0] dark:border-white/[0.08]'
                       }`}
                     >
                       {d.label}
@@ -334,7 +334,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                         m === 'strict_material' ? 'open_jee' : 'strict_material'
                       )
                     }
-                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-300 font-medium cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-[#475569] dark:text-[#94A3B8] font-medium cursor-pointer"
                   >
                     Mode: {tutorContextMode === 'strict_material' ? 'Strict Material' : 'Open JEE'}
                   </button>
@@ -342,7 +342,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                     type="button"
                     disabled={socraticLoading}
                     onClick={() => handleRequestSocraticHint('full', 'unit_check')}
-                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-emerald-600 dark:text-emerald-400 font-medium cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-[#00A86B] font-medium cursor-pointer"
                   >
                     Unit Check
                   </button>
@@ -355,31 +355,31 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                   value={socraticPrompt}
                   onChange={(e) => setSocraticPrompt(e.target.value)}
                   placeholder={`Ask a JEE doubt on ${activeChapter}...`}
-                  className="flex-1 px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-xs text-zinc-900 dark:text-zinc-100"
+                  className="flex-1 px-3.5 py-2 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-xs text-[#0F172A] dark:text-[#F8FAFC]"
                 />
                 <button
                   type="button"
                   onClick={() => handleRequestSocraticHint(1)}
                   disabled={socraticLoading}
-                  className="btn-terracotta px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer"
+                  className="btn-brand px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer"
                 >
                   {socraticLoading ? 'Thinking...' : 'Get Hint 1'}
                 </button>
               </div>
 
               {upstreamError && (
-                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-[#111113] border border-amber-500/30 flex items-center justify-between gap-3 text-xs text-amber-800 dark:text-amber-300">
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-[#111827] border border-amber-500/30 flex items-center justify-between gap-3 text-xs text-amber-800 dark:text-amber-300">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
                     <div>
-                      <span className="font-mono font-semibold">[{upstreamError.errorCode}]</span>{' '}
+                      <span className="font-semibold">[{upstreamError.errorCode}]</span>{' '}
                       {upstreamError.message}
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRequestSocraticHint(hintStep)}
-                    className="px-3 py-1.5 rounded-lg btn-terracotta font-semibold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg btn-brand font-semibold inline-flex items-center gap-1 shrink-0 cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     Retry
@@ -388,18 +388,18 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
               )}
 
               {socraticOutput && !upstreamError && (
-                <div className="p-4 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] text-xs leading-relaxed space-y-2.5 text-zinc-700 dark:text-zinc-200">
+                <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-xs leading-relaxed space-y-2.5 text-[#0F172A] dark:text-[#F8FAFC]">
                   <MathRichText content={socraticOutput} />
                   {socraticCitations.length > 0 && (
-                    <div className="pt-2 border-t border-zinc-200 dark:border-white/[0.07] flex flex-wrap items-center gap-1.5">
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase">
+                    <div className="pt-2 border-t border-[#E2E8F0] dark:border-white/[0.08] flex flex-wrap items-center gap-1.5">
+                      <span className="text-[10px] font-semibold text-[#475569] dark:text-[#94A3B8] uppercase">
                         Citations
                       </span>
                       {socraticCitations.map((c, ci) => (
                         <span
                           key={ci}
                           title={c.excerpt}
-                          className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 text-[10px] font-medium"
+                          className="px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] text-[10px] font-medium"
                         >
                           Page {c.pageNumber}
                         </span>

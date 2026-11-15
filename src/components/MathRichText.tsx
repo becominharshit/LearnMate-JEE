@@ -70,12 +70,12 @@ export const MathRichText: React.FC<MathRichTextProps> = ({
           components={{
             p: ({ children }) => <p className="leading-relaxed">{children}</p>,
             strong: ({ children }) => (
-              <strong className="font-semibold text-[#1C1917] dark:text-[#F5F0E6] bg-[#D4653B]/10 px-1 py-0.5 rounded">
+              <strong className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] bg-blue-500/10 px-1 py-0.5 rounded">
                 {children}
               </strong>
             ),
             em: ({ children }) => (
-              <em className="italic font-medium text-[#D4653B] dark:text-[#E07348] underline decoration-[#D4653B]/40 underline-offset-2">
+              <em className="italic font-medium text-[#2563EB] dark:text-blue-400 underline decoration-[#2563EB]/40 underline-offset-2">
                 {children}
               </em>
             ),
@@ -102,12 +102,12 @@ export const MathRichText: React.FC<MathRichTextProps> = ({
           components={{
             p: ({ children }) => <span>{children}</span>,
             strong: ({ children }) => (
-              <strong className="font-semibold text-[#1C1917] dark:text-[#F5F0E6] bg-[#D4653B]/10 px-1 py-0.5 rounded">
+              <strong className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] bg-blue-500/10 px-1 py-0.5 rounded">
                 {children}
               </strong>
             ),
             em: ({ children }) => (
-              <em className="italic font-medium text-[#D4653B] dark:text-[#E07348] underline decoration-[#D4653B]/40 underline-offset-2">
+              <em className="italic font-medium text-[#2563EB] dark:text-blue-400 underline decoration-[#2563EB]/40 underline-offset-2">
                 {children}
               </em>
             ),

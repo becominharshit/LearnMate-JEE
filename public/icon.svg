@@ -1,17 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 96" width="120" height="96" fill="none">
-  <style>
-    .ribbon-primary { fill: #1C1917; }
-    @media (prefers-color-scheme: dark) {
-      .ribbon-primary { fill: #F5F0E6; }
-    }
-  </style>
   <defs>
-    <linearGradient id="lm-terracotta-fav" x1="28" y1="68" x2="80" y2="30" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#D4653B" />
-      <stop offset="100%" stop-color="#E07348" />
+    <linearGradient id="lm-brand-left" x1="12" y1="12" x2="54" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="65%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="lm-brand-fold" x1="27" y1="68" x2="78" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1D4ED8" />
+      <stop offset="50%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="lm-brand-right" x1="50" y1="30" x2="106" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="48%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#00A86B" />
     </linearGradient>
   </defs>
-  <path d="M27 65 C37 56, 48 39, 64 31 L79 44 C67 48, 59 61, 52 72 Z" fill="url(#lm-terracotta-fav)" />
-  <path d="M54 36 C68 25, 84 26, 92 43 L106 75 C94 70, 84 70, 74 75 L61 48 C58 42, 54 41, 49 43 Z" class="ribbon-primary" />
-  <path d="M36 14 C38 10, 44 10, 48 13 C52 16, 54 21, 51 27 L32 63 C38 62, 46 64, 53 71 C46 80, 36 83, 22 83 C12 83, 8 74, 13 64 L36 14 Z" class="ribbon-primary" />
+  <path d="M27 65 C37 56, 48 39, 64 31 L79 44 C67 48, 59 61, 52 72 Z" fill="url(#lm-brand-fold)" />
+  <path d="M54 36 C68 25, 84 26, 92 43 L106 75 C94 70, 84 70, 74 75 L61 48 C58 42, 54 41, 49 43 Z" fill="url(#lm-brand-right)" />
+  <path d="M36 14 C38 10, 44 10, 48 13 C52 16, 54 21, 51 27 L32 63 C38 62, 46 64, 53 71 C46 80, 36 83, 22 83 C12 83, 8 74, 13 64 L36 14 Z" fill="url(#lm-brand-left)" />
 </svg>

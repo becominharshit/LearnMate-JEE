@@ -83,42 +83,42 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#09090B] text-[#1C1917] dark:text-[#F5F0E6] flex flex-col relative">
+    <div className="min-h-screen bg-[#F8FAFF] dark:bg-[#070B14] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative">
       {/* Top Bar */}
-      <header className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-[#E7E2DA] dark:border-white/[0.08]">
+      <header className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-[#E2E8F0] dark:border-white/[0.08]">
         <BrandLogo className="w-8 h-7" showWordmark badgeText="JEE" />
 
         <div className="flex md:hidden items-center gap-2">
           <button
             type="button"
             onClick={() => onOpenAuth('signin')}
-            className="px-3 py-1.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] text-xs font-medium cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-xs font-medium cursor-pointer"
           >
             Sign in
           </button>
         </div>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#57534E] dark:text-[#A1A1AA]">
-          <a href="#how-it-works" className="hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150">
+        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#475569] dark:text-[#94A3B8]">
+          <a href="#how-it-works" className="hover:text-[#0F172A] dark:hover:text-[#F8FAFC] transition-colors duration-150">
             Workflow
           </a>
-          <a href="#try-question" className="hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150">
+          <a href="#try-question" className="hover:text-[#0F172A] dark:hover:text-[#F8FAFC] transition-colors duration-150">
             Try Doubt
           </a>
-          <a href="#faq" className="hover:text-[#1C1917] dark:hover:text-[#F5F0E6] transition-colors duration-150">
+          <a href="#faq" className="hover:text-[#0F172A] dark:hover:text-[#F8FAFC] transition-colors duration-150">
             FAQ
           </a>
           <button
             type="button"
             onClick={() => onOpenAuth('signin')}
-            className="font-medium text-[#1C1917] dark:text-[#F5F0E6] hover:text-[#D4653B] dark:hover:text-[#E07348] transition-colors cursor-pointer"
+            className="font-medium text-[#0F172A] dark:text-[#F8FAFC] hover:text-[#2563EB] dark:hover:text-blue-400 transition-colors cursor-pointer"
           >
             Sign in
           </button>
           <button
             type="button"
             onClick={() => onOpenAuth('signup')}
-            className="btn-terracotta px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-pointer"
+            className="btn-brand px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-pointer"
           >
             <span>Get Started</span>
             <ArrowRight className="w-4 h-4" />
@@ -130,18 +130,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
       <main className="flex-1">
         <section className="max-w-[1280px] mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-center">
           <div className="lg:col-span-7 space-y-6">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#57534E] dark:text-[#A1A1AA]">
-              <Sparkles className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
+            <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-[#475569] dark:text-[#94A3B8]">
+              <Sparkles className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400" />
               <span>JEE Main 2027 · Session 1</span>
               <span>·</span>
-              <span className="tabular-nums">{daysToJee2027}d left</span>
+              <span className="tabular-nums font-semibold text-[#0F172A] dark:text-[#F8FAFC]">{daysToJee2027}d left</span>
             </div>
 
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[54px] leading-[1.08] tracking-[-0.03em] text-[#1C1917] dark:text-[#F5F0E6]">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[54px] leading-[1.08] tracking-[-0.03em] text-[#0F172A] dark:text-[#F8FAFC]">
               Your JEE notes, turned into an active study system.
             </h1>
 
-            <p className="text-[#57534E] dark:text-[#A1A1AA] text-base sm:text-lg leading-relaxed max-w-xl">
+            <p className="text-[#475569] dark:text-[#94A3B8] text-base sm:text-lg leading-relaxed max-w-xl">
               Upload chapters in English, Hinglish, or Hindi. Drill NTA CBT papers and review only what you miss.
             </p>
 
@@ -149,54 +149,54 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
               <button
                 type="button"
                 onClick={() => onOpenAuth('signup')}
-                className="btn-terracotta px-6 py-3 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-pointer"
+                className="btn-brand px-6 py-3 rounded-lg font-semibold text-sm flex items-center gap-2 cursor-pointer"
               >
                 <span>Create free account</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <div className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] text-xs">
-                <label htmlFor="landing-currency-select" className="text-[#57534E] dark:text-[#A1A1AA] font-medium">
+              <div className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-xs">
+                <label htmlFor="landing-currency-select" className="text-[#475569] dark:text-[#94A3B8] font-medium">
                   PPP
                 </label>
                 <select
                   id="landing-currency-select"
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
-                  className="bg-transparent font-mono font-semibold text-[#1C1917] dark:text-[#F5F0E6] focus:outline-none cursor-pointer"
+                  className="bg-transparent tabular-nums font-semibold text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none cursor-pointer"
                 >
                   {(Object.keys(GLOBAL_PPP_PRICING) as SupportedCurrency[]).map((code) => (
-                    <option key={code} value={code} className="bg-[#FFFFFF] dark:bg-[#121214] text-[#1C1917] dark:text-[#F5F0E6]">
+                    <option key={code} value={code} className="bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC]">
                       {code} ({GLOBAL_PPP_PRICING[code].symbol}
                       {GLOBAL_PPP_PRICING[code].proMonthly}/mo)
                     </option>
                   ))}
                 </select>
-                <span className="text-[#57534E] dark:text-[#A1A1AA] font-mono hidden sm:inline">
+                <span className="text-[#475569] dark:text-[#94A3B8] tabular-nums hidden sm:inline">
                   Pro {activePricing.symbol}
                   {activePricing.proMonthly}/mo
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-[#57534E] dark:text-[#A1A1AA]">
-              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+            <div className="flex items-center gap-2 text-xs text-[#475569] dark:text-[#94A3B8]">
+              <ShieldCheck className="w-4 h-4 text-[#00A86B] shrink-0" />
               <span>Free tier included · Private per-account library</span>
             </div>
           </div>
 
           {/* Interactive Sample Card */}
           <div className="lg:col-span-5 relative pb-6">
-            <div className="rounded-2xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] p-6 pb-9 space-y-4">
+            <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] p-6 pb-9 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[#1C1917] dark:text-[#F5F0E6]">
+                <span className="text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC]">
                   Conditional probability
                 </span>
-                <span className="font-mono text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
+                <span className="tabular-nums text-[11px] text-[#475569] dark:text-[#94A3B8]">
                   Page 1
                 </span>
               </div>
 
-              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA] leading-relaxed">
+              <p className="text-sm text-[#475569] dark:text-[#94A3B8] leading-relaxed">
                 {sampleLang === 'English'
                   ? 'If B has already happened, how likely is A? The sample space shrinks to B.'
                   : sampleLang === 'Hindi'
@@ -204,13 +204,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
                   : 'Agar event B pehle hi ho chuka hai, toh A hone ki probability kya hogi? Sample space sirf B reh jaata hai.'}
               </p>
 
-              <div className="px-4 py-3.5 rounded-xl bg-[#F3EFEA] dark:bg-[#1A1A1D] border border-[#E7E2DA] dark:border-white/[0.08] font-mono text-sm font-semibold text-[#1C1917] dark:text-[#F5F0E6]">
+              <div className="px-4 py-3.5 rounded-xl bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] tabular-nums text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                 P(A | B) = P(A ∩ B) / P(B)
               </div>
 
-              <div className="space-y-2 text-xs text-[#57534E] dark:text-[#A1A1AA]">
+              <div className="space-y-2 text-xs text-[#475569] dark:text-[#94A3B8]">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[#00A86B] shrink-0" />
                   <span>
                     {sampleLang === 'English'
                       ? 'Divide by condition P(B), not P(A).'
@@ -220,7 +220,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[#00A86B] shrink-0" />
                   <span>
                     {sampleLang === 'English'
                       ? 'P(A | B) and P(B | A) differ.'
@@ -235,7 +235,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
                 <button
                   type="button"
                   onClick={() => onOpenAuth('signup')}
-                  className="text-xs font-medium text-[#D4653B] dark:text-[#E07348] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-medium text-[#2563EB] dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
                   <span>Open sample chapter</span>
                   <span>→</span>
@@ -244,19 +244,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
             </div>
 
             {/* Language Switcher */}
-            <div className="mt-4 sm:mt-0 sm:absolute sm:-bottom-1 sm:-left-4 bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] rounded-xl px-3 py-2 flex items-center gap-2 shadow-sm">
-              <Languages className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
+            <div className="mt-4 sm:mt-0 sm:absolute sm:-bottom-1 sm:-left-4 bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] rounded-xl px-3 py-2 flex items-center gap-2 shadow-sm">
+              <Languages className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400" />
               <div className="flex items-center gap-1 text-xs font-medium">
                 {(['English', 'Hinglish', 'Hindi'] as const).map((lang, i) => (
                   <React.Fragment key={lang}>
-                    {i > 0 && <span className="text-[#E7E2DA] dark:text-zinc-700">/</span>}
+                    {i > 0 && <span className="text-[#E2E8F0] dark:text-slate-700">/</span>}
                     <button
                       type="button"
                       onClick={() => setSampleLang(lang)}
                       className={`px-2 py-0.5 rounded cursor-pointer transition-colors duration-150 ${
                         sampleLang === lang
-                          ? 'font-semibold text-[#D4653B] dark:text-[#E07348] bg-[#D4653B]/10 dark:bg-[#D4653B]/[0.12]'
-                          : 'text-[#57534E] dark:text-[#A1A1AA] hover:text-[#1C1917] dark:hover:text-[#F5F0E6]'
+                          ? 'font-semibold text-[#2563EB] dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/[0.15]'
+                          : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
                       }`}
                     >
                       {lang}
@@ -269,32 +269,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
         </section>
 
         {/* Workflow */}
-        <section id="how-it-works" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 border-t border-[#E7E2DA] dark:border-white/[0.08]">
-          <p className="text-[11px] font-mono uppercase tracking-wider text-[#57534E] dark:text-[#A1A1AA] mb-4">
+        <section id="how-it-works" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 border-t border-[#E2E8F0] dark:border-white/[0.08]">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94A3B8] mb-4">
             JEE Main &amp; Advanced Workflow
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+            <div className="p-6 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2">
               <h3 className="font-display font-semibold text-base">
                 01. Bring your material
               </h3>
-              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA]">
+              <p className="text-sm text-[#475569] dark:text-[#94A3B8]">
                 PDFs, handwritten scans, or YouTube lectures.
               </p>
             </div>
-            <div className="p-6 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+            <div className="p-6 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2">
               <h3 className="font-display font-semibold text-base">
                 02. 3D, SVG &amp; Video Studio
               </h3>
-              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA]">
+              <p className="text-sm text-[#475569] dark:text-[#94A3B8]">
                 Free-body diagrams, VSEPR models, and concept visuals.
               </p>
             </div>
-            <div className="p-6 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+            <div className="p-6 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2">
               <h3 className="font-display font-semibold text-base">
                 03. NTA CBT &amp; Mistake DNA
               </h3>
-              <p className="text-sm text-[#57534E] dark:text-[#A1A1AA]">
+              <p className="text-sm text-[#475569] dark:text-[#94A3B8]">
                 75-Q CBT simulator, spaced repetition, and formula sheets.
               </p>
             </div>
@@ -303,12 +303,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
 
         {/* Try a Question */}
         <section id="try-question" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-          <div className="p-6 rounded-2xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h2 className="font-display font-semibold text-lg">
                 Try a JEE concept question
               </h2>
-              <p className="text-xs text-[#57534E] dark:text-[#A1A1AA]">
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
                 Instant answer in {sampleLang}.
               </p>
             </div>
@@ -318,19 +318,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
                 value={quickQuestion}
                 onChange={(e) => setQuickQuestion(e.target.value)}
                 placeholder="Why is Zn not considered a transition element?"
-                className="flex-1 px-3.5 py-2 rounded-lg bg-[#F3EFEA] dark:bg-[#1A1A1D] border border-[#E7E2DA] dark:border-white/[0.08] text-sm text-[#1C1917] dark:text-[#F5F0E6] placeholder:text-[#57534E] dark:placeholder:text-[#A1A1AA] focus:outline-none focus:border-[#D4653B]"
+                className="flex-1 px-3.5 py-2 rounded-lg bg-[#F1F5F9] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-sm text-[#0F172A] dark:text-[#F8FAFC] placeholder:text-[#475569] dark:placeholder:text-[#94A3B8] focus:outline-none focus:border-[#2563EB]"
               />
               <button
                 type="submit"
                 disabled={quickLoading}
-                className="btn-terracotta px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer"
+                className="btn-brand px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer"
               >
                 {quickLoading ? '...' : 'Ask'}
               </button>
             </form>
           </div>
           {quickAnswer && (
-            <div className="mt-3 p-4 rounded-xl bg-[#FFFFFF] dark:bg-[#121214] border border-[#E7E2DA] dark:border-white/[0.08] text-sm text-[#57534E] dark:text-[#A1A1AA] whitespace-pre-wrap">
+            <div className="mt-3 p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-sm text-[#475569] dark:text-[#94A3B8] whitespace-pre-wrap">
               {quickAnswer}
             </div>
           )}
@@ -340,7 +340,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
         <section id="faq" className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5">
             <h2 className="font-display font-semibold text-2xl">FAQ</h2>
-            <p className="text-sm text-[#57534E] dark:text-[#A1A1AA] mt-1">
+            <p className="text-sm text-[#475569] dark:text-[#94A3B8] mt-1">
               Privacy, models, and exam accuracy.
             </p>
           </div>
@@ -348,22 +348,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
             {faqs.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-xl border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] overflow-hidden"
+                className="rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] overflow-hidden"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full px-5 py-4 text-left flex items-center justify-between font-medium text-sm hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] transition-colors duration-150 cursor-pointer"
+                  className="w-full px-5 py-4 text-left flex items-center justify-between font-medium text-sm hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-colors duration-150 cursor-pointer"
                 >
                   <span>{item.q}</span>
                   {openFaq === idx ? (
-                    <Minus className="w-4 h-4 text-[#57534E] dark:text-[#A1A1AA] shrink-0" />
+                    <Minus className="w-4 h-4 text-[#475569] dark:text-[#94A3B8] shrink-0" />
                   ) : (
-                    <Plus className="w-4 h-4 text-[#57534E] dark:text-[#A1A1AA] shrink-0" />
+                    <Plus className="w-4 h-4 text-[#475569] dark:text-[#94A3B8] shrink-0" />
                   )}
                 </button>
                 {openFaq === idx && (
-                  <div className="px-5 pb-4 text-sm text-[#57534E] dark:text-[#A1A1AA] leading-relaxed border-t border-[#E7E2DA] dark:border-white/[0.08] pt-3">
+                  <div className="px-5 pb-4 text-sm text-[#475569] dark:text-[#94A3B8] leading-relaxed border-t border-[#E2E8F0] dark:border-white/[0.08] pt-3">
                     {item.a}
                   </div>
                 )}
@@ -373,13 +373,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
         </section>
 
         {/* Minimalist Conversion Section */}
-        <section className="w-full py-14 px-6 border-t border-[#E7E2DA] dark:border-white/[0.08]">
-          <div className="max-w-[920px] mx-auto rounded-2xl bg-[#121214] obsidian-sheen border border-white/[0.08] p-8 sm:p-12 text-[#F5F0E6] flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        <section className="w-full py-14 px-6 border-t border-[#E2E8F0] dark:border-white/[0.08]">
+          <div className="max-w-[920px] mx-auto rounded-2xl bg-[#070B14] border border-white/[0.08] p-8 sm:p-12 text-[#F8FAFC] flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div className="space-y-2.5 max-w-lg">
               <h2 className="font-display font-bold text-2xl sm:text-3xl leading-tight">
                 Start with one chapter.
               </h2>
-              <p className="text-[#A1A1AA] text-sm leading-relaxed">
+              <p className="text-[#94A3B8] text-sm leading-relaxed">
                 Upload notes, drill CBT mocks, and keep your workspace private.
               </p>
             </div>
@@ -387,7 +387,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
               <button
                 type="button"
                 onClick={() => onOpenAuth('signup')}
-                className="btn-terracotta px-6 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="btn-brand px-6 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Create free account</span>
                 <ArrowRight className="w-4 h-4" />
@@ -395,7 +395,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
               <button
                 type="button"
                 onClick={() => onOpenAuth('signin')}
-                className="px-6 py-2 rounded-lg bg-[#1A1A1D] hover:bg-[#222226] text-[#F5F0E6] font-medium text-xs border border-white/[0.08] transition-colors duration-150 cursor-pointer"
+                className="px-6 py-2 rounded-lg bg-[#1E293B] hover:bg-slate-700 text-[#F8FAFC] font-medium text-xs border border-white/[0.08] transition-colors duration-150 cursor-pointer"
               >
                 Sign in
               </button>
@@ -405,8 +405,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
       </main>
 
       {/* Footer */}
-      <footer className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-10 text-xs text-[#57534E] dark:text-[#A1A1AA] space-y-4 border-t border-[#E7E2DA] dark:border-white/[0.08]">
-        <div className="flex flex-wrap items-center gap-6 font-medium text-[#1C1917] dark:text-[#F5F0E6]">
+      <footer className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-10 text-xs text-[#475569] dark:text-[#94A3B8] space-y-4 border-t border-[#E2E8F0] dark:border-white/[0.08]">
+        <div className="flex flex-wrap items-center gap-6 font-medium text-[#0F172A] dark:text-[#F8FAFC]">
           <BrandLogo className="w-6 h-5" showWordmark />
           <button type="button" onClick={() => onOpenLegal('privacy')} className="hover:underline cursor-pointer">
             Privacy
@@ -424,10 +424,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, onOpenLega
             Contact &amp; Report
           </button>
         </div>
-        <p className="leading-relaxed max-w-3xl text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
+        <p className="leading-relaxed max-w-3xl text-[11px] text-[#475569] dark:text-[#94A3B8]">
           Independent JEE study tool. Not affiliated with NTA or IITs. Verify critical derivations against textbooks.
         </p>
-        <p className="text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
+        <p className="text-[11px] text-[#475569] dark:text-[#94A3B8]">
           © 2026 LearnMate · JEE Main 2027 Session 1 · GDPR &amp; India DPDP Act 2023 Compliant
         </p>
       </footer>
@@ -577,9 +577,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#FAF8F5] dark:bg-[#09090B] text-[#1C1917] dark:text-[#F5F0E6]">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F8FAFF] dark:bg-[#070B14] text-[#0F172A] dark:text-[#F8FAFC]">
       {/* Left Brand Showcase Panel */}
-      <div className="lg:col-span-6 bg-[#09090B] obsidian-sheen border-r border-white/[0.08] text-[#F5F0E6] p-8 sm:p-14 flex flex-col justify-between">
+      <div className="lg:col-span-6 bg-[#070B14] border-r border-white/[0.08] text-[#F8FAFC] p-8 sm:p-14 flex flex-col justify-between">
         <BrandLogo className="w-8 h-7" tone="dark-surface" showWordmark badgeText="JEE" />
 
         <div className="my-12 space-y-6 max-w-lg">
@@ -587,27 +587,27 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             Your JEE workspace, built around your notes.
           </h1>
 
-          <div className="space-y-3.5 text-sm text-[#A1A1AA]">
+          <div className="space-y-3.5 text-sm text-[#94A3B8]">
             <div className="flex items-center gap-3">
-              <BookOpen className="w-4 h-4 text-[#E07348] shrink-0" />
+              <BookOpen className="w-4 h-4 text-[#2563EB] shrink-0" />
               <span>Chapter notes, scans, and 12h lecture transcripts.</span>
             </div>
             <div className="flex items-center gap-3">
-              <Languages className="w-4 h-4 text-[#E07348] shrink-0" />
+              <Languages className="w-4 h-4 text-[#7C3AED] shrink-0" />
               <span>English, Hinglish, and Hindi study modes.</span>
             </div>
             <div className="flex items-center gap-3">
-              <Target className="w-4 h-4 text-[#E07348] shrink-0" />
+              <Target className="w-4 h-4 text-[#00A86B] shrink-0" />
               <span>75-Q NTA CBT simulator &amp; SM-2 Mistake DNA.</span>
             </div>
           </div>
 
-          <div className="pt-1 font-mono text-xs text-[#A1A1AA]">
+          <div className="pt-1 tabular-nums text-xs text-[#94A3B8]">
             {daysToJee2027}d to JEE Main 2027 Session 1
           </div>
         </div>
 
-        <div className="text-xs text-[#A1A1AA]">
+        <div className="text-xs text-[#94A3B8]">
           Private per-student workspace · Firebase Auth &amp; Firestore
         </div>
       </div>
@@ -617,7 +617,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         <button
           type="button"
           onClick={onBackToLanding}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-[#fafafa] mb-6 cursor-pointer w-fit"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] mb-6 cursor-pointer w-fit"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back</span>
@@ -629,22 +629,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <h2 className="font-display font-semibold text-2xl">
                 Reset password
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-1">
                 We&apos;ll email you a reset link.
               </p>
             </div>
 
             <form onSubmit={handlePasswordResetSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="email"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] text-sm focus:outline-none focus:border-zinc-400"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] text-sm focus:outline-none focus:border-[#2563EB]"
                   />
                 </div>
               </div>
@@ -664,7 +664,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg btn-terracotta font-semibold text-sm flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer disabled:opacity-60"
+                className="w-full py-2.5 rounded-lg btn-brand font-semibold text-sm flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer disabled:opacity-60"
               >
                 <span>{loading ? 'Sending...' : 'Send Reset Link'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -678,7 +678,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 setResetSent(false);
                 setErrorMsg(null);
               }}
-              className="text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:underline cursor-pointer"
+              className="text-xs font-medium text-slate-700 dark:text-slate-300 hover:underline cursor-pointer"
             >
               ← Back to Sign In
             </button>
@@ -688,7 +688,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             <h2 className="font-display font-semibold text-2xl">
               {mode === 'signup' ? 'Create account' : 'Sign in'}
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 mb-6">
+            <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-1 mb-6">
               Private encrypted study workspace.
             </p>
 
@@ -697,7 +697,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               type="button"
               disabled={loading}
               onClick={handleGoogleLogin}
-              className="w-full py-2.5 px-4 rounded-lg border border-zinc-200 dark:border-white/[0.07] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#18181b] flex items-center justify-center gap-3 text-sm font-medium transition-colors duration-150 cursor-pointer disabled:opacity-60"
+              className="w-full py-2.5 px-4 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] flex items-center justify-center gap-3 text-sm font-medium transition-colors duration-150 cursor-pointer disabled:opacity-60"
             >
               <svg className="w-4 h-4" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -709,21 +709,21 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             </button>
 
             <div className="relative my-6 flex items-center justify-center">
-              <div className="border-t border-zinc-200 dark:border-white/[0.07] w-full" />
-              <span className="bg-[#fafafa] dark:bg-[#09090b] px-3 text-[11px] text-zinc-400 whitespace-nowrap">
+              <div className="border-t border-[#E2E8F0] dark:border-white/[0.08] w-full" />
+              <span className="bg-[#F8FAFF] dark:bg-[#070B14] px-3 text-[11px] text-slate-400 whitespace-nowrap">
                 or email
               </span>
-              <div className="border-t border-zinc-200 dark:border-white/[0.07] w-full" />
+              <div className="border-t border-[#E2E8F0] dark:border-white/[0.08] w-full" />
             </div>
 
             <form onSubmit={handleEmailSubmit} noValidate className="space-y-4">
               {mode === 'signup' && (
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     Name
                   </label>
                   <div className="relative">
-                    <UserIcon className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
+                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                     <input
                       type="text"
                       value={name}
@@ -732,8 +732,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                         setFieldErrors((prev) => ({ ...prev, name: undefined }));
                       }}
                       placeholder="Aarav Sharma"
-                      className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111113] text-sm focus:outline-none ${
-                        fieldErrors.name ? 'border-red-500' : 'border-zinc-200 dark:border-white/[0.07] focus:border-zinc-400'
+                      className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111827] text-sm focus:outline-none ${
+                        fieldErrors.name ? 'border-red-500' : 'border-[#E2E8F0] dark:border-white/[0.08] focus:border-[#2563EB]'
                       }`}
                     />
                   </div>
@@ -744,9 +744,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               )}
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="email"
                     value={email}
@@ -755,8 +755,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setFieldErrors((prev) => ({ ...prev, email: undefined }));
                     }}
                     placeholder="you@example.com"
-                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111113] text-sm focus:outline-none ${
-                      fieldErrors.email ? 'border-red-500' : 'border-zinc-200 dark:border-white/[0.07] focus:border-zinc-400'
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111827] text-sm focus:outline-none ${
+                      fieldErrors.email ? 'border-red-500' : 'border-[#E2E8F0] dark:border-white/[0.08] focus:border-[#2563EB]'
                     }`}
                   />
                 </div>
@@ -766,9 +766,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Password</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="password"
                     value={password}
@@ -777,8 +777,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setFieldErrors((prev) => ({ ...prev, password: undefined }));
                     }}
                     placeholder="Minimum 6 characters"
-                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111113] text-sm focus:outline-none ${
-                      fieldErrors.password ? 'border-red-500' : 'border-zinc-200 dark:border-white/[0.07] focus:border-zinc-400'
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#111827] text-sm focus:outline-none ${
+                      fieldErrors.password ? 'border-red-500' : 'border-[#E2E8F0] dark:border-white/[0.08] focus:border-[#2563EB]'
                     }`}
                   />
                 </div>
@@ -795,7 +795,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                         setResetSent(false);
                         setErrorMsg(null);
                       }}
-                      className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-[#fafafa] hover:underline cursor-pointer"
+                      className="text-xs font-medium text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:underline cursor-pointer"
                     >
                       Forgot Password?
                     </button>
@@ -804,13 +804,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </div>
 
               {mode === 'signup' && (
-                <div className="p-3 rounded-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] space-y-2.5 text-xs">
-                  <label className="flex items-center gap-2 font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer">
+                <div className="p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2.5 text-xs">
+                  <label className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isUnder18}
                       onChange={(e) => setIsUnder18(e.target.checked)}
-                      className="rounded accent-zinc-900 dark:accent-[#fafafa]"
+                      className="rounded accent-[#2563EB]"
                     />
                     <span>Under 18 (guardian consent required)</span>
                   </label>
@@ -821,14 +821,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                         value={guardianEmail}
                         onChange={(e) => setGuardianEmail(e.target.value)}
                         placeholder="Parent / Guardian email"
-                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-white/[0.07] text-xs bg-zinc-50 dark:bg-[#18181b] focus:outline-none"
+                        className="w-full px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] text-xs bg-[#F1F5F9] dark:bg-[#1E293B] focus:outline-none focus:border-[#2563EB]"
                       />
-                      <label className="flex items-start gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 cursor-pointer">
+                      <label className="flex items-start gap-2 text-[11px] text-[#475569] dark:text-[#94A3B8] cursor-pointer">
                         <input
                           type="checkbox"
                           checked={guardianConsent}
                           onChange={(e) => setGuardianConsent(e.target.checked)}
-                          className="mt-0.5 rounded accent-zinc-900 dark:accent-[#fafafa]"
+                          className="mt-0.5 rounded accent-[#2563EB]"
                         />
                         <span>
                           Guardian consents under India DPDP Act 2023 &amp; GDPR.
@@ -848,14 +848,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-terracotta w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="btn-brand w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 <ArrowRight className="w-4 h-4" />
                 <span>{mode === 'signup' ? 'Create account' : 'Sign in'}</span>
               </button>
             </form>
 
-            <p className="text-center text-xs text-[#57534E] dark:text-[#A1A1AA] mt-5">
+            <p className="text-center text-xs text-[#475569] dark:text-[#94A3B8] mt-5">
               {mode === 'signup' ? (
                 <>
                   Have an account?{' '}
@@ -866,7 +866,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setErrorMsg(null);
                       setFieldErrors({});
                     }}
-                    className="font-semibold text-[#D4653B] dark:text-[#E07348] hover:underline cursor-pointer"
+                    className="font-semibold text-[#2563EB] dark:text-blue-400 hover:underline cursor-pointer"
                   >
                     Sign in
                   </button>
@@ -881,7 +881,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       setErrorMsg(null);
                       setFieldErrors({});
                     }}
-                    className="font-semibold text-[#D4653B] dark:text-[#E07348] hover:underline cursor-pointer"
+                    className="font-semibold text-[#2563EB] dark:text-blue-400 hover:underline cursor-pointer"
                   >
                     Create account
                   </button>
@@ -890,16 +890,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             </p>
 
             {onTryDemo && (
-              <div className="mt-5 pt-4 border-t border-[#E7E2DA] dark:border-white/[0.08] space-y-2">
+              <div className="mt-5 pt-4 border-t border-[#E2E8F0] dark:border-white/[0.08] space-y-2">
                 <button
                   type="button"
                   onClick={onTryDemo}
-                  className="w-full py-2.5 px-4 rounded-lg border border-[#E7E2DA] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#121214] hover:bg-[#F3EFEA] dark:hover:bg-[#1A1A1D] text-xs font-medium flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-xs font-medium flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer"
                 >
-                  <Compass className="w-3.5 h-3.5 text-[#D4653B] dark:text-[#E07348]" />
+                  <Compass className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400" />
                   <span>Try Demo Without Account</span>
                 </button>
-                <p className="text-[11px] text-center text-[#57534E] dark:text-[#A1A1AA]">
+                <p className="text-[11px] text-center text-[#475569] dark:text-[#94A3B8]">
                   Local preview only.
                 </p>
               </div>
@@ -907,8 +907,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           </>
         )}
 
-        <div className="mt-6 pt-4 border-t border-[#E7E2DA] dark:border-white/[0.08] flex items-center gap-2 text-[11px] text-[#57534E] dark:text-[#A1A1AA]">
-          <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+        <div className="mt-6 pt-4 border-t border-[#E2E8F0] dark:border-white/[0.08] flex items-center gap-2 text-[11px] text-[#475569] dark:text-[#94A3B8]">
+          <ShieldCheck className="w-4 h-4 text-[#00A86B] shrink-0" />
           <span>Private to your account.</span>
         </div>
       </div>

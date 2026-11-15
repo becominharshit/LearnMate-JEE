@@ -22,7 +22,6 @@ import { CompactStudyUtilitiesDrawer } from './components/utilities/CompactStudy
 import { PracticeWorkspaceView } from './components/PracticeWorkspaceView';
 import { DynamicCompanion } from './components/DynamicCompanion';
 import { MistakeBookAndImprovementModal } from './components/MistakeBookAndImprovementModal';
-import { PwaOfflineAndJobsBar } from './components/PwaOfflineAndJobsBar';
 import { AdminCommercialConsoleModal } from './components/AdminCommercialConsoleModal';
 import { AdminQuestionBankModal } from './components/AdminQuestionBankModal';
 import { AppShellFrame } from './components/AppShellFrame';
@@ -33,12 +32,12 @@ export function App() {
 
   if (s.authLoading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#09090B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8FAFF] dark:bg-[#070B14] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="animate-pulse">
             <BrandLogo className="w-12 h-10" />
           </div>
-          <div className="text-sm font-medium text-[#57534E] dark:text-[#A1A1AA]">Loading LearnMate JEE...</div>
+          <div className="text-sm font-medium text-[#475569] dark:text-[#94A3B8]">Loading LearnMate JEE...</div>
         </div>
       </div>
     );
@@ -163,7 +162,7 @@ export function App() {
         onCloseNotifications={() => s.setNotificationsOpen(false)}
         onOpenVoiceTutor={() => s.setVoiceTutorOpen(true)}
         onOpenProfileModal={() => s.setProfileModalOpen(true)}
-        avatarColor={s.studentProfile.avatarColor || '#D4653B'}
+        avatarColor={s.studentProfile.avatarColor || '#2563EB'}
         userInitial={userInitial}
         onStartCBTMock={(mode) => {
           s.startCBTMockSession(mode);
@@ -386,12 +385,6 @@ export function App() {
         )}
       </AppShellFrame>
 
-      <PwaOfflineAndJobsBar
-        isAdmin={s.isAdmin}
-        onOpenAdminConsole={() => s.setProModalOpen(true)}
-        onOpenAdminQuestionBank={() => s.setQuestionBankModalOpen(true)}
-      />
-
       <AddMaterialModal
         isOpen={s.addMaterialOpen}
         initialTab={s.addMaterialInitialTab}
@@ -485,6 +478,7 @@ export function App() {
         isOpen={s.legalModalState.isOpen}
         initialTab={s.legalModalState.tab}
         onClose={() => s.setLegalModalState((prev) => ({ ...prev, isOpen: false }))}
+        onDeleteAccountData={s.handleDeleteAccountData}
       />
 
       <InstantPracticeModal
