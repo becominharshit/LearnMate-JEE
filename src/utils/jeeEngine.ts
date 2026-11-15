@@ -881,84 +881,6 @@ export function calculateNextSRSReview(
   };
 }
 
-export interface ShiftPercentilePrediction {
-  percentile: number;
-  predictedAirMin: number;
-  predictedAirMax: number;
-  cutoffCleared: boolean;
-  targetInstituteTier: string;
-  normalizedMarksOutOf300: number;
-}
-
-/**
- * Quizrr / MathonGo-style Shift-Difficulty Normalization & NTA Percentile / AIR Predictor.
- */
-export function predictNtaPercentileAndAir(params: {
-  score: number;
-  maxScore: number;
-  shiftDifficulty?: 'Easy' | 'Moderate' | 'Tough';
-  totalCandidates?: number;
-}): ShiftPercentilePrediction {
-  const {
-    score,
-    maxScore,
-    shiftDifficulty = 'Moderate',
-    totalCandidates = 1420000,
-  } = params;
-
-  const safeMax = Math.max(1, maxScore);
-  const rawNormalized300 = Math.max(-75, Math.min(300, Math.round((score / safeMax) * 300)));
-
-  // Shift difficulty adjustment (+14 marks equivalent for Tough shift, -12 for Easy shift)
-  const shiftBonus = shiftDifficulty === 'Tough' ? 14 : shiftDifficulty === 'Easy' ? -12 : 0;
-  const effectiveScore = Math.max(0, Math.min(300, rawNormalized300 + shiftBonus));
-
-  let percentile = 50;
-  if (effectiveScore >= 280) {
-    percentile = 99.98 + ((effectiveScore - 280) / 20) * 0.019;
-  } else if (effectiveScore >= 240) {
-    percentile = 99.8 + ((effectiveScore - 240) / 40) * 0.18;
-  } else if (effectiveScore >= 200) {
-    percentile = 99.2 + ((effectiveScore - 200) / 40) * 0.6;
-  } else if (effectiveScore >= 170) {
-    percentile = 98.0 + ((effectiveScore - 170) / 30) * 1.2;
-  } else if (effectiveScore >= 140) {
-    percentile = 95.5 + ((effectiveScore - 140) / 30) * 2.5;
-  } else if (effectiveScore >= 110) {
-    percentile = 91.0 + ((effectiveScore - 110) / 30) * 4.5;
-  } else if (effectiveScore >= 80) {
-    percentile = 82.0 + ((effectiveScore - 80) / 30) * 9.0;
-  } else {
-    percentile = Math.max(12.0, (effectiveScore / 80) * 82.0);
-  }
-
-  const roundedPercentile = Number(Math.min(99.999, percentile).toFixed(4));
-  const rawRank = Math.max(1, Math.round(((100 - roundedPercentile) / 100) * totalCandidates));
-  const predictedAirMin = Math.max(1, Math.round(rawRank * 0.88));
-  const predictedAirMax = Math.max(predictedAirMin + 15, Math.round(rawRank * 1.12));
-  const cutoffCleared = roundedPercentile >= 93.2;
-
-  const targetInstituteTier =
-    roundedPercentile >= 99.6
-      ? 'Top 5 NITs (Trichy, Surathkal, Warangal) CSE & IIIT-H'
-      : roundedPercentile >= 98.5
-      ? 'Top 10 NITs & IIITs Core / Circuital Branches'
-      : roundedPercentile >= 95.0
-      ? 'NITs / IIITs / GFTIs & Qualified for JEE Advanced'
-      : roundedPercentile >= 93.2
-      ? 'JEE Advanced Cutoff Cleared — Push +35 Marks for NIT Seat'
-      : 'Below General Cutoff — Focus on High-Weightage Chapters & Mistake Book';
-
-  return {
-    percentile: roundedPercentile,
-    predictedAirMin,
-    predictedAirMax,
-    cutoffCleared,
-    targetInstituteTier,
-    normalizedMarksOutOf300: rawNormalized300,
-  };
-}
-
 export interface ChapterShardTask {
   id: string;
   shardNumber: number;
@@ -976,161 +898,405 @@ export interface ChapterShardTask {
 }
 
 /**
- * Generates 15-Minute "ShardZ" active-recall micro-tasks with a 3-question mastery check per shard.
+ * Generates 15-Minute "ShardZ" active-recall micro-tasks with subject-authentic JEE syllabus questions.
  */
 export function generateChapterShardZ(
   chapter: string,
   subject: 'Physics' | 'Chemistry' | 'Mathematics'
 ): ChapterShardTask[] {
+  if (subject === 'Physics') {
+    return [
+      {
+        id: `shard-${chapter}-1`,
+        shardNumber: 1,
+        title: `ShardZ #1: Conservation Laws & Dimensional Analysis in ${chapter}`,
+        durationMinutes: 15,
+        focusConcept: `Verify frame conditions, free-body resolution, and conservation principles in ${chapter}.`,
+        formulaHook:
+          '$$\\vec{F}_{\\text{net}} = \\frac{d\\vec{p}}{dt}, \\quad W_{\\text{all}} = \\Delta K, \\quad \\tau_{\\text{ext}} = \\frac{d\\vec{L}}{dt}$$',
+        masteryQuestions: [
+          {
+            id: `sq-${chapter}-1-1`,
+            prompt: `In ${chapter}, if an isolated system experiences zero net external force ($\\vec{F}_{\\text{ext}} = 0$), which physical quantity remains strictly conserved?`,
+            options: [
+              'Kinetic energy only',
+              'Total linear momentum $\\vec{P}$',
+              'Angular speed $\\omega$ only',
+              'Potential energy gradient',
+            ],
+            correctIndex: 1,
+            explanation:
+              'By Newton’s second law for a system of particles, $\\vec{F}_{\\text{ext}} = d\\vec{P}/dt = 0$ guarantees conservation of total linear momentum $\\vec{P}$, even during inelastic internal interactions.',
+          },
+          {
+            id: `sq-${chapter}-1-2`,
+            prompt: `When checking an analytical expression derived in ${chapter}, the argument inside $\\sin(\\omega t - kx)$ or $e^{-t/\\tau}$ must have dimensions:`,
+            options: [
+              '$[M^1L^1T^{-2}]$',
+              '$[L^1T^{-1}]$',
+              '$[M^0L^0T^0]$ (Dimensionless)',
+              '$[T^{-1}]$',
+            ],
+            correctIndex: 2,
+            explanation:
+              'All transcendental functions ($\\sin, \\cos, \\exp, \\ln$) require strictly dimensionless arguments $[M^0L^0T^0]$.',
+          },
+          {
+            id: `sq-${chapter}-1-3`,
+            prompt: `A conservative internal force field in ${chapter} obeys $\\vec{F} = -\\nabla U$. The work done by this force along any closed loop is:`,
+            options: [
+              'Positive and proportional to path length',
+              'Equal to $\\Delta K$ around the loop',
+              'Dependent on speed',
+              'Identically zero ($\\oint \\vec{F}\\cdot d\\vec{r} = 0$)',
+            ],
+            correctIndex: 3,
+            explanation:
+              'The closed-loop line integral of a conservative force field is always zero because work depends solely on initial and final positions.',
+          },
+        ],
+      },
+      {
+        id: `shard-${chapter}-2`,
+        shardNumber: 2,
+        title: `ShardZ #2: Work-Energy, Flux & Symmetry in ${chapter}`,
+        durationMinutes: 15,
+        focusConcept: `Apply energy balance, symmetry, and differential relations cleanly in ${chapter}.`,
+        formulaHook:
+          '$$I = I_{\\text{cm}} + Md^2, \\quad K_{\\text{rolling}} = \\frac{1}{2}Mv_{\\text{cm}}^2\\left(1 + \\frac{k^2}{R^2}\\right)$$',
+        masteryQuestions: [
+          {
+            id: `sq-${chapter}-2-1`,
+            prompt: `A solid disc of mass $M$ and radius $R$ rolls without slipping with speed $v$ on a horizontal plane. Its rotational kinetic energy as a fraction of total kinetic energy is:`,
+            options: ['$\\frac{1}{3}$', '$\\frac{1}{2}$', '$\\frac{2}{3}$', '$\\frac{2}{5}$'],
+            correctIndex: 0,
+            explanation:
+              'For a disc, $I = \\frac{1}{2}MR^2$, so $K_{\\text{rot}} = \\frac{1}{4}Mv^2$ and $K_{\\text{total}} = \\frac{3}{4}Mv^2$, giving $K_{\\text{rot}}/K_{\\text{total}} = 1/3$.',
+          },
+          {
+            id: `sq-${chapter}-2-2`,
+            prompt: `A particle starts from rest under a constant net power $P_0$. Its displacement $x$ varies with time $t$ as:`,
+            options: ['$x \\propto t$', '$x \\propto t^{3/2}$', '$x \\propto t^2$', '$x \\propto t^{1/2}$'],
+            correctIndex: 1,
+            explanation:
+              'Constant power gives $\\frac{1}{2}mv^2 = P_0 t \\implies v \\propto t^{1/2} \\implies x = \\int v\\,dt \\propto t^{3/2}$.',
+          },
+          {
+            id: `sq-${chapter}-2-3`,
+            prompt: `Two identical springs of stiffness $k$ connected in parallel support a mass $m$. The effective spring constant of the combination is:`,
+            options: ['$k/2$', '$k$', '$2k$', '$4k$'],
+            correctIndex: 2,
+            explanation:
+              'In parallel, both springs undergo identical extension $x$, so restoring force is $F = (k + k)x = 2kx \\implies k_{\\text{eq}} = 2k$.',
+          },
+        ],
+      },
+      {
+        id: `shard-${chapter}-3`,
+        shardNumber: 3,
+        title: `ShardZ #3: Limiting Cases & Boundary Conditions in ${chapter}`,
+        durationMinutes: 15,
+        focusConcept: `Verify physical boundary regimes, equilibrium stability, and vector signs in ${chapter}.`,
+        formulaHook:
+          '$$F_x = -\\frac{dU}{dx}, \\quad \\frac{d^2U}{dx^2} > 0 \\text{ (Stable Equilibrium)}$$',
+        masteryQuestions: [
+          {
+            id: `sq-${chapter}-3-1`,
+            prompt: `A particle moves in a 1D potential $U(x)$. Which condition corresponds to a position of stable equilibrium?`,
+            options: [
+              '$\\frac{dU}{dx} = 0$ and $\\frac{d^2U}{dx^2} < 0$',
+              '$\\frac{dU}{dx} \\ne 0$ and $\\frac{d^2U}{dx^2} > 0$',
+              '$\\frac{dU}{dx} = 0$ and $\\frac{d^2U}{dx^2} = 0$ always',
+              '$\\frac{dU}{dx} = 0$ and $\\frac{d^2U}{dx^2} > 0$',
+            ],
+            correctIndex: 3,
+            explanation:
+              'Equilibrium requires $F = -dU/dx = 0$, and stability requires a local minimum of potential energy ($d^2U/dx^2 > 0$).',
+          },
+          {
+            id: `sq-${chapter}-3-2`,
+            prompt: `In an elastic head-on collision between two bodies of equal mass, if the second body is initially at rest, after collision the first body:`,
+            options: [
+              'Comes completely to rest and transfers all kinetic energy',
+              'Rebounds with half its initial speed',
+              'Moves forward with twice its speed',
+              'Sticks to the second body',
+            ],
+            correctIndex: 0,
+            explanation:
+              'For equal masses and $e = 1$, velocities exchange completely: $v_1\' = u_2 = 0$ and $v_2\' = u_1$.',
+          },
+          {
+            id: `sq-${chapter}-3-3`,
+            prompt: `When a thin converging lens of refractive index $\\mu_g = 1.5$ is immersed in a liquid of refractive index $\\mu_L = 1.6$, the lens behaves as a:`,
+            options: [
+              'Converging lens of shorter focal length',
+              'Diverging lens',
+              'Plane glass slab',
+              'Converging lens of unchanged focal length',
+            ],
+            correctIndex: 1,
+            explanation:
+              'By the Lens Maker’s formula, $\\frac{1}{f} \\propto \\left(\\frac{\\mu_g}{\\mu_L} - 1\\right)$. Since $\\mu_g < \\mu_L$, the factor becomes negative and a biconvex lens diverges light.',
+          },
+        ],
+      },
+    ];
+  }
+
+  if (subject === 'Chemistry') {
+    return [
+      {
+        id: `shard-${chapter}-1`,
+        shardNumber: 1,
+        title: `ShardZ #1: Structure, Bonding & Energetics in ${chapter}`,
+        durationMinutes: 15,
+        focusConcept: `Identify hybridisation, oxidation states, and thermodynamic sign conventions in ${chapter}.`,
+        formulaHook:
+          '$$\\Delta G^\\circ = -nFE^\\circ_{\\text{cell}} = -2.303\\,RT\\log_{10} K_{\\text{eq}}$$',
+        masteryQuestions: [
+          {
+            id: `sq-${chapter}-1-1`,
+            prompt: `Which orbital hybridisation corresponds to a square planar molecular geometry with $4$ bond pairs and $2$ lone pairs around the central atom?`,
+            options: ['$sp^3$', '$sp^3d^2$', '$sp^2$', '$sp^3d$'],
+            correctIndex: 1,
+            explanation:
+              'A steric number of $6$ ($4\\,\\sigma\\text{ bonds} + 2\\text{ lone pairs}$, as in $\\text{XeF}_4$) gives $sp^3d^2$ hybridisation with a square planar shape.',
+          },
+          {
+            id: `sq-${chapter}-1-2`,
+            prompt: `For an exothermic reaction with $\\Delta H < 0$ and $\\Delta S < 0$, the reaction becomes spontaneous ($\\Delta G < 0$) at:`,
+            options: [
+              'All temperatures',
+              'High temperatures where $T|\\Delta S| > |\\Delta H|$',
+              'Low temperatures where $|\\Delta H| > T|\\Delta S|$',
+              'No temperature',
+            ],
+            correctIndex: 2,
+            explanation:
+              'Since $\\Delta G = \\Delta H - T\\Delta S$, with $\\Delta H < 0$ and $-T\\Delta S > 0$, spontaneity requires low $T$ so enthalpy dominates.',
+          },
+          {
+            id: `sq-${chapter}-1-3`,
+            prompt: `What is the oxidation state of chromium in potassium dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$)?`,
+            options: ['$+3$', '$+4$', '$+5$', '$+6$'],
+            correctIndex: 3,
+            explanation:
+              '$2(+1) + 2x + 7(-2) = 0 \\implies 2x = 12 \\implies x = +6$.',
+          },
+        ],
+      },
+      {
+        id: `shard-${chapter}-2`,
+        shardNumber: 2,
+        title: `ShardZ #2: Kinetics, Equilibrium & Electrochemistry in ${chapter}`,
+        durationMinutes: 15,
+        focusConcept: `Apply rate laws, Le Chatelier shifts, and Nernst relations accurately in ${chapter}.`,
+        formulaHook:
+          '$$k = A e^{-E_a/RT}, \\quad t_{1/2} = \\frac{0.693}{k}, \\quad K_p = K_c(RT)^{\\Delta n_g}$$',
+        masteryQuestions: [
+          {
+            id: `sq-${chapter}-2-1`,
+            prompt: `For a zero-order reaction, how does the half-life $t_{1/2}$ depend on initial reactant concentration $[A]_0$?`,
+            options: [
+              '$t_{1/2} \\propto [A]_0$',
+              'Independent of $[A]_0$',
+              '$t_{1/2} \\propto 1/[A]_0$',
+              '$t_{1/2} \\propto 1/[A]_0^2$',
+            ],
+            correctIndex: 0,
+            explanation:
+              'For zero-order kinetics, $t_{1/2} = \\frac{[A]_0}{2k}$, which is directly proportional to $[A]_0$.',
+          },
+          {
+            id: `sq-${chapter}-2-2`,
+            prompt: `Adding an inert gas at constant volume to an equilibrium mixture $\\text{N}_2(g) + 3\\text{H}_2(g) \\rightleftharpoons 2\\text{NH}_3(g)$:`,
+            options: [
+              'Shifts equilibrium toward products',
+              'Causes no shift in equilibrium composition',
+              'Shifts equilibrium toward reactants',
+              'Decreases the equilibrium constant $K_c$',
+            ],
+            correctIndex: 1,
+            explanation:
+              'At constant volume, adding an inert gas does not change the partial pressures or molar concentrations of any reacting species, so equilibrium is undisturbed.',
+          },
+          {
+            id: `sq-${chapter}-2-3`,
+            prompt: `A positive standard cell potential ($E^\\circ_{\\text{cell}} > 0$) implies which relationship between $\\Delta G^\\circ$ and $K_{\\text{eq}}$?`,
+            options: [
+              '$\\Delta G^\\circ > 0, \\; K_{\\text{eq}} < 1$',
+              '$\\Delta G^\\circ = 0, \\; K_{\\text{eq}} = 1$',
+              '$\\Delta G^\\circ < 0, \\; K_{\\text{eq}} > 1$',
+              '$\\Delta G^\\circ < 0, \\; K_{\\text{eq}} < 1$',
+            ],
+            correctIndex: 2,
+            explanation:
+              'Since $\\Delta G^\\circ = -nFE^\\circ_{\\text{cell}} = -RT\\ln K_{\\text{eq}}$, $E^\\circ_{\\text{cell}} > 0$ gives $\\Delta G^\\circ < 0$ and $K_{\\text{eq}} > 1$.',
+          },
+        ],
+      },
+      {
+        id: `shard-${chapter}-3`,
+        shardNumber: 3,
+        title: `ShardZ #3: Reactivity Trends, Isomerism & Exceptions in ${chapter}`,
+        durationMinutes: 15,
+        focusConcept: `Spot electronic effects, periodic anomalies, and stereochemical rules in ${chapter}.`,
+        formulaHook:
+          '$$\\mu_{\\text{spin}} = \\sqrt{n(n+2)}\\text{ BM}, \\quad \\text{BO} = \\frac{N_b - N_a}{2}$$',
+        masteryQuestions: [
+          {
+            id: `sq-${chapter}-3-1`,
+            prompt: `Among $\\text{NH}_3$, $\\text{PH}_3$, $\\text{AsH}_3$, and $\\text{SbH}_3$, which hydride has the highest boiling point due to intermolecular hydrogen bonding?`,
+            options: ['$\\text{PH}_3$', '$\\text{AsH}_3$', '$\\text{SbH}_3$', '$\\text{NH}_3$'],
+            correctIndex: 3,
+            explanation:
+              'Strong intermolecular $\\text{N–H}\\cdots\\text{N}$ hydrogen bonding elevates the boiling point of $\\text{NH}_3$ above $\\text{PH}_3$ and $\\text{AsH}_3$.',
+          },
+          {
+            id: `sq-${chapter}-3-2`,
+            prompt: `Which paramagnetic diatomic species has a bond order of $2.5$?`,
+            options: ['$\\text{NO}$', '$\\text{N}_2$', '$\\text{CO}$', '$\\text{F}_2$'],
+            correctIndex: 0,
+            explanation:
+              '$\\text{NO}$ has $15$ total electrons (one unpaired $\\pi^*$ electron), yielding $\\text{BO} = \\frac{10 - 5}{2} = 2.5$.',
+          },
+          {
+            id: `sq-${chapter}-3-3`,
+            prompt: `In nucleophilic substitution reactions, the $\\text{S}_\\text{N}2$ mechanism proceeds with:`,
+            options: [
+              'Complete racemization',
+              'Walden inversion of configuration in a single concerted step',
+              'Formation of a planar carbocation intermediate',
+              'Zero dependence on nucleophile concentration',
+            ],
+            correctIndex: 1,
+            explanation:
+              'Backside attack by the nucleophile in a concerted bimolecular transition state produces $100\\%$ stereochemical inversion.',
+          },
+        ],
+      },
+    ];
+  }
+
   return [
     {
       id: `shard-${chapter}-1`,
       shardNumber: 1,
-      title: `ShardZ #1: First Principles & Governing Law of ${chapter}`,
+      title: `ShardZ #1: Core Identities & Domain Checks in ${chapter}`,
       durationMinutes: 15,
-      focusConcept: `Master the fundamental conservation laws, standard SI units, and sign conventions in ${chapter}.`,
+      focusConcept: `Verify function domains, symmetry identities, and algebraic invariants in ${chapter}.`,
       formulaHook:
-        subject === 'Physics'
-          ? '$$\\vec{F}_{\\text{net}} = \\frac{d\\vec{p}}{dt}, \\quad W_{\\text{all}} = \\Delta K$$'
-          : subject === 'Chemistry'
-          ? '$$\\Delta G^\\circ = -nFE^\\circ_{\\text{cell}} = -2.303\\,RT\\log_{10} K_{\\text{eq}}$$'
-          : '$$\\int_a^b f(x)\\,dx = \\int_a^b f(a+b-x)\\,dx$$',
+        '$$\\int_a^b f(x)\\,dx = \\int_a^b f(a+b-x)\\,dx, \\quad |\\text{adj}(A)| = |A|^{n-1}$$',
       masteryQuestions: [
         {
           id: `sq-${chapter}-1-1`,
-          prompt: `Before applying any shortcut formula in ${chapter}, which condition must be verified first?`,
-          options: [
-            'Domain validity, reference frame, and standard SI units',
-            'Numerical approximation of constants to 1 significant figure',
-            'Ignoring boundary conditions',
-            'Skipping dimensional homogeneity',
-          ],
-          correctIndex: 0,
+          prompt: `If $f(x)$ is an odd continuous function on $[-a, a]$, what is the value of $\\int_{-a}^{a} \\left(f(x) + 3\\right)dx$?`,
+          options: ['$0$', '$6a$', '$2\\int_0^a f(x)\\,dx$', '$3a$'],
+          correctIndex: 1,
           explanation:
-            'Every JEE Main & Advanced formula requires checking frame validity, boundary conditions, and SI units first.',
+            'Since $\\int_{-a}^a f(x)\\,dx = 0$ for an odd function, only the constant term $3$ integrates over length $2a$ to give $6a$.',
         },
         {
           id: `sq-${chapter}-1-2`,
-          prompt: `In dimensional verification of an equation in ${chapter}, the arguments of exponential or logarithmic terms must be:`,
+          prompt: `What is the domain of the real-valued function $g(x) = \\ln(x^2 - 9)$?`,
           options: [
-            'Strictly dimensionless ($[M^0L^0T^0]$)',
-            'Proportional to mass $[M^1]$',
-            'In CGS units only',
-            'Dependent on time $[T^1]$',
+            '$[-3, 3]$',
+            '$(-3, 3)$',
+            '$(-\\infty, -3) \\cup (3, \\infty)$',
+            '$[3, \\infty)$',
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
-            'Transcendental functions ($\\exp, \\ln, \\sin, \\cos$) require dimensionless arguments ($[M^0L^0T^0]$).',
+            'Logarithm requires a strictly positive argument: $x^2 - 9 > 0 \\implies |x| > 3$, i.e., $(-\\infty, -3) \\cup (3, \\infty)$.',
         },
         {
           id: `sq-${chapter}-1-3`,
-          prompt: `When converting natural logarithm $\\ln(x)$ to base-10 logarithm $\\log_{10}(x)$ in ${chapter}, multiply by:`,
-          options: ['$2.303$', '$0.693$', '$1.414$', '$3.141$'],
-          correctIndex: 0,
-          explanation: '$\\ln(x) = \\ln(10)\\,\\log_{10}(x) \\approx 2.303\\,\\log_{10}(x)$.',
+          prompt: `For two non-zero vectors $\\vec{a}$ and $\\vec{b}$, the quantity $|\\vec{a}\\times\\vec{b}|^2 + (\\vec{a}\\cdot\\vec{b})^2$ simplifies identically to:`,
+          options: [
+            '$|\\vec{a}| + |\\vec{b}|$',
+            '$0$',
+            '$|\\vec{a}|^2 - |\\vec{b}|^2$',
+            '$|\\vec{a}|^2 |\\vec{b}|^2$',
+          ],
+          correctIndex: 3,
+          explanation:
+            'Lagrange’s identity: $|\\vec{a}|^2|\\vec{b}|^2(\\sin^2\\theta + \\cos^2\\theta) = |\\vec{a}|^2|\\vec{b}|^2$.',
         },
       ],
     },
     {
       id: `shard-${chapter}-2`,
       shardNumber: 2,
-      title: `ShardZ #2: Step-by-Step Numerical Solver & Limiting Cases`,
+      title: `ShardZ #2: Calculus, Matrices & Extremum Methods in ${chapter}`,
       durationMinutes: 15,
-      focusConcept: `Apply symbolic simplification and limiting-case analysis ($x \\to 0, x \\to \\infty$) to solve Section A & B problems.`,
+      focusConcept: `Apply derivatives, matrix determinants, and series bounds in ${chapter}.`,
       formulaHook:
-        subject === 'Physics'
-          ? '$$I = I_{\\text{cm}} + Md^2, \\quad \\tau_{\\text{ext}} = I\\alpha$$'
-          : subject === 'Chemistry'
-          ? '$$k = A e^{-E_a/RT}, \\quad t_{1/2} = \\frac{0.693}{k}$$'
-          : '$$|\\text{adj}(A)| = |A|^{n-1}, \\quad A^{-1} = \\frac{\\text{adj}(A)}{|A|}$$',
+        '$$\\frac{d}{dx}\\int_{u(x)}^{v(x)} f(t)\\,dt = f(v(x))v\'(x) - f(u(x))u\'(x)$$',
       masteryQuestions: [
         {
           id: `sq-${chapter}-2-1`,
-          prompt: `Why should you simplify expressions symbolically before plugging in decimals in Section B numericals?`,
-          options: [
-            'Prevents premature rounding errors and cancels common factors cleanly',
-            'Increases calculation time',
-            'Changes the physical units',
-            'Eliminates the need to read the question',
-          ],
+          prompt: `Evaluate $\\lim_{x \\to 0} \\frac{e^{3x} - 1}{x}$:`,
+          options: ['$3$', '$1$', '$0$', '$e^3$'],
           correctIndex: 0,
           explanation:
-            'Symbolic simplification prevents rounding drift in compulsory Section B numerical-value questions (+4/-1).',
+            'Rewriting as $3\\cdot\\frac{e^{3x}-1}{3x}$ gives $3 \\times 1 = 3$ as $x \\to 0$.',
         },
         {
           id: `sq-${chapter}-2-2`,
-          prompt: `Under the NTA JEE Main 2026/2027 Paper 1 rules, what is the marking scheme for Compulsory Section B Numerical questions?`,
-          options: [
-            '+4 for correct, -1 for wrong, 0 for unattempted',
-            '+4 for correct, 0 for wrong',
-            '+2 for correct, -0.5 for wrong',
-            '+3 for correct, -1 for wrong',
-          ],
-          correctIndex: 0,
+          prompt: `If $A$ is a $3 \\times 3$ skew-symmetric matrix, then $\\det(A)$ is always:`,
+          options: ['$1$', '$0$', '$-1$', '$3$'],
+          correctIndex: 1,
           explanation:
-            'Both Section A (20 MCQs) and Section B (5 Compulsory Numericals) carry +4 for correct and -1 for wrong in NTA JEE Main.',
+            'For odd order $n = 3$, $\\det(A) = \\det(A^T) = \\det(-A) = (-1)^3\\det(A) = -\\det(A) \\implies \\det(A) = 0$.',
         },
         {
           id: `sq-${chapter}-2-3`,
-          prompt: `How can you eliminate distractor options rapidly in a complex ${chapter} MCQ?`,
-          options: [
-            'Check dimensional consistency and extreme limiting cases ($0$ or $\\infty$)',
-            'Guess the longest option',
-            'Always pick Option C',
-            'Skip reading the stem',
-          ],
-          correctIndex: 0,
+          prompt: `For positive real numbers $x > 0$, the minimum value of $x + \\frac{9}{x}$ is:`,
+          options: ['$3$', '$9$', '$6$', '$12$'],
+          correctIndex: 2,
           explanation:
-            'Limiting-case checks and dimensional homogeneity frequently eliminate 2 to 3 wrong options in under 20 seconds.',
+            'By AM–GM inequality, $\\frac{x + 9/x}{2} \\ge \\sqrt{x \\cdot \\frac{9}{x}} = 3 \\implies x + \\frac{9}{x} \\ge 6$, attained at $x = 3$.',
         },
       ],
     },
     {
       id: `shard-${chapter}-3`,
       shardNumber: 3,
-      title: `ShardZ #3: JEE Advanced Exceptions, Edge Cases & Trap Defense`,
+      title: `ShardZ #3: Roots, Conics & Continuity Traps in ${chapter}`,
       durationMinutes: 15,
-      focusConcept: `Spot non-ideal regimes, discontinuous boundaries, and multi-correct partial marking traps in ${chapter}.`,
+      focusConcept: `Check differentiability corners, discriminant boundaries, and conic parameters in ${chapter}.`,
       formulaHook:
-        subject === 'Physics'
-          ? '$$K_{\\text{rolling}} = \\frac{1}{2}Mv_{\\text{cm}}^2\\left(1 + \\frac{k^2}{R^2}\\right)$$'
-          : subject === 'Chemistry'
-          ? '$$\\mu_{\\text{spin}} = \\sqrt{n(n+2)}\\text{ BM}, \\quad Z = \\frac{PV}{nRT}$$'
-          : '$$|\\vec{a}\\times\\vec{b}|^2 + (\\vec{a}\\cdot\\vec{b})^2 = |\\vec{a}|^2|\\vec{b}|^2$$',
+        '$$e = \\sqrt{1 - \\frac{b^2}{a^2}} \\text{ (Ellipse)}, \\quad |z_1 + z_2| \\le |z_1| + |z_2|$$',
       masteryQuestions: [
         {
           id: `sq-${chapter}-3-1`,
-          prompt: `In a JEE Advanced Multiple-Correct question (+4 / -2) where 3 options (A, B, C) are correct, what score do you get if you select only A and B?`,
-          options: ['+2 partial marks', '+4 marks', '-2 marks', '0 marks'],
-          correctIndex: 0,
+          prompt: `At $x = 2$, the function $f(x) = |x - 2|$ is:`,
+          options: [
+            'Discontinuous and non-differentiable',
+            'Differentiable with $f\'(2) = 1$',
+            'Both continuous and differentiable',
+            'Continuous, but NOT differentiable',
+          ],
+          correctIndex: 3,
           explanation:
-            'When zero wrong options are selected, JEE Advanced awards +1 partial mark per correct option chosen (+2 for 2 correct options).',
+            'Left-hand derivative is $-1$ and right-hand derivative is $+1$ at $x = 2$, creating a sharp corner despite continuity.',
         },
         {
           id: `sq-${chapter}-3-2`,
-          prompt: `What happens in a JEE Advanced Multiple-Correct question (+4 / -2) if you select 2 correct options and 1 wrong option?`,
-          options: [
-            '-2 marks (any wrong option selected forfeits partial marks)',
-            '+1 mark',
-            '0 marks',
-            '+2 marks',
-          ],
+          prompt: `For the quadratic equation $ax^2 + bx + c = 0$ ($a > 0$) to have strictly positive values for all $x \\in \\mathbb{R}$, the discriminant $D = b^2 - 4ac$ must satisfy:`,
+          options: ['$D < 0$', '$D = 0$', '$D > 0$', '$D \\ge 0$'],
           correctIndex: 0,
           explanation:
-            'Selecting even a single wrong option in a +4/-2 multiple-correct question results in -2 marks.',
+            'An upward-opening parabola lies strictly above the $x$-axis for all real $x$ if and only if it has no real roots ($D < 0$).',
         },
         {
           id: `sq-${chapter}-3-3`,
-          prompt: `After making an error on a ${chapter} question, what is the best way to prevent repeating it?`,
-          options: [
-            'Tag the Error Root Cause in your Mistake Book and schedule an SM-2 flashcard',
-            'Ignore the question and move on',
-            'Memorize only the option letter',
-            'Re-read the same page passively',
-          ],
-          correctIndex: 0,
+          prompt: `The eccentricity $e$ of a rectangular hyperbola ($x^2 - y^2 = a^2$) is:`,
+          options: ['$1$', '$\\sqrt{2}$', '$2$', '$1/\\sqrt{2}$'],
+          correctIndex: 1,
           explanation:
-            'Root-cause tagging + SuperMemo SM-2 active recall turns every mistake into permanent exam marks.',
+            'For a rectangular hyperbola $a = b$, so $e = \\sqrt{1 + \\frac{b^2}{a^2}} = \\sqrt{1 + 1} = \\sqrt{2}$.',
         },
       ],
     },
@@ -2107,8 +2273,7 @@ export function resolveCbtSessionInit<
   );
   const examMode: ExamTrack = canResume ? params.existingDraft!.examMode : params.initialExamMode;
   const firstQuestionNumber = params.customQuestions?.[0]?.number || 1;
-  const defaultDurationSeconds =
-    (params.customDurationMinutes || (examMode === 'NEET UG' ? 200 : 180)) * 60;
+  const defaultDurationSeconds = (params.customDurationMinutes || 180) * 60;
 
   return {
     isCustomTest,

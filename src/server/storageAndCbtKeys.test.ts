@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
 import { isOwnerStoragePath } from './routes/storageRoutes';
-import { stripQuestionAnswerKeys } from './data/authoritativeAnswerKeys';
+import { CURATED_PACK_KEYS, stripQuestionAnswerKeys } from './data/authoritativeAnswerKeys';
 import { gradeCbtAttemptOnServer } from './coreStudyEngine';
 import { CBT_MOCK_QUESTIONS } from '../data/jeeInitialContent';
 
@@ -27,6 +27,12 @@ test('Public static PYQ packs strip authoritative answer keys and explanations',
       assert.equal(q.correctIndices, undefined, `${filename} leaked correctIndices`);
       assert.equal(q.numericalAnswer, undefined, `${filename} leaked numericalAnswer`);
       assert.equal(q.explanation, undefined, `${filename} leaked explanation`);
+      const auth = CURATED_PACK_KEYS.find((entry) => entry.id === q.id);
+      assert.ok(auth, `Missing authoritative key entry for ${q.id}`);
+      assert.deepEqual(q.options, auth.options, `Options mismatch for ${q.id}`);
+      if (auth.numericalAnswer !== undefined) {
+        assert.deepEqual(q.options, [], `Numerical question ${q.id} should not expose MCQ options`);
+      }
     }
   }
 });
@@ -55,6 +61,7 @@ test('stripQuestionAnswerKeys removes all grading fields and server grading igno
   // Server must award +4 for the authoritative answer key, ignoring the forged client key
   assert.equal(gradedWithTrueAnswer.summary.totalScore, 4);
   assert.equal(gradedWithTrueAnswer.summary.correctCount, 1);
+  assert.equal('percentilePrediction' in gradedWithTrueAnswer, false);
 
   // Unknown question ID must fail closed for official_mock
   assert.throws(

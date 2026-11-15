@@ -2338,7 +2338,7 @@ export const ProgressDashboardView: React.FC<ProgressViewProps> = ({
             {lastMockScore !== null ? `${lastMockScore} / 300` : 'Not Attempted'}
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-            {lastMockScore !== null ? 'Est. 98.4+ Percentile' : 'Take your first 75-Q CBT'}
+            {lastMockScore !== null ? 'Latest completed mock' : 'Take your first 75-Q CBT'}
           </div>
         </div>
 
@@ -2558,7 +2558,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
     setActiveSubject(nextList[0]?.subject || 'Physics');
     setActiveSection('Section A');
     setCurrentQNumber(1);
-    setSecondsRemaining((mode === 'NEET UG' ? 200 : 180) * 60);
+    setSecondsRemaining(180 * 60);
     setResponses(buildInitialResponses(nextList));
   };
 

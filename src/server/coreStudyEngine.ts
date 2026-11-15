@@ -4,7 +4,6 @@ import {
   CBTQuestion,
   CBTMockSummary,
   calculateCBTMockScore,
-  predictNtaPercentileAndAir,
   QuestionResponseState,
   ExamTrack,
 } from '../utils/jeeEngine';
@@ -206,7 +205,6 @@ export function sendStructuredUpstreamError(
 export interface ServerVerifiedCbtGradeResult {
   summary: CBTMockSummary;
   scaledScoreOutOf300: number;
-  percentilePrediction: ReturnType<typeof predictNtaPercentileAndAir>;
   verifiedAtIso: string;
   examMode: ExamTrack;
   keyVersion: string;
@@ -227,7 +225,6 @@ export function gradeCbtAttemptOnServer(params: {
   attemptType?: 'official_mock' | 'custom_drill';
   responses: Record<string, QuestionResponseState>;
   examMode?: ExamTrack;
-  shiftDifficulty?: 'Easy' | 'Moderate' | 'Tough';
 }): ServerVerifiedCbtGradeResult {
   const examMode: ExamTrack = params.examMode || 'JEE Main';
   const attemptType = params.attemptType || 'official_mock';
@@ -294,11 +291,6 @@ export function gradeCbtAttemptOnServer(params: {
     0,
     Math.min(300, Math.round((summary.totalScore / Math.max(1, summary.maxScore)) * 300))
   );
-  const percentilePrediction = predictNtaPercentileAndAir({
-    score: scaledScoreOutOf300,
-    maxScore: 300,
-    shiftDifficulty: params.shiftDifficulty || 'Moderate',
-  });
 
   const questionSolutions: ServerVerifiedCbtGradeResult['questionSolutions'] = {};
   for (const q of authoritativeQuestions) {
@@ -313,7 +305,6 @@ export function gradeCbtAttemptOnServer(params: {
   return {
     summary,
     scaledScoreOutOf300,
-    percentilePrediction,
     verifiedAtIso: new Date().toISOString(),
     examMode,
     keyVersion: AUTHORITATIVE_KEY_VERSION,

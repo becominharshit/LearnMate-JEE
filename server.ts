@@ -127,6 +127,7 @@ export function createLearnMateExpressApp() {
     '/api/ingest',
     authenticateStudentMiddleware,
     requireAuthenticatedStudent,
+    rateLimiterAndQuotaMiddleware,
     ingestionRouter
   );
 
@@ -170,23 +171,63 @@ export function createLearnMateExpressApp() {
   return app;
 }
 
+export function parseCliFlag(flagName: string, argv: string[] = process.argv): string | undefined {
+  const eqPrefix = `--${flagName}=`;
+  for (let i = 2; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg.startsWith(eqPrefix)) {
+      return arg.slice(eqPrefix.length).trim() || undefined;
+    }
+    if (arg === `--${flagName}` && i + 1 < argv.length) {
+      const next = argv[i + 1];
+      if (!next.startsWith('--')) {
+        return next.trim() || undefined;
+      }
+    }
+  }
+  return undefined;
+}
+
+export function resolveServerBindTarget(
+  env: NodeJS.ProcessEnv = process.env,
+  argv: string[] = process.argv
+): { port: number; host: string } {
+  const cliPortRaw = parseCliFlag('port', argv);
+  const cliPort = cliPortRaw ? Number(cliPortRaw) : NaN;
+  const envPort = env.PORT ? Number(env.PORT) : NaN;
+  const port =
+    Number.isFinite(cliPort) && cliPort > 0
+      ? cliPort
+      : Number.isFinite(envPort) && envPort > 0
+        ? envPort
+        : 3000;
+  const host = parseCliFlag('host', argv) || env.HOST || '0.0.0.0';
+  return { port, host };
+}
+
 async function startServer() {
   const app = createLearnMateExpressApp();
   const server = http.createServer(app);
-  const PORT = Number(process.env.PORT || 3000);
+  const { port: PORT, host: HOST } = resolveServerBindTarget();
 
   attachVoiceLiveWebSocketServer(server);
 
+  let viteServer: { close: () => Promise<void> } | null = null;
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
+    const disableHmr =
+      process.env.DISABLE_HMR === 'true' || Boolean(process.env.K_SERVICE);
     const hmrPort = process.env.HMR_PORT ? Number(process.env.HMR_PORT) : undefined;
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
-        ...(hmrPort ? { hmr: { port: hmrPort } } : {}),
+        hmr: disableHmr ? false : hmrPort ? { port: hmrPort } : { server },
+        ws: disableHmr ? false : hmrPort ? { port: hmrPort } : { server },
+        ...(disableHmr ? { watch: null } : {}),
       },
       appType: 'spa',
     });
+    viteServer = vite;
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(__dirname, 'dist');
@@ -196,9 +237,38 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`LearnMate JEE server running on http://localhost:${PORT}`);
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(PORT, HOST, () => {
+      server.removeListener('error', reject);
+      console.log(
+        `LearnMate JEE server running on http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`
+      );
+      resolve();
+    });
   });
+
+  server.on('error', (err) => {
+    console.error('LearnMate JEE server error:', err);
+    process.exit(1);
+  });
+
+  const shutdown = async () => {
+    try {
+      if (viteServer) {
+        await viteServer.close();
+      }
+    } catch {
+      // ignore Vite shutdown errors
+    }
+    server.close(() => {
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(0), 2000).unref();
+  };
+
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
 }
 
 const isNodeTestProcess =
@@ -206,5 +276,8 @@ const isNodeTestProcess =
   process.argv.some((arg) => arg === '--test' || arg.endsWith('.test.ts'));
 
 if (process.env.LEARNMATE_SKIP_AUTO_LISTEN !== 'true' && !isNodeTestProcess) {
-  startServer();
+  startServer().catch((err) => {
+    console.error('Failed to start LearnMate JEE server:', err);
+    process.exit(1);
+  });
 }

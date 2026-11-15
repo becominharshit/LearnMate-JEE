@@ -62,15 +62,12 @@ import {
   listDriveStudyFiles,
   readGoogleDocContent,
   DriveFileItem,
-  saveDocumentToIndexedDb,
   extractPdfTextAndMetadataWithPdfJs,
   extractScannedPdfPagesViaOcr,
   apiFetchWithAuth,
   ingestYouTubeOnServer,
   reportQuestionIssueOnServer,
   verifySinglePyqAnswerOnServer,
-  requestSignedCloudStorageUrl,
-  confirmCloudUpload,
 } from '../services/workspaceService';
 import { wsUrl } from '../config/apiConfig';
 import {
@@ -104,6 +101,9 @@ interface AddMaterialModalProps {
     contentSummary: string;
     originalFileUrl?: string;
     originalMimeType?: string;
+    originalFile?: File;
+    pageCount?: number;
+    extractionQuality?: 'full' | 'partial' | 'needs_ocr' | 'unavailable';
   }) => Promise<void>;
 }
 
@@ -127,12 +127,18 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   const [driveFiles, setDriveFiles] = useState<DriveFileItem[]>([]);
   const [driveLoading, setDriveLoading] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
+  const cameraInput = useRef<HTMLInputElement>(null);
+  const importRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setActiveTab(initialTab);
     setErrorText(null);
     setAnalyzing(false);
     setStatusMessage('');
+    return () => {
+      importRequest.current?.abort();
+      importRequest.current = null;
+    };
   }, [initialTab, isOpen]);
 
   if (!isOpen) return null;
@@ -232,165 +238,132 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
     }
   };
 
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    mode: 'pdf' | 'photo'
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file || importRequest.current || analyzing) return;
+
+    const controller = new AbortController();
+    importRequest.current = controller;
+    const { signal } = controller;
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    const mimeType = isPdf ? 'application/pdf' : file.type.startsWith('image/') ? file.type : 'image/jpeg';
+    const original = file.type === mimeType ? file : new File([file], file.name, { type: mimeType });
     setErrorText(null);
     setAnalyzing(true);
-    setStatusMessage(
-      mode === 'photo'
-        ? `Auto-detecting JEE subject & chapter and running Handwritten Notes Scan on ${file.name}...`
-        : `Parsing ${file.name} via local pdf.js worker & storing binary in IndexedDB...`
-    );
+    setStatusMessage(isPdf ? 'Reading the PDF…' : 'Reading your handwritten notes…');
 
+    let text = '';
+    let pageCount = 1;
+    let extractionQuality: 'partial' | 'needs_ocr' | undefined;
     try {
-      const reader = new FileReader();
-      const dataUrlPromise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          resolve(String(reader.result || ''));
-        };
-        reader.onerror = reject;
-      });
-      reader.readAsDataURL(file);
-      const fullDataUrl = await dataUrlPromise;
-      const base64Data = fullDataUrl.split(',')[1] || '';
-
-      let clientPdfText = '';
-      let pdfPageCount = 1;
-      let ocrNotesSummary = '';
-
-      if (mode === 'pdf' && file.name.toLowerCase().endsWith('.pdf')) {
-        const extractedPdf = await extractPdfTextAndMetadataWithPdfJs(
+      if (isPdf) {
+        const extracted = await extractPdfTextAndMetadataWithPdfJs(
           file,
-          (pct, cur, total) =>
-            setStatusMessage(`Extracting PDF page ${cur}/${total} (${pct}%)...`)
+          (pct, current, total) => {
+            if (!signal.aborted) setStatusMessage(`Reading PDF page ${current}/${total} (${pct}%)…`);
+          },
+          signal,
         );
-        if (extractedPdf.extractionError) {
-          setErrorText(extractedPdf.extractionError);
-          setAnalyzing(false);
-          setStatusMessage('');
-          return;
-        }
-        clientPdfText = extractedPdf.extractedText;
-        pdfPageCount = extractedPdf.pageCount;
-
-        if (extractedPdf.scannedPageNumbers.length > 0) {
-          setStatusMessage(
-            `Running vision OCR on ${Math.min(60, extractedPdf.scannedPageNumbers.length)} scanned page(s)...`
-          );
+        if (extracted.extractionError) throw new Error(extracted.extractionError);
+        text = extracted.extractedText;
+        pageCount = extracted.pageCount;
+        if (extracted.scannedPageNumbers.length) {
           const { ocrTextByPage } = await extractScannedPdfPagesViaOcr(
             file,
-            extractedPdf.scannedPageNumbers,
-            (done, total) =>
-              setStatusMessage(`Running vision OCR on scanned PDF pages (${done}/${total})...`)
+            extracted.scannedPageNumbers,
+            (done, total) => {
+              if (!signal.aborted) setStatusMessage(`Reading scanned pages (${done}/${total})…`);
+            },
+            signal,
           );
-          if (ocrTextByPage.size > 0) {
-            const existingBlocks = new Map<number, string>();
-            for (const block of clientPdfText.split(/\n{2,}/)) {
-              const m = /^\[Page\s+(\d+)\]/i.exec(block.trim());
-              if (m) existingBlocks.set(Number(m[1]), block.trim());
-            }
-            for (const [pgNum, txt] of ocrTextByPage.entries()) {
-              existingBlocks.set(pgNum, txt);
-            }
-            clientPdfText = Array.from(existingBlocks.entries())
-              .sort((a, b) => a[0] - b[0])
-              .map((entry) => entry[1])
-              .join('\n\n');
-            ocrNotesSummary = `Vision OCR completed on ${ocrTextByPage.size} scanned page(s).`;
+          const pages = new Map<number, string>();
+          for (const block of text.split(/\n{2,}/)) {
+            const marker = /^\[Page\s+(\d+)\]/i.exec(block.trim());
+            if (marker) pages.set(Number(marker[1]), block.trim());
           }
+          for (const [number, contents] of ocrTextByPage) pages.set(number, contents);
+          text = Array.from(pages.entries())
+            .sort(([left], [right]) => left - right)
+            .map(([, contents]) => contents)
+            .join('\n\n');
+          if (ocrTextByPage.size < extracted.scannedPageNumbers.length) extractionQuality = 'partial';
         }
-      }
-
-      const detectedMime = file.type || (mode === 'pdf' ? 'application/pdf' : 'image/jpeg');
-      const docId = `idb-doc-${Date.now()}`;
-      await saveDocumentToIndexedDb({
-        id: docId,
-        userId: 'active_user',
-        file,
-        title: file.name,
-        mimeType: detectedMime,
-        dataUrl: fullDataUrl,
-        extractedText: clientPdfText,
-        pageCount: pdfPageCount,
-        sizeBytes: file.size,
-        createdAt: new Date().toISOString(),
-      });
-
-      // Best-effort owner-scoped Cloud Storage upload when bucket is configured
-      try {
-        const ticket = await requestSignedCloudStorageUrl({
-          fileName: file.name,
-          mimeType: detectedMime,
-          operation: 'upload',
-          sizeBytes: file.size,
-        });
-        if (ticket.ok && ticket.storageConfigured && ticket.signedUrl && ticket.assetId) {
-          const putRes = await fetch(ticket.signedUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': detectedMime },
-            body: file,
+        if (pageCount > 250) extractionQuality = 'partial';
+      } else {
+        try {
+          let imageFile = original;
+          if (original.size > 8 * 1024 * 1024) {
+            const image = await createImageBitmap(original);
+            try {
+              const scale = Math.min(1, 2400 / Math.max(image.width, image.height));
+              const canvas = document.createElement('canvas');
+              canvas.width = Math.max(1, Math.round(image.width * scale));
+              canvas.height = Math.max(1, Math.round(image.height * scale));
+              const context = canvas.getContext('2d');
+              if (!context) throw new Error('Image resizing is unavailable.');
+              context.fillStyle = '#fff';
+              context.fillRect(0, 0, canvas.width, canvas.height);
+              context.drawImage(image, 0, 0, canvas.width, canvas.height);
+              const resized = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+              if (!resized) throw new Error('Unable to resize this image.');
+              imageFile = new File([resized], file.name, { type: resized.type });
+            } finally {
+              image.close();
+            }
+          }
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result ?? ''));
+            reader.onerror = () => reject(new Error('Unable to read the selected image.'));
+            reader.readAsDataURL(imageFile);
           });
-          if (putRes.ok) {
-            await confirmCloudUpload(ticket.assetId);
-          }
+          signal.throwIfAborted();
+          const result = await apiFetchWithAuth<{ text?: string }>(
+            '/api/ai/analyze',
+            {
+              sourceType: 'photo',
+              mediaBase64: dataUrl.split(',')[1],
+              mimeType: imageFile.type,
+              prompt: 'Transcribe the visible handwritten text and equations verbatim. Mark unreadable words as [unreadable]. Do not add explanations, facts, or formulas.',
+            },
+            'POST',
+            { signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]) },
+          );
+          if (result.ok) text = result.data.text?.trim() || '';
+        } catch {
+          // A failed transcription can still leave a usable original in the workspace.
         }
-      } catch {
-        // Cloud Storage optional in local dev; IndexedDB holds full document safely
       }
 
-      const fileStem = file.name.replace(/\.[^/.]+$/, '');
-      const initialDetection = detectJeeSubjectAndChapter(
-        `${fileStem} ${clientPdfText.slice(0, 2000)}`,
-        titleInput
-      );
-
-      let aiText = '';
-      if (mode === 'photo' || clientPdfText.trim().length < 80) {
-        const { ok, data } = await apiFetchWithAuth<{ text?: string }>(
-          '/api/ai/analyze',
-          {
-            mediaBase64: base64Data.slice(0, 600000),
-            mimeType: detectedMime,
-            sourceType: mode,
-            prompt: `Automatically identify whether this material belongs to JEE Physics, Chemistry, or Mathematics and which chapter it covers, then extract concise notes for "${initialDetection.chapter}" from ${file.name}.\n\nExtracted Text Context:\n${clientPdfText.slice(0, 4000)}`,
-          }
-        );
-        aiText = ok ? data.text || '' : '';
-      }
-
-      const finalDetection = detectJeeSubjectAndChapter(
-        `${fileStem} ${clientPdfText.slice(0, 2000)} ${aiText}`,
-        titleInput
-      );
-
+      signal.throwIfAborted();
+      const detected = detectJeeSubjectAndChapter(`${file.name} ${text.slice(0, 3000)}`, titleInput);
+      setStatusMessage('Saving the source on this device…');
       await onAddMaterial({
-        title: titleInput.trim() || finalDetection.chapter || file.name,
-        subject: finalDetection.subject,
-        chapter: finalDetection.chapter,
-        sourceType: mode,
+        title: titleInput.trim() || detected.chapter || file.name,
+        subject: detected.subject,
+        chapter: detected.chapter,
+        sourceType: isPdf ? 'pdf' : 'photo',
         sourceRef: file.name,
-        originalFileUrl: fullDataUrl,
-        originalMimeType: detectedMime,
-        contentSummary: clientPdfText
-          ? aiText
-            ? `${clientPdfText}\n\n---\n### AI Extracted Notes\n${aiText}`
-            : ocrNotesSummary
-            ? `${clientPdfText}\n\n<!-- ${ocrNotesSummary} -->`
-            : clientPdfText
-          : aiText ||
-            `**${finalDetection.chapter}** (${finalDetection.subject}): IndexedDB-stored document (${pdfPageCount} pages) from ${file.name}. Needs OCR or text extraction.`,
+        originalFile: original,
+        originalMimeType: mimeType,
+        contentSummary: text,
+        pageCount,
+        extractionQuality: text ? extractionQuality : 'needs_ocr',
       });
+      if (signal.aborted) return;
       setTitleInput('');
       onClose();
-    } catch (err: any) {
-      setErrorText(err?.message || 'Could not analyze uploaded file.');
+    } catch (error) {
+      if (!signal.aborted) {
+        setErrorText(error instanceof Error ? error.message : 'Unable to save this file.');
+      }
     } finally {
-      setAnalyzing(false);
-      setStatusMessage('');
+      if (importRequest.current === controller) {
+        importRequest.current = null;
+        setAnalyzing(false);
+        setStatusMessage('');
+      }
     }
   };
 
@@ -399,10 +372,10 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
       setErrorText('Please paste your study text, handwritten transcription, or formulas first.');
       return;
     }
+    if (analyzing) return;
+    setErrorText(null);
     setAnalyzing(true);
-    setStatusMessage(
-      'Auto-identifying JEE subject & chapter and structuring your notes into full detailed pages, flashcards & mind map...'
-    );
+    setStatusMessage('Saving your notes on this device…');
     try {
       const detected = detectJeeSubjectAndChapter(pastedText, titleInput);
       await onAddMaterial({
@@ -416,6 +389,8 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
       setTitleInput('');
       setPastedText('');
       onClose();
+    } catch (error) {
+      setErrorText(error instanceof Error ? error.message : 'Unable to save your notes.');
     } finally {
       setAnalyzing(false);
       setStatusMessage('');
@@ -619,7 +594,8 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
               <input
                 type="file"
                 accept=".pdf,image/*"
-                onChange={(e) => handleFileChange(e, 'pdf')}
+                onChange={handleFileChange}
+                disabled={analyzing}
                 className="hidden"
               />
             </label>
@@ -639,10 +615,31 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleFileChange(e, 'photo')}
+                onChange={handleFileChange}
+                disabled={analyzing}
                 className="hidden"
               />
             </label>
+            <button
+              type="button"
+              disabled={analyzing}
+              onClick={() => cameraInput.current?.click()}
+              className="min-h-11 px-4 py-2 rounded-lg border border-zinc-300 text-sm font-semibold dark:border-white/20"
+            >
+              Take Photo
+            </button>
+            <input
+              ref={cameraInput}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              disabled={analyzing}
+              hidden
+            />
+            <p className="text-xs text-zinc-600 dark:text-zinc-300">
+              Review the transcription against the original photo.
+            </p>
           </div>
         )}
 
@@ -721,6 +718,8 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
             <button
               type="button"
               onClick={() => {
+                importRequest.current?.abort();
+                importRequest.current = null;
                 setAnalyzing(false);
                 setStatusMessage('');
               }}
@@ -3225,7 +3224,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
             <div>
               <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                Target AIR / Percentile Goal
+                Personal exam goal
               </label>
               <input
                 type="text"
@@ -3233,7 +3232,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 onChange={(e) =>
                   setFormState((s) => ({ ...s, targetRankOrPercentile: e.target.value }))
                 }
-                placeholder="e.g., 99.5+ Percentile / AIR < 1500"
+                placeholder="Enter your own goal (optional)"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/[0.1] bg-white dark:bg-[#18181b] text-zinc-900 dark:text-zinc-100"
               />
             </div>

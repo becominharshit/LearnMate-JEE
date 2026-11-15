@@ -82,7 +82,6 @@ export function loadValidatedFirebaseConfig(): FirebaseEnvConfig | null {
 
 export function formatFirebaseAuthError(error: any): string {
   const code = String(error?.code || '').toLowerCase();
-  const msg = String(error?.message || '');
 
   if (code.includes('api-key-not-valid') || code.includes('invalid-api-key')) {
     return 'Firebase API key configuration is invalid or out of sync. Please refresh the page or verify your Firebase web config.';
@@ -118,7 +117,7 @@ export function formatFirebaseAuthError(error: any): string {
   if (code === 'auth/network-request-failed') {
     return 'Network error reaching Firebase Authentication. Check your internet connection and try again.';
   }
-  return msg || 'Authentication failed. Please try again or continue with Google.';
+  return 'Sign-in could not be completed. Please try again or use another sign-in method.';
 }
 
 const firebaseConfig = loadValidatedFirebaseConfig();

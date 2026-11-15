@@ -276,7 +276,7 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
         if (activePreset === 'Incline') {
           const rampLen = 4.2;
           const rampWidth = 1.6;
-          const baseLen = rampLen * Math.cos(theta);
+          const baseLen = Math.max(0.18, rampLen * Math.cos(theta));
           const rampHeight = rampLen * Math.sin(theta);
 
           const baseRail = new THREE.Mesh(
@@ -917,7 +917,7 @@ export const ThreeSceneCanvas = React.forwardRef<ThreeSceneCanvasHandle, ThreeSc
                 <input
                   type="range"
                   min={15}
-                  max={60}
+                  max={preset === 'Incline' ? 90 : 60}
                   value={angleDeg}
                   onChange={(e) => setAngleDeg(Number(e.target.value))}
                   aria-label="Primary 3D physics parameter"

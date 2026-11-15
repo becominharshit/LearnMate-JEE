@@ -12,28 +12,11 @@ export class PersistenceUnavailableError extends Error {
   }
 }
 
-let cachedDbId: string | null | undefined;
 function getConfiguredDatabaseId(): string | undefined {
-  if (cachedDbId !== undefined) return cachedDbId || undefined;
-  const fromEnv = process.env.VITE_FIREBASE_DATABASE_ID?.trim() || process.env.FIREBASE_DATABASE_ID?.trim();
+  const fromEnv = process.env.FIREBASE_DATABASE_ID?.trim();
   if (fromEnv && fromEnv !== '(default)') {
-    cachedDbId = fromEnv;
     return fromEnv;
   }
-  try {
-    const cfgPath = path.resolve(process.cwd(), 'firebase-applet-config.json');
-    if (fs.existsSync(cfgPath)) {
-      const parsed = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'));
-      const id = typeof parsed?.firestoreDatabaseId === 'string' ? parsed.firestoreDatabaseId.trim() : '';
-      if (id && id !== '(default)') {
-        cachedDbId = id;
-        return id;
-      }
-    }
-  } catch {
-    // ignore invalid optional config
-  }
-  cachedDbId = '';
   return undefined;
 }
 

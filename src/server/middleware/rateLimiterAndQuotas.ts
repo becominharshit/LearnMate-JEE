@@ -3,6 +3,7 @@ import { AuthenticatedRequest, computeRequestFingerprint } from './authAndSecuri
 import {
   adminGetDoc,
   adminRunDailyQuotaIncrement,
+  PersistenceUnavailableError,
   resetDevPersistenceMemoryForTest,
 } from '../persistence/firestoreAdminStore';
 
@@ -63,11 +64,42 @@ export function setStudentSubscriptionTier(uid: string, tier: SubscriptionTier):
   }
 }
 
+function isGracefulQuotaFallbackError(err: unknown): boolean {
+  if (err instanceof PersistenceUnavailableError) return true;
+  const code = String((err as any)?.code ?? '');
+  const message = String((err as any)?.message ?? '').toUpperCase();
+  return (
+    code === '5' ||
+    code === '7' ||
+    code === '14' ||
+    code === 'NOT_FOUND' ||
+    code === 'PERMISSION_DENIED' ||
+    code === 'UNAVAILABLE' ||
+    message.includes('NOT_FOUND') ||
+    message.includes('PERMISSION_DENIED') ||
+    message.includes('PERSISTENCE_UNAVAILABLE')
+  );
+}
+
 export async function resolveStudentSubscriptionTier(uid: string): Promise<SubscriptionTier> {
-  const ent = await adminGetDoc<{ tier?: SubscriptionTier }>('billing_entitlements', uid);
-  if (ent?.tier && (ent.tier === 'free' || ent.tier === 'pro' || ent.tier === 'institute')) {
-    userTierStore.set(uid, ent.tier);
-    return ent.tier;
+  if (!uid || uid === 'anonymous' || uid === 'demo') {
+    return 'free';
+  }
+  try {
+    const ent = await adminGetDoc<{ tier?: SubscriptionTier }>('billing_entitlements', uid);
+    if (ent?.tier && (ent.tier === 'free' || ent.tier === 'pro' || ent.tier === 'institute')) {
+      userTierStore.set(uid, ent.tier);
+      return ent.tier;
+    }
+  } catch (err) {
+    if (isGracefulQuotaFallbackError(err)) {
+      console.warn(
+        `[QuotaTier] Firestore tier lookup unavailable for uid=${uid}; using cached/free tier.`,
+        (err as any)?.message || err
+      );
+      return userTierStore.get(uid) || 'free';
+    }
+    throw err;
   }
   return userTierStore.get(uid) || 'free';
 }
@@ -122,6 +154,47 @@ export function consumeTokenBucket(
   };
 }
 
+export async function consumeTokenBucketDistributed(
+  fingerprint: string,
+  maxPerMinute = getMaxRequestsPerMinute()
+): Promise<{ allowed: boolean; remaining: number; retryAfterSeconds: number }> {
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL?.trim().replace(/\/+$/, '');
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if (upstashUrl && upstashToken) {
+    try {
+      const minuteSlot = Math.floor(Date.now() / 60000);
+      const redisKey = `learnmate:rl:${minuteSlot}:${fingerprint}`;
+      const resp = await fetch(`${upstashUrl}/incr/${encodeURIComponent(redisKey)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${upstashToken}` },
+        signal: AbortSignal.timeout(2500),
+      });
+      if (resp.ok) {
+        const data = (await resp.json()) as { result?: number };
+        const count = Number(data.result || 1);
+        if (count === 1) {
+          void fetch(`${upstashUrl}/expire/${encodeURIComponent(redisKey)}/65`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${upstashToken}` },
+          }).catch(() => {});
+        }
+        if (count > maxPerMinute) {
+          const retryAfterSeconds = Math.max(2, 60 - Math.floor((Date.now() % 60000) / 1000));
+          return { allowed: false, remaining: 0, retryAfterSeconds };
+        }
+        return {
+          allowed: true,
+          remaining: Math.max(0, maxPerMinute - count),
+          retryAfterSeconds: 0,
+        };
+      }
+    } catch {
+      // Fall back to local token bucket if Upstash is temporarily unreachable
+    }
+  }
+  return consumeTokenBucket(fingerprint, maxPerMinute);
+}
+
 export async function consumeDailyUidQuota(
   uid: string,
   estimatedTokens = 650
@@ -131,17 +204,25 @@ export async function consumeDailyUidQuota(
   const limits = getTierLimits(tier);
 
   // Optional Upstash Redis REST atomic increment when configured
-  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL?.trim().replace(/\/+$/, '');
   const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
   if (upstashUrl && upstashToken) {
     try {
       const redisKey = `learnmate:quota:${todayIso}:${uid}`;
       const resp = await fetch(`${upstashUrl}/incr/${encodeURIComponent(redisKey)}`, {
+        method: 'POST',
         headers: { Authorization: `Bearer ${upstashToken}` },
+        signal: AbortSignal.timeout(2500),
       });
       if (resp.ok) {
         const data = (await resp.json()) as { result?: number };
         const count = Number(data.result || 1);
+        if (count === 1) {
+          void fetch(`${upstashUrl}/expire/${encodeURIComponent(redisKey)}/172800`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${upstashToken}` },
+          }).catch(() => {});
+        }
         const state: DailyUidQuotaState = {
           uid,
           tier,
@@ -158,33 +239,58 @@ export async function consumeDailyUidQuota(
         };
       }
     } catch {
-      // Fall through to persistent Firestore Admin store (which fails closed in production if unavailable)
+      // Fall through to persistent Firestore Admin store / graceful in-memory fallback
     }
   }
 
-  const persisted = await adminRunDailyQuotaIncrement({
-    uid,
-    dayIso: todayIso,
-    tier,
-    maxRequestsPerDay: limits.maxReq,
-    maxTokensPerDay: limits.maxTok,
-    estimatedTokens,
-  });
+  try {
+    const persisted = await adminRunDailyQuotaIncrement({
+      uid,
+      dayIso: todayIso,
+      tier,
+      maxRequestsPerDay: limits.maxReq,
+      maxTokensPerDay: limits.maxTok,
+      estimatedTokens,
+    });
 
-  const state: DailyUidQuotaState = {
-    uid,
-    tier,
-    dayIso: todayIso,
-    requestsUsed: persisted.requestsUsed,
-    tokensUsed: persisted.tokensUsed,
-    maxRequestsPerDay: limits.maxReq,
-    maxTokensPerDay: limits.maxTok,
-  };
-  dailyQuotaStore.set(uid, state);
-  return {
-    allowed: persisted.allowed,
-    state,
-  };
+    const state: DailyUidQuotaState = {
+      uid,
+      tier,
+      dayIso: todayIso,
+      requestsUsed: persisted.requestsUsed,
+      tokensUsed: persisted.tokensUsed,
+      maxRequestsPerDay: limits.maxReq,
+      maxTokensPerDay: limits.maxTok,
+    };
+    dailyQuotaStore.set(uid, state);
+    return {
+      allowed: persisted.allowed,
+      state,
+    };
+  } catch (err) {
+    if (isGracefulQuotaFallbackError(err)) {
+      console.warn(
+        `[QuotaFallback] Firestore daily quota increment unavailable for uid=${uid}; using in-memory fallback.`,
+        (err as any)?.message || err
+      );
+      const prev = dailyQuotaStore.get(uid);
+      const prevReqs = prev && prev.dayIso === todayIso ? prev.requestsUsed : 0;
+      const prevToks = prev && prev.dayIso === todayIso ? prev.tokensUsed : 0;
+      const allowed = prevReqs + 1 <= limits.maxReq;
+      const nextState: DailyUidQuotaState = {
+        uid,
+        tier,
+        dayIso: todayIso,
+        requestsUsed: allowed ? prevReqs + 1 : prevReqs,
+        tokensUsed: allowed ? prevToks + estimatedTokens : prevToks,
+        maxRequestsPerDay: limits.maxReq,
+        maxTokensPerDay: limits.maxTok,
+      };
+      dailyQuotaStore.set(uid, nextState);
+      return { allowed, state: nextState };
+    }
+    throw err;
+  }
 }
 
 export async function getDailyUidQuotaSnapshot(uid: string): Promise<DailyUidQuotaState> {
@@ -192,22 +298,32 @@ export async function getDailyUidQuotaSnapshot(uid: string): Promise<DailyUidQuo
   const tier = await resolveStudentSubscriptionTier(uid);
   const limits = getTierLimits(tier);
 
-  const persisted = await adminGetDoc<{
-    dayIso?: string;
-    requestsUsed?: number;
-    tokensUsed?: number;
-  }>('daily_usage_quotas', `${todayIso}_${uid}`);
+  try {
+    const persisted = await adminGetDoc<{
+      dayIso?: string;
+      requestsUsed?: number;
+      tokensUsed?: number;
+    }>('daily_usage_quotas', `${todayIso}_${uid}`);
 
-  if (persisted && persisted.dayIso === todayIso) {
-    return {
-      uid,
-      tier,
-      dayIso: todayIso,
-      requestsUsed: Number(persisted.requestsUsed || 0),
-      tokensUsed: Number(persisted.tokensUsed || 0),
-      maxRequestsPerDay: limits.maxReq,
-      maxTokensPerDay: limits.maxTok,
-    };
+    if (persisted && persisted.dayIso === todayIso) {
+      return {
+        uid,
+        tier,
+        dayIso: todayIso,
+        requestsUsed: Number(persisted.requestsUsed || 0),
+        tokensUsed: Number(persisted.tokensUsed || 0),
+        maxRequestsPerDay: limits.maxReq,
+        maxTokensPerDay: limits.maxTok,
+      };
+    }
+  } catch (err) {
+    if (!isGracefulQuotaFallbackError(err)) {
+      throw err;
+    }
+    console.warn(
+      `[QuotaFallback] Firestore daily quota snapshot unavailable for uid=${uid}; using cached fallback.`,
+      (err as any)?.message || err
+    );
   }
 
   const existing = dailyQuotaStore.get(uid);
@@ -270,7 +386,7 @@ export async function rateLimiterAndQuotaMiddleware(
   const uid = req.userUid || 'anonymous';
   const fingerprint = req.clientFingerprint || computeRequestFingerprint(req, uid);
 
-  const bucketResult = consumeTokenBucket(fingerprint);
+  const bucketResult = await consumeTokenBucketDistributed(fingerprint);
   if (!bucketResult.allowed) {
     res.setHeader('Retry-After', String(bucketResult.retryAfterSeconds));
     res.status(429).json({

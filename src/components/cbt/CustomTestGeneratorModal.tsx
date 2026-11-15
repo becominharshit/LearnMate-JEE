@@ -390,7 +390,7 @@ export const CustomTestGeneratorModal: React.FC<CustomTestGeneratorModalProps> =
         {/* Footer */}
         <div className="px-6 py-4 border-t border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-[#141417] flex items-center justify-between gap-3">
           <div className="text-xs text-zinc-500 dark:text-zinc-400">
-            NTA Marking <span className="font-mono tabular-nums font-semibold text-zinc-900 dark:text-zinc-200">+4 / -1</span> · Percentile Predictor Active
+            NTA Marking <span className="font-mono tabular-nums font-semibold text-zinc-900 dark:text-zinc-200">+4 / -1</span>
           </div>
           <div className="flex items-center gap-2">
             <button

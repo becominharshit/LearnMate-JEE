@@ -1,16 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Award,
-  BarChart3,
-  CheckCircle2,
-  Flame,
-  Layers,
-  Play,
-  Sliders,
-  Target,
-  TrendingUp,
-} from 'lucide-react';
-import { predictNtaPercentileAndAir, ExamTrack } from '../../utils/jeeEngine';
+import { Play, Sliders } from 'lucide-react';
+import type { ExamTrack } from '../../utils/jeeEngine';
 import { JEE_SYLLABUS_DATA } from '../../data/jeeInitialContent';
 import { getDaysToJeeMain2027Session1 } from '../../config/examSpecs';
 import type { MistakeNotebookEntry } from '../RevisePracticeProgressCBT';
@@ -38,22 +28,9 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
   onOpenCustomTestGenerator,
   onPracticeWeakTopic,
 }) => {
-  const [shiftDifficulty, setShiftDifficulty] = useState<'Easy' | 'Moderate' | 'Tough'>('Moderate');
-  const [simulatedScore, setSimulatedScore] = useState<number>(lastMockScore ?? 185);
   const [heatmapSubject, setHeatmapSubject] = useState<
     'All' | 'Physics' | 'Chemistry' | 'Mathematics'
   >('All');
-
-  const activeScore = lastMockScore !== null ? lastMockScore : simulatedScore;
-  const prediction = useMemo(
-    () =>
-      predictNtaPercentileAndAir({
-        score: activeScore,
-        maxScore: 300,
-        shiftDifficulty,
-      }),
-    [activeScore, shiftDifficulty]
-  );
 
   const filteredSyllabus = useMemo(
     () =>
@@ -95,7 +72,7 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-semibold tracking-[-0.02em] text-2xl text-zinc-900 dark:text-zinc-50">
-            Progress &amp; Rank
+            Progress
           </h1>
           <p className="text-xs font-mono tabular-nums text-zinc-500 mt-0.5">
             JEE Main 2027 · {masteryStats.daysToExam}d left · {masteryStats.weightedMasteryPct}% mastery
@@ -124,82 +101,7 @@ export const ProgressAndRankView: React.FC<ProgressAndRankViewProps> = ({
       </div>
 
       <div className="p-6 rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/[0.07] grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-              Percentile &amp; AIR Predictor
-            </span>
-            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#18181b] p-1 rounded-lg">
-              {(['Easy', 'Moderate', 'Tough'] as const).map((shift) => (
-                <button
-                  key={shift}
-                  type="button"
-                  onClick={() => setShiftDifficulty(shift)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-colors duration-150 ${
-                    shiftDifficulty === shift
-                      ? 'bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100'
-                      : 'text-zinc-500'
-                  }`}
-                >
-                  {shift} Shift
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07]">
-              <div className="text-[11px] font-medium text-zinc-500">NTA Percentile</div>
-              <div className="text-2xl font-mono font-bold tabular-nums text-zinc-900 dark:text-zinc-50 mt-1">
-                {prediction.percentile}%ile
-              </div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">
-                {shiftDifficulty} normalization
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07]">
-              <div className="text-[11px] font-medium text-zinc-500">Predicted AIR</div>
-              <div className="text-xl font-mono font-bold tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
-                {prediction.predictedAirMin.toLocaleString()}–{prediction.predictedAirMax.toLocaleString()}
-              </div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">
-                14.2L candidates
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07]">
-              <div className="text-[11px] font-medium text-zinc-500">Score</div>
-              <div className="text-2xl font-mono font-bold tabular-nums text-amber-600 dark:text-amber-400 mt-1">
-                {activeScore} / 300
-              </div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">
-                {lastMockScore !== null ? 'Latest CBT' : 'What-If Slider'}
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] space-y-2">
-            <div className="flex items-center justify-between text-xs font-medium">
-              <span className="text-zinc-600 dark:text-zinc-300">Simulate Target Score</span>
-              <span className="font-mono font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{activeScore} / 300</span>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={300}
-              step={5}
-              value={activeScore}
-              onChange={(e) => setSimulatedScore(Number(e.target.value))}
-              className="w-full accent-[#D4653B] cursor-pointer"
-            />
-            <div className="text-xs text-zinc-600 dark:text-zinc-400">
-              Projected Tier: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{prediction.targetInstituteTier}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-5 p-5 rounded-2xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-12 p-5 rounded-2xl bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.07] flex flex-col justify-between space-y-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Mastery &amp; Error Bleed

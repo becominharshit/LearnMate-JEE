@@ -18,6 +18,8 @@ import {
 } from 'firebase/firestore';
 import { computeStableContentHash, splitSourceIntoPages } from './studyBundleBuilder';
 import { apiFetch, apiUrl } from '../config/apiConfig';
+import type { MaterialItem } from '../components/HomeAndStudyViews';
+import type { MaterialStudyBundle } from '../data/jeeInitialContent';
 
 export interface DriveFileItem {
   id: string;
@@ -69,6 +71,47 @@ function getIndexedDb(): Promise<IDBPDatabase> | null {
     });
   }
   return dbPromise;
+}
+
+interface StoredStudyMaterial {
+  id: string;
+  uid: string;
+  material: MaterialItem;
+  bundle: MaterialStudyBundle;
+  original?: File;
+  savedAt: number;
+}
+
+export async function saveStudyMaterialOnDevice(
+  uid: string,
+  material: MaterialItem,
+  bundle: MaterialStudyBundle,
+  original?: File,
+): Promise<void> {
+  const database = await getIndexedDb();
+  if (!database) {
+    throw new Error('This browser cannot save your study material on this device.');
+  }
+  await database.put(IDB_STORE_BUNDLES, {
+    id: `learnmate_${uid}_${material.id}`,
+    uid,
+    material,
+    bundle,
+    original,
+    savedAt: Date.now(),
+  } satisfies StoredStudyMaterial);
+}
+
+export async function listStudyMaterialsOnDevice(uid: string): Promise<StoredStudyMaterial[]> {
+  const database = await getIndexedDb();
+  if (!database) return [];
+  const materials = await database.getAllFromIndex(IDB_STORE_BUNDLES, 'by_uid', uid);
+  return (materials as StoredStudyMaterial[]).sort((a, b) => b.savedAt - a.savedAt);
+}
+
+export async function removeStudyMaterialFromDevice(uid: string, materialId: string): Promise<void> {
+  const database = await getIndexedDb();
+  await database?.delete(IDB_STORE_BUNDLES, `learnmate_${uid}_${materialId}`);
 }
 
 /**
@@ -302,10 +345,10 @@ export async function syncChunkedMaterialToFirestore(
  * Configures local Vite-bundled pdf.js worker (no external CDN dependency).
  */
 async function loadPdfJsConfigured() {
-  const pdfjsLib = await import('pdfjs-dist');
-  if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
     try {
-      const workerMod: any = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+      const workerMod: any = await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url');
       if (workerMod?.default) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = workerMod.default;
       }
@@ -322,7 +365,8 @@ async function loadPdfJsConfigured() {
  */
 export async function extractPdfTextAndMetadataWithPdfJs(
   file: File,
-  onProgress?: (pct: number, currentPage: number, totalPages: number) => void
+  onProgress?: (pct: number, currentPage: number, totalPages: number) => void,
+  signal?: AbortSignal,
 ): Promise<{
   pageCount: number;
   extractedText: string;
@@ -341,6 +385,7 @@ export async function extractPdfTextAndMetadataWithPdfJs(
     const scannedPageNumbers: number[] = [];
 
     for (let i = 1; i <= maxPagesToScan; i++) {
+      signal?.throwIfAborted();
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       const strings = (content.items as any[])
@@ -386,7 +431,8 @@ export async function extractPdfTextAndMetadataWithPdfJs(
 export async function extractScannedPdfPagesViaOcr(
   file: File,
   scannedPageNumbers: number[],
-  onProgress?: (completed: number, total: number) => void
+  onProgress?: (completed: number, total: number) => void,
+  signal?: AbortSignal,
 ): Promise<{ ocrTextByPage: Map<number, string>; errors: string[] }> {
   const ocrTextByPage = new Map<number, string>();
   const errors: string[] = [];
@@ -402,6 +448,7 @@ export async function extractScannedPdfPagesViaOcr(
     const batchSize = 3;
 
     for (let idx = 0; idx < maxOcrPages.length; idx += batchSize) {
+      signal?.throwIfAborted();
       const batch = maxOcrPages.slice(idx, idx + batchSize);
       const batchResults = await Promise.all(
         batch.map(async (pageNum) => {
@@ -420,7 +467,11 @@ export async function extractScannedPdfPagesViaOcr(
               mediaBase64: base64,
               mimeType: 'image/jpeg',
               sourceType: 'photo',
-              prompt: `Transcribe ALL printed/handwritten text and LaTeX equations ($...$ / $$...$$) from Page ${pageNum} verbatim. Output clean JEE study notes for Page ${pageNum} only.`,
+              prompt: `Transcribe the visible text and equations on page ${pageNum} verbatim. Mark unreadable content as [unreadable]. Do not add information.`,
+            }, 'POST', {
+              signal: signal
+                ? AbortSignal.any([signal, AbortSignal.timeout(25_000)])
+                : AbortSignal.timeout(25_000),
             });
             if (!res.ok) {
               return { pageNum, text: '', error: res.error.message };
@@ -495,18 +546,22 @@ export async function getAuthenticatedRequestHeaders(): Promise<Record<string, s
 export async function apiFetchWithAuth<T = any>(
   endpoint: string,
   body?: Record<string, any>,
-  method: 'POST' | 'GET' | 'DELETE' = 'POST'
+  method: 'POST' | 'GET' | 'DELETE' = 'POST',
+  options?: { signal?: AbortSignal; idToken?: string },
 ): Promise<
   | { ok: true; data: T; error?: undefined }
   | { ok: false; data: Partial<T>; error: StructuredUpstreamError }
 > {
   try {
-    const headers = await getAuthenticatedRequestHeaders();
+    const headers = options?.idToken
+      ? { 'Content-Type': 'application/json', Authorization: `Bearer ${options.idToken}` }
+      : await getAuthenticatedRequestHeaders();
 
     const res = await apiFetch(endpoint, {
       method,
       headers,
       body: method === 'GET' || !body ? undefined : JSON.stringify(body),
+      signal: options?.signal,
     });
 
     const json = await res.json().catch(() => ({}));
@@ -1024,14 +1079,14 @@ export async function requestSignedCloudStorageUrl(params: {
   operation?: 'upload' | 'download';
   sizeBytes?: number;
   assetId?: string;
-}): Promise<SignedCloudStorageTicket> {
+}, idToken?: string): Promise<SignedCloudStorageTicket> {
   const res = await apiFetchWithAuth<SignedCloudStorageTicket>('/api/storage/signed-url', {
     fileName: params.fileName,
     mimeType: params.mimeType,
     operation: params.operation || 'upload',
     sizeBytes: params.sizeBytes || 0,
     ...(params.assetId ? { assetId: params.assetId } : {}),
-  });
+  }, 'POST', { idToken, signal: AbortSignal.timeout(45_000) });
 
   if (!res.ok) {
     return {
@@ -1045,10 +1100,32 @@ export async function requestSignedCloudStorageUrl(params: {
   return res.data as SignedCloudStorageTicket;
 }
 
-export async function confirmCloudUpload(assetId: string) {
-  return apiFetchWithAuth<{ ok: boolean; asset: any }>('/api/storage/confirm-upload', {
-    assetId,
+export async function confirmCloudUpload(assetId: string, idToken?: string) {
+  return apiFetchWithAuth<{ ok: boolean; asset: any }>(
+    '/api/storage/confirm-upload',
+    { assetId },
+    'POST',
+    { idToken, signal: AbortSignal.timeout(45_000) },
+  );
+}
+
+export async function syncStudyOriginalToCloud(original: File, idToken: string): Promise<boolean> {
+  const ticket = await requestSignedCloudStorageUrl({
+    fileName: original.name,
+    mimeType: original.type,
+    operation: 'upload',
+    sizeBytes: original.size,
+  }, idToken);
+  if (!ticket.ok || !ticket.storageConfigured || !ticket.signedUrl || !ticket.assetId) return false;
+
+  const response = await fetch(ticket.signedUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': original.type },
+    body: original,
+    signal: AbortSignal.timeout(45_000),
   });
+  if (!response.ok) return false;
+  return (await confirmCloudUpload(ticket.assetId, idToken)).ok;
 }
 
 export async function deleteCloudAsset(assetId: string) {
@@ -1091,12 +1168,10 @@ export async function gradeCbtAttemptOnServerApi(params: {
   attemptType?: 'official_mock' | 'custom_drill';
   responses: Record<string, any>;
   examMode: string;
-  shiftDifficulty?: 'Easy' | 'Moderate' | 'Tough';
 }) {
   return apiFetchWithAuth<{
     summary: any;
     scaledScoreOutOf300: number;
-    percentilePrediction: any;
     verifiedAtIso: string;
     examMode: string;
     keyVersion: string;
@@ -1120,8 +1195,11 @@ export async function ingestDocumentOnServer(params: {
   sourceType?: 'pdf' | 'photo' | 'youtube' | 'text' | 'drive';
   sourceRef?: string;
   rawText: string;
-}) {
-  return apiFetchWithAuth('/api/ingest/document', params);
+}, idToken?: string) {
+  return apiFetchWithAuth('/api/ingest/document', params, 'POST', {
+    idToken,
+    signal: AbortSignal.timeout(45_000),
+  });
 }
 
 export async function ingestYouTubeOnServer(params: {

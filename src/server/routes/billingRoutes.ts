@@ -403,16 +403,19 @@ billingRouter.post('/waitlist', checkoutRateLimit, async (req: AuthenticatedRequ
       },
       true
     );
-  } catch {
-    // Non-blocking fallback when persistence is read-only
+    res.json({
+      status: 'WAITLIST_JOINED',
+      planId,
+      joinedAtIso: new Date().toISOString(),
+      message: 'You are on the LearnMate Pro Early Access waitlist!',
+    });
+  } catch (err: any) {
+    res.status(err?.statusCode || 503).json({
+      errorCode: err?.errorCode || 'PERSISTENCE_UNAVAILABLE',
+      message: err?.message || 'Waitlist storage is unavailable right now. Please try again later.',
+      requestId: req.requestId,
+    });
   }
-
-  res.json({
-    status: 'WAITLIST_JOINED',
-    planId,
-    joinedAtIso: new Date().toISOString(),
-    message: 'You are on the LearnMate Pro Early Access waitlist!',
-  });
 });
 
 // Live Stripe / Razorpay Checkout Session Creator (returns 503 PAYMENTS_NOT_CONFIGURED when secrets absent)

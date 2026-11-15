@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   db,
   isFirebaseConfigured,
@@ -51,9 +51,13 @@ import {
   deleteAccountOnServer,
   fetchCommercialEntitlements,
   ingestDocumentOnServer,
+  listStudyMaterialsOnDevice,
+  removeStudyMaterialFromDevice,
+  saveStudyMaterialOnDevice,
   purgeUserFirestoreData,
   syncChunkedMaterialToFirestore,
   syncRevisionStateToFirestore,
+  syncStudyOriginalToCloud,
 } from '../services/workspaceService';
 import { runOneTimeTenantMigration } from '../services/migrationService';
 import {
@@ -142,6 +146,10 @@ export function useLearnMateAppState() {
 
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
   const [materialBundles, setMaterialBundles] = useState<Record<string, MaterialStudyBundle>>({});
+  const workspaceUid = currentUser?.uid;
+  const materialOwner = useRef<string | undefined>(undefined);
+  const savedMaterialIds = useRef(new Set<string>());
+  const originalUrls = useRef(new Map<string, string>());
   const [tasks, setTasks] = useState<StudyTaskItem[]>([]);
   const [creations, setCreations] = useState<CreationItem[]>([]);
   const [mistakesNotebook, setMistakesNotebook] = useState<MistakeNotebookEntry[]>([]);
@@ -187,7 +195,7 @@ export function useLearnMateAppState() {
     dailyGoalHours: 6,
     batchStatus: 'Class 12',
     coachingName: 'Self-Study + LearnMate JEE',
-    targetRankOrPercentile: '99.5+ Percentile / AIR < 1500',
+    targetRankOrPercentile: '',
   });
 
   useEffect(() => {
@@ -632,21 +640,63 @@ export function useLearnMateAppState() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!currentUser || isLocalOrDemoUid(currentUser.uid) || !isFirebaseConfigured || !db) {
-      return;
-    }
-    const materialsRef = collection(db, 'users', currentUser.uid, 'materials');
-    const q = query(materialsRef, orderBy('createdAt', 'desc'));
+  const withOriginalPreview = (material: MaterialItem, original?: File): MaterialItem => {
+    if (!original) return material;
+    const previous = originalUrls.current.get(material.id);
+    if (previous) return { ...material, originalFileUrl: previous };
+    const url = URL.createObjectURL(original);
+    originalUrls.current.set(material.id, url);
+    return { ...material, originalFileUrl: url };
+  };
 
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        if (!snapshot.empty) {
-          const loaded: MaterialItem[] = snapshot.docs.map((d) => {
-            const data = d.data();
+  useEffect(() => {
+    setMaterials([]);
+    setMaterialBundles({});
+    setSelectedMaterial(null);
+    materialOwner.current = workspaceUid;
+    if (!workspaceUid) return;
+
+    let active = true;
+    void listStudyMaterialsOnDevice(workspaceUid)
+      .then((records) => {
+        if (!active) return;
+        const restored = records
+          .filter(({ material }) => !savedMaterialIds.current.has(material.id))
+          .map(({ material, bundle, original }) => {
+            savedMaterialIds.current.add(material.id);
+            return { material: withOriginalPreview(material, original), bundle };
+          });
+        const restoredIds = new Set(restored.map(({ material }) => material.id));
+        setMaterials((previous) => [
+          ...restored.map(({ material }) => material),
+          ...previous.filter(({ id }) => !restoredIds.has(id)),
+        ]);
+        setMaterialBundles((previous) => ({
+          ...previous,
+          ...Object.fromEntries(restored.map(({ material, bundle }) => [material.id, bundle])),
+        }));
+        setSelectedMaterial((previous) =>
+          restored.find(({ material }) => material.id === previous?.id)?.material ??
+          previous ??
+          restored[0]?.material ??
+          null
+        );
+      })
+      .catch(() => {
+        if (active) showToast('Unable to open study materials saved on this device.');
+      });
+
+    let unsubscribe: (() => void) | undefined;
+    if (!isLocalOrDemoUid(workspaceUid) && isFirebaseConfigured && db) {
+      const materialsRef = collection(db, 'users', workspaceUid, 'materials');
+      unsubscribe = onSnapshot(
+        query(materialsRef, orderBy('createdAt', 'desc')),
+        (snapshot) => {
+          if (!active) return;
+          const cloudMaterials: MaterialItem[] = snapshot.docs.map((document) => {
+            const data = document.data();
             return {
-              id: d.id,
+              id: document.id,
               title: data.title || 'Untitled Material',
               subject: (data.subject as MaterialItem['subject']) || 'Physics',
               chapter: data.chapter || 'General',
@@ -654,45 +704,51 @@ export function useLearnMateAppState() {
               sourceRef: data.sourceRef || '',
               pageCount: data.pageCount || 1,
               currentPage: data.currentPage || 1,
-              progressPct: 15,
+              progressPct: data.progressPct ?? 15,
               contentSummary: data.contentSummary || '',
               addedLabel: 'Uploaded',
             };
           });
-          setMaterials(loaded);
-          setMaterialBundles((prev) => {
-            const next = { ...prev };
-            loaded.forEach((m) => {
-              if (!next[m.id]) {
-                next[m.id] = generateMaterialStudyBundle({
-                  materialId: m.id,
-                  title: m.title,
-                  subject: m.subject,
-                  chapter: m.chapter,
-                  sourceType: m.sourceType,
-                  rawText: m.contentSummary,
-                });
-              }
-            });
+          const cloudOnly = cloudMaterials.filter(({ id }) => !savedMaterialIds.current.has(id));
+          setMaterials((previous) => [
+            ...previous.filter(({ id }) => savedMaterialIds.current.has(id)),
+            ...cloudOnly,
+          ]);
+          setMaterialBundles((previous) => {
+            const next = { ...previous };
+            for (const material of cloudOnly) {
+              if (next[material.id]) continue;
+              next[material.id] = generateMaterialStudyBundle({
+                materialId: material.id,
+                title: material.title,
+                subject: material.subject,
+                chapter: material.chapter,
+                sourceType: material.sourceType,
+                rawText: material.contentSummary,
+              });
+            }
             return next;
           });
-          setSelectedMaterial((cur) => cur || loaded[0] || null);
-        } else {
-          setMaterials([]);
-          setSelectedMaterial(null);
-        }
-      },
-      (err) => {
-        try {
-          handleFirestoreError(err, OperationType.LIST, `users/${currentUser.uid}/materials`);
-        } catch {
-          // Ignore snapshot error if offline
-        }
-      }
-    );
+          setSelectedMaterial((previous) => {
+            if (previous && savedMaterialIds.current.has(previous.id)) return previous;
+            return cloudOnly.find(({ id }) => id === previous?.id) ?? cloudOnly[0] ?? null;
+          });
+        },
+        () => {
+          if (active) showToast('Cloud materials are unavailable. Materials on this device are still accessible.');
+        },
+      );
+    }
 
-    return () => unsub();
-  }, [currentUser]);
+    return () => {
+      active = false;
+      unsubscribe?.();
+      materialOwner.current = undefined;
+      savedMaterialIds.current.clear();
+      for (const url of originalUrls.current.values()) URL.revokeObjectURL(url);
+      originalUrls.current.clear();
+    };
+  }, [workspaceUid]);
 
   const handleSaveStudentProfile = async (updated: StudentProfileData) => {
     setStudentProfile(updated);
@@ -778,8 +834,15 @@ export function useLearnMateAppState() {
     contentSummary: string;
     originalFileUrl?: string;
     originalMimeType?: string;
+    originalFile?: File;
+    pageCount?: number;
+    extractionQuality?: MaterialStudyBundle['extractionQuality'];
   }) => {
-    const newId = `mat-${Date.now()}`;
+    const owner = currentUser;
+    if (!owner || materialOwner.current !== owner.uid) {
+      throw new Error('Open a study workspace before saving material.');
+    }
+    const newId = `mat-${crypto.randomUUID()}`;
     const bundle = generateMaterialStudyBundle({
       materialId: newId,
       title: newMat.title,
@@ -791,21 +854,28 @@ export function useLearnMateAppState() {
       originalMimeType: newMat.originalMimeType,
     });
 
-    const localItem: MaterialItem = {
+    if (newMat.extractionQuality) bundle.extractionQuality = newMat.extractionQuality;
+
+    const storedItem: MaterialItem = {
       id: newId,
       title: newMat.title,
       subject: newMat.subject,
       chapter: newMat.chapter,
       sourceType: newMat.sourceType,
       sourceRef: newMat.sourceRef,
-      originalFileUrl: newMat.originalFileUrl || newMat.sourceRef,
+      originalFileUrl: newMat.originalFileUrl || (newMat.originalFile ? undefined : newMat.sourceRef),
       originalMimeType: newMat.originalMimeType,
-      pageCount: bundle.pages.length,
+      pageCount: newMat.pageCount ?? bundle.pages.length,
       currentPage: 1,
       progressPct: 15,
       contentSummary: newMat.contentSummary,
       addedLabel: 'Just now',
     };
+
+    await saveStudyMaterialOnDevice(owner.uid, storedItem, bundle, newMat.originalFile);
+    if (materialOwner.current !== owner.uid) return;
+    savedMaterialIds.current.add(newId);
+    const localItem = withOriginalPreview(storedItem, newMat.originalFile);
 
     setMaterialBundles((prev) => ({ ...prev, [newId]: bundle }));
     setMaterials((prev) => [localItem, ...prev]);
@@ -815,40 +885,51 @@ export function useLearnMateAppState() {
     setXp((x) => x + 25);
     if (streakDays === 0) setStreakDays(1);
     showToast(
-      `Indexed "${newMat.title}" (${bundle.pages.length} page${
-        bundle.pages.length === 1 ? '' : 's'
-      }) with ${bundle.extractionQuality === 'full' ? 'full source text' : bundle.extractionQuality}!`
+      `Saved "${newMat.title}" (${localItem.pageCount} page${localItem.pageCount === 1 ? '' : 's'})`
     );
 
-    if (newMat.contentSummary.trim().length > 0) {
-      ingestDocumentOnServer({
-        materialId: newId,
-        title: newMat.title,
-        subject: newMat.subject,
-        chapter: newMat.chapter,
-        sourceType: newMat.sourceType,
-        sourceRef: newMat.sourceRef,
-        rawText: newMat.contentSummary,
-      }).catch(() => {});
-    }
-
-    if (currentUser && !isLocalOrDemoUid(currentUser.uid) && isFirebaseConfigured && db) {
-      const syncRes = await syncChunkedMaterialToFirestore(currentUser.uid, newId, {
-        title: newMat.title,
-        subject: newMat.subject,
-        chapter: newMat.chapter,
-        sourceType: newMat.sourceType,
-        sourceRef: newMat.sourceRef || '',
-        pageCount: bundle.pages.length,
-        currentPage: 1,
-        progressPct: 15,
-        contentSummary: newMat.contentSummary || '',
-        extractionQuality: bundle.extractionQuality,
-      });
-      if (!syncRes.synced && syncRes.error) {
-        showToast(syncRes.error);
+    if (isLocalOrDemoUid(owner.uid) || !isFirebaseConfigured || !db) return;
+    void (async () => {
+      try {
+        const idToken = await owner.getIdToken();
+        if (materialOwner.current !== owner.uid) return;
+        const [sync, indexed, uploaded] = await Promise.all([
+          syncChunkedMaterialToFirestore(owner.uid, newId, {
+            title: newMat.title,
+            subject: newMat.subject,
+            chapter: newMat.chapter,
+            sourceType: newMat.sourceType,
+            sourceRef: newMat.sourceRef || '',
+            pageCount: localItem.pageCount,
+            currentPage: 1,
+            progressPct: 15,
+            contentSummary: newMat.contentSummary,
+            extractionQuality: bundle.extractionQuality,
+          }),
+          newMat.contentSummary.trim()
+            ? ingestDocumentOnServer({
+                materialId: newId,
+                title: newMat.title,
+                subject: newMat.subject,
+                chapter: newMat.chapter,
+                sourceType: newMat.sourceType,
+                sourceRef: newMat.sourceRef,
+                rawText: newMat.contentSummary,
+              }, idToken)
+            : Promise.resolve({ ok: true }),
+          newMat.originalFile
+            ? syncStudyOriginalToCloud(newMat.originalFile, idToken).catch(() => false)
+            : Promise.resolve(true),
+        ]);
+        if (materialOwner.current === owner.uid && (!sync.synced || !indexed.ok || !uploaded)) {
+          showToast('Saved on this device. Cloud sync or tutor indexing did not finish.');
+        }
+      } catch {
+        if (materialOwner.current === owner.uid) {
+          showToast('Saved on this device. Cloud sync is unavailable.');
+        }
       }
-    }
+    })();
   };
 
   const handleUpdateMaterialPage = (
@@ -870,7 +951,20 @@ export function useLearnMateAppState() {
     showToast(`Saved annotated Page ${pageNumber} back to your library!`);
   };
 
-  const handleDeleteMaterial = (matId: string) => {
+  const handleDeleteMaterial = async (matId: string) => {
+    const uid = materialOwner.current;
+    if (!uid) return;
+    try {
+      await removeStudyMaterialFromDevice(uid, matId);
+    } catch {
+      if (materialOwner.current === uid) showToast('Unable to remove material from this device.');
+      return;
+    }
+    if (materialOwner.current !== uid) return;
+    savedMaterialIds.current.delete(matId);
+    const originalUrl = originalUrls.current.get(matId);
+    if (originalUrl) URL.revokeObjectURL(originalUrl);
+    originalUrls.current.delete(matId);
     setMaterials((prev) => {
       const remaining = prev.filter((m) => m.id !== matId);
       if (selectedMaterial?.id === matId) {

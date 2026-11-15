@@ -84,7 +84,11 @@ export function splitSourceIntoPages(
             'No selectable text was detected in this file. If this is a scanned PDF or handwritten photo, run Gemini Vision OCR or paste key text excerpts.',
         },
       ],
-      extractionQuality: sourceType === 'youtube' ? 'unavailable' : 'needs_ocr',
+      extractionQuality: sourceType === 'youtube'
+        ? 'unavailable'
+        : clean && (sourceType === 'text' || sourceType === 'drive')
+          ? 'partial'
+          : 'needs_ocr',
     };
   }
 

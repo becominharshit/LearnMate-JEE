@@ -297,21 +297,26 @@ export async function persistIngestionRecordAndJob(params: {
       true
     );
   }
-  const chunksToPersist = params.record.chunks.slice(0, 120);
-  for (const chunk of chunksToPersist) {
-    await adminSetDoc(
-      `users/${params.uid}/materials/${params.record.materialId}/chunks`,
-      chunk.chunkId,
-      {
-        userId: params.uid,
-        materialId: params.record.materialId,
-        pageNumber: chunk.pageNumber,
-        chunkIndex: chunk.chunkIndex,
-        text: chunk.text.slice(0, 19000),
-        ...(chunk.timestampLabel ? { timestampLabel: chunk.timestampLabel } : {}),
-        createdAtIso: params.record.createdAtIso,
-      },
-      true
+  const chunkBatchSize = 50;
+  for (let i = 0; i < params.record.chunks.length; i += chunkBatchSize) {
+    const batch = params.record.chunks.slice(i, i + chunkBatchSize);
+    await Promise.all(
+      batch.map((chunk) =>
+        adminSetDoc(
+          `users/${params.uid}/materials/${params.record.materialId}/chunks`,
+          chunk.chunkId,
+          {
+            userId: params.uid,
+            materialId: params.record.materialId,
+            pageNumber: chunk.pageNumber,
+            chunkIndex: chunk.chunkIndex,
+            text: chunk.text.slice(0, 19000),
+            ...(chunk.timestampLabel ? { timestampLabel: chunk.timestampLabel } : {}),
+            createdAtIso: params.record.createdAtIso,
+          },
+          true
+        )
+      )
     );
   }
 }
@@ -349,7 +354,7 @@ export async function retrieveTopKChunksForStudentPersistent(params: {
   const topK = Math.max(1, Math.min(8, params.topK || 4));
   const persistedChunks = await adminListCollection<IndexedMaterialChunk>(
     `users/${params.uid}/materials/${params.materialId}/chunks`,
-    120
+    1000
   );
   return scoreChunksByQuery(persistedChunks, params.query, topK, params.currentPage);
 }
@@ -412,6 +417,17 @@ export function getUserIngestionJob(uid: string, jobId: string): IngestionJobRec
   const job = jobStore.get(jobId);
   if (!job || job.uid !== uid) return null;
   return job;
+}
+
+export async function getUserIngestionJobPersistent(
+  uid: string,
+  jobId: string
+): Promise<IngestionJobRecord | null> {
+  const mem = getUserIngestionJob(uid, jobId);
+  if (mem) return mem;
+  const persisted = await adminGetDoc<IngestionJobRecord>(`users/${uid}/studyJobs`, jobId);
+  if (!persisted) return null;
+  return { ...persisted, jobId: persisted.jobId || jobId, uid };
 }
 
 export async function cancelUserIngestionJobPersistent(

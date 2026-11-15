@@ -240,3 +240,28 @@ test('Tenant isolation prevents student B from retrieving chunks indexed by stud
   });
   assert.equal(hitsForB.length, 0);
 });
+
+test('resolveServerBindTarget honors --port/--host CLI flags over container PORT=8080', async () => {
+  const { resolveServerBindTarget, parseCliFlag } = await import('../../server');
+
+  assert.equal(parseCliFlag('port', ['node', 'server.ts', '--port', '3000', '--host', '0.0.0.0']), '3000');
+  assert.equal(parseCliFlag('host', ['node', 'server.ts', '--port=3099', '--host=127.0.0.1']), '127.0.0.1');
+
+  assert.deepEqual(
+    resolveServerBindTarget(
+      { PORT: '8080', HOST: '127.0.0.1' },
+      ['node', 'server.ts', '--port', '3000', '--host', '0.0.0.0']
+    ),
+    { port: 3000, host: '0.0.0.0' }
+  );
+
+  assert.deepEqual(
+    resolveServerBindTarget({ PORT: '4100' }, ['node', 'server.ts']),
+    { port: 4100, host: '0.0.0.0' }
+  );
+
+  assert.deepEqual(
+    resolveServerBindTarget({}, ['node', 'server.ts']),
+    { port: 3000, host: '0.0.0.0' }
+  );
+});

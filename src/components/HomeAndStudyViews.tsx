@@ -109,6 +109,7 @@ interface TutorChatTurn {
   text: string;
   contextMode: 'strict_material' | 'open_jee';
   citations?: { pageNumber: number; excerpt: string }[];
+  failed?: boolean;
   embeddedVisual?: {
     type: '2D Diagram' | '3D Scene' | 'Concept Image' | 'Animated Video';
     preset?: Preset3DId;
@@ -1353,20 +1354,26 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
     try {
       const res = await apiFetchWithAuth<{
         text?: string;
-        citations?: { pageNumber: number; excerpt: string }[];
+        citations?: { pageNumber: number; snippet: string }[];
+        verificationStatus?: string;
       }>('/api/ai/tutor', {
         prompt: promptText,
         materialId: selectedMaterial?.id,
         language: tutorLang,
         contextMode: tutorContextMode,
-        difficulty: tutorDifficulty,
-        context: currentPageData
-          ? JSON.stringify(currentPageData)
-          : selectedMaterial?.contentSummary || '',
-      });
+        difficultyLevel: tutorDifficulty,
+        currentPage: currentPageData?.pageNumber,
+        context: selectedMaterial?.contentSummary.trim()
+          ? currentPageData?.sections[0]?.paragraphs?.join('\n\n') || ''
+          : '',
+      }, 'POST', { signal: AbortSignal.timeout(40_000) });
       const replyText = res.ok
-        ? res.data.text || 'Tutor did not return an explanation. Please try again.'
-        : `[${res.error.errorCode}] ${res.error.message}`;
+        ? res.data.text?.trim() || 'The tutor returned an empty answer. Please try again.'
+        : res.error.status === 401
+          ? 'Sign in to ask the tutor.'
+          : 'The tutor is temporarily unavailable. Your saved source is still accessible.';
+      const failed = !res.ok || !res.data.text?.trim() ||
+        res.data.verificationStatus === 'insufficient_material_context';
 
       setTutorChat((prev) => [
         ...prev,
@@ -1375,7 +1382,11 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
           role: 'tutor',
           text: replyText,
           contextMode: tutorContextMode,
-          citations: res.ok && Array.isArray(res.data.citations) ? res.data.citations : undefined,
+          failed,
+          citations: res.ok ? res.data.citations?.map(({ pageNumber, snippet }) => ({
+            pageNumber,
+            excerpt: snippet,
+          })) : undefined,
         },
       ]);
     } catch {
@@ -1386,6 +1397,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
           role: 'tutor',
           text: 'Could not reach AI Tutor. Please try again.',
           contextMode: tutorContextMode,
+          failed: true,
         },
       ]);
     } finally {
@@ -1561,7 +1573,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
     if (!currentPageData) return;
     setTtsPlaying(true);
     try {
-      const lastTutor = [...tutorChat].reverse().find((t) => t.role === 'tutor');
+      const lastTutor = [...tutorChat].reverse().find((t) => t.role === 'tutor' && !t.failed);
       const textToSpeak =
         lastTutor?.text ||
         currentPageData.aiTutorSummary[tutorLang === 'Hinglish' ? 'hinglish' : 'english'];
@@ -2678,6 +2690,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             <div className="space-y-3">
                               {selectedMaterial.originalFileUrl &&
                               (selectedMaterial.originalFileUrl.startsWith('data:image') ||
+                                selectedMaterial.originalFileUrl.startsWith('blob:') ||
                                 selectedMaterial.originalFileUrl.startsWith('http')) ? (
                                 <div className="p-3 bg-white dark:bg-[#111113] rounded-xl border border-zinc-200 dark:border-white/[0.07] flex justify-center">
                                   <img
@@ -2757,8 +2770,19 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                       </div>
                     )}
 
-                    {/* FULL DETAILED NOTES OR QUICK NOTES VIEW */}
-                    {(notesDensity === 'Full' || notesDensity === 'Quick') && (
+                    {notesDensity === 'Quick' && (
+                      <section aria-label="Quick Notes" className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
+                        <h2 className="text-lg font-semibold">Quick Notes</h2>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-300">
+                          Source excerpt · {currentPageData.timestampRange || `Page ${currentPageData.pageNumber}`}
+                        </p>
+                        <MathRichText content={currentPageData.aiTutorSummary.english} />
+                        {Array.from(new Set(currentPageData.sections.flatMap((section) => section.formulas || [])))
+                          .slice(0, 4)
+                          .map((formula) => <MathRichText key={formula} content={formula} />)}
+                      </section>
+                    )}
+                    {notesDensity === 'Full' && (
                       <>
                         <h2 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl text-zinc-900 dark:text-zinc-50">
                           <MathRichText content={currentPageData.heading} inline />
@@ -2801,8 +2825,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                               <h3 className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100">
                                 <MathRichText content={sec.numberTitle} inline />
                               </h3>
-                              {notesDensity === 'Full' &&
-                                sec.paragraphs?.map((p, pIdx) => (
+                              {sec.paragraphs?.map((p, pIdx) => (
                                   <div
                                     key={pIdx}
                                     className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed"
@@ -3102,7 +3125,10 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                                 <button
                                   key={cIdx}
                                   type="button"
-                                  onClick={() => setPageIdx(Math.max(0, cit.pageNumber - 1))}
+                                  onClick={() => {
+                                    const index = pagesList.findIndex((page) => page.pageNumber === cit.pageNumber);
+                                    if (index >= 0) setPageIdx(index);
+                                  }}
                                   className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-[#18181b] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/[0.07] text-[10px] font-medium hover:bg-zinc-200 dark:hover:bg-[#1f1f23] cursor-pointer"
                                   title={cit.excerpt}
                                 >
@@ -3112,7 +3138,7 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             </div>
                           )}
 
-                          {turn.role === 'tutor' && (
+                          {turn.role === 'tutor' && !turn.failed && (
                             <div className="pt-2 border-t border-zinc-200 dark:border-white/[0.07] space-y-2">
                               <button
                                 type="button"

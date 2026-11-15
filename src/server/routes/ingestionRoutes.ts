@@ -6,7 +6,7 @@ import {
   createIngestionJob,
   extractYouTubeVideoId,
   fetchAuthorizedYouTubeCaptions,
-  getUserIngestionJob,
+  getUserIngestionJobPersistent,
   ingestMaterialSynchronously,
   listUserIngestionJobsPersistent,
   parseSrtVttOrTimestampTranscript,
@@ -14,6 +14,12 @@ import {
   retrieveTopKChunksForStudentPersistent,
   retryUserIngestionJob,
 } from '../../services/ingestionJobsService';
+import {
+  buildThinkingFallbackChain,
+  generateWithModelFallback,
+  getModelRoutingConfig,
+  getValidatedGenAIClient,
+} from '../coreStudyEngine';
 import { detectJeeSubjectAndChapter } from '../../utils/jeeEngine';
 
 export const ingestionRouter = Router();
@@ -40,19 +46,27 @@ ingestionRouter.get('/jobs', async (req: AuthenticatedRequest, res: Response) =>
   }
 });
 
-ingestionRouter.get('/jobs/:jobId', (req: AuthenticatedRequest, res: Response) => {
+ingestionRouter.get('/jobs/:jobId', async (req: AuthenticatedRequest, res: Response) => {
   const uid = req.userUid!;
   const jobId = String(req.params.jobId || '');
-  const job = getUserIngestionJob(uid, jobId);
-  if (!job) {
-    res.status(404).json({
-      errorCode: 'JOB_NOT_FOUND',
-      message: 'Ingestion job not found for your account.',
+  try {
+    const job = await getUserIngestionJobPersistent(uid, jobId);
+    if (!job) {
+      res.status(404).json({
+        errorCode: 'JOB_NOT_FOUND',
+        message: 'Ingestion job not found for your account.',
+        requestId: req.requestId,
+      });
+      return;
+    }
+    res.json({ job });
+  } catch (err: any) {
+    res.status(err?.statusCode || 503).json({
+      errorCode: err?.errorCode || 'PERSISTENCE_UNAVAILABLE',
+      message: err?.message || 'Unable to load ingestion job.',
       requestId: req.requestId,
     });
-    return;
   }
-  res.json({ job });
 });
 
 ingestionRouter.post('/jobs/:jobId/cancel', async (req: AuthenticatedRequest, res: Response) => {
@@ -264,16 +278,65 @@ ingestionRouter.post('/youtube', async (req: AuthenticatedRequest, res: Response
   let parsedSegments = parseSrtVttOrTimestampTranscript(cleanTranscript);
   let extractedVia = 'user_transcript';
 
-  // If URL-only without pasted transcript, try genuine public YouTube timedtext captionTracks
+  // If URL-only without pasted transcript, try genuine public YouTube timedtext captionTracks,
+  // then fall back to Gemini multimodal video transcription via FileURI.
   if (!cleanTranscript) {
     const autoCaptions = await fetchAuthorizedYouTubeCaptions(videoId);
     if (autoCaptions.length > 0) {
       parsedSegments = autoCaptions;
       extractedVia = 'youtube_caption_tracks';
+    } else {
+      try {
+        const ai = getValidatedGenAIClient();
+        const models = getModelRoutingConfig();
+        const prompt = `Watch this JEE lecture video and transcribe the spoken explanation and board equations verbatim into timestamped [HH:MM:SS] sections suitable for JEE Main & Advanced study notes. Use LaTeX ($...$ / $$...$$) for mathematical expressions. Start each segment on a new line as [HH:MM:SS] <topic & verbatim notes>.`;
+        const { result } = await generateWithModelFallback(
+          buildThinkingFallbackChain(models.thinking),
+          async (model) =>
+            ai.models.generateContent({
+              model,
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    { fileData: { fileUri: canonicalUrl, mimeType: 'video/*' } },
+                    { text: prompt },
+                  ],
+                },
+              ],
+            })
+        );
+        const aiTranscript = String(result?.text || '').trim();
+        if (aiTranscript.length > 0) {
+          extractedVia = 'gemini_multimodal_video';
+          const parsedFromAi = parseSrtVttOrTimestampTranscript(aiTranscript);
+          if (parsedFromAi.length > 0) {
+            parsedSegments = parsedFromAi;
+          } else {
+            parsedSegments = aiTranscript
+              .split(/\n+/)
+              .map((line, i) => {
+                const text = line.trim();
+                if (!text) return null;
+                const sec = i * 30;
+                const label = `${String(Math.floor(sec / 3600)).padStart(2, '0')}:${String(
+                  Math.floor((sec % 3600) / 60)
+                ).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+                return { timestampLabel: label, seconds: sec, text };
+              })
+              .filter((item): item is NonNullable<typeof item> => Boolean(item));
+          }
+        }
+      } catch (aiErr: any) {
+        console.warn(
+          `[YouTubeIngest] Gemini multimodal transcription failed for videoId=${videoId}:`,
+          aiErr?.message || aiErr
+        );
+      }
     }
   }
 
-  // Fail closed: Never fabricate lecture timestamps or notes when no genuine captions/transcript exist!
+  // Fail closed: Never fabricate lecture timestamps or notes when no genuine captions/transcript/video transcription exist!
   if (parsedSegments.length === 0 && cleanTranscript.length < 40) {
     res.status(422).json({
       status: 'CAPTIONS_UNAVAILABLE',
@@ -287,7 +350,7 @@ ingestionRouter.post('/youtube', async (req: AuthenticatedRequest, res: Response
         thumbnailUrl,
       },
       message:
-        'Public YouTube captions are unavailable or disabled for this video. Paste the lecture transcript, WebVTT/SRT captions, or timestamped chapter outline below so LearnMate builds strictly source-cited notes without inventing facts.',
+        'Public captions were unavailable and automated video transcription could not extract text for this video. Paste the lecture transcript, WebVTT/SRT captions, or timestamped chapter outline below so LearnMate builds strictly source-cited notes.',
       requestId: req.requestId,
     });
     return;
@@ -347,6 +410,7 @@ ingestionRouter.post('/youtube', async (req: AuthenticatedRequest, res: Response
     },
     segmentsCount: parsedSegments.length,
     segments: parsedSegments.slice(0, 100),
+    transcriptText: formattedTranscript,
     material: {
       materialId: record.materialId,
       title: record.title,

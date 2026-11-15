@@ -7,7 +7,7 @@ import {
   isOriginAllowed,
   logStructuredEvent,
 } from '../middleware/authAndSecurity';
-import { consumeDailyUidQuota, consumeTokenBucket } from '../middleware/rateLimiterAndQuotas';
+import { consumeDailyUidQuota, consumeTokenBucketDistributed } from '../middleware/rateLimiterAndQuotas';
 import { getModelRoutingConfig, getValidatedGenAIClient } from '../coreStudyEngine';
 
 const MAX_WS_PAYLOAD_BYTES = 1024 * 1024; // 1 MB per frame
@@ -79,7 +79,7 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
     }
 
     const fingerprint = computeRequestFingerprint(request, verification.uid);
-    const bucket = consumeTokenBucket(fingerprint);
+    const bucket = await consumeTokenBucketDistributed(fingerprint);
     if (!bucket.allowed) {
       socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n');
       socket.destroy();
@@ -93,10 +93,11 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
         socket.destroy();
         return;
       }
-    } catch {
-      socket.write('HTTP/1.1 503 Service Unavailable\r\n\r\n');
-      socket.destroy();
-      return;
+    } catch (err) {
+      logStructuredEvent('warn', 'ws_quota_fallback', {
+        uid: verification.uid.slice(0, 6),
+        message: (err as any)?.message || 'Quota check fell back gracefully',
+      });
     }
 
     wss.handleUpgrade(request, socket, head, (ws) => {

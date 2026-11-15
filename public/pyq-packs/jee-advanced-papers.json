@@ -28,7 +28,7 @@
       "marksCorrect": 4,
       "marksWrong": 0,
       "stem": "[Non-Negative Integer (+4 / 0)] A uniform solid sphere of radius $R = 1\\text{ m}$ rolls without slipping on a horizontal surface with center-of-mass speed $v = 10\\text{ m/s}$ and ascends a rough curved ramp without slipping. Taking $g = 10\\text{ m/s}^2$, the maximum vertical height $h$ (in meters) reached by the sphere is:",
-      "options": ["7", "5", "10", "3"]
+      "options": []
     },
     {
       "id": "pack-ja-2025-phy-1",
@@ -49,9 +49,9 @@
       "stem": "[MULTI-CORRECT: +4 / -2 with Partial Marking] Two point charges $+q$ and $-q$ are fixed in vacuum at $(0, 0, a)$ and $(0, 0, -a)$ respectively. Which of the following statements is/are true on the $xy$-plane ($z = 0$)?",
       "options": [
         "The electrostatic potential $V$ is zero at every point on the $xy$-plane",
+        "The dipole electrostatic interaction energy is independent of separation $2a$",
         "The electric field at every point on the $xy$-plane is directed along $-\\hat{k}$",
-        "Zero net work is done by the electric field in moving a test charge from $(a, 0, 0)$ to $(0, a, 0)$",
-        "The dipole electrostatic interaction energy is independent of separation $2a$"
+        "Zero net work is done by the electric field in moving a test charge from $(a, 0, 0)$ to $(0, a, 0)$"
       ]
     },
     {
@@ -71,7 +71,7 @@
       "marksCorrect": 4,
       "marksWrong": 0,
       "stem": "[Non-Negative Integer (+4 / 0)] The total number of stereoisomers possible for butane-2,3-diol ($\\text{CH}_3\\text{-CH(OH)-CH(OH)-CH}_3$) is:",
-      "options": ["3", "2", "4", "1"]
+      "options": []
     },
     {
       "id": "pack-ja-phy-1",
@@ -127,8 +127,8 @@
         "(4) $sp^3d^2$, Paramagnetic ($4$ unpaired $e^-$)"
       ],
       "options": [
-        "P-1, Q-2, R-3, S-4",
         "P-2, Q-1, R-3, S-4",
+        "P-1, Q-2, R-3, S-4",
         "P-1, Q-2, R-4, S-3",
         "P-3, Q-4, R-1, S-2"
       ]
@@ -152,9 +152,9 @@
       "paragraphPassage": "Let $A$ be a $3 \\times 3$ non-singular real matrix satisfying $\\det(A) = 2$. Define $B = \\text{adj}(\\text{adj}(A))$.",
       "stem": "Based on the passage above, the value of $\\det(B^{-1})$ is:",
       "options": [
-        "$\\frac{1}{16}$",
         "$16$",
         "$\\frac{1}{8}$",
+        "$\\frac{1}{16}$",
         "$\\frac{1}{64}$"
       ]
     },
@@ -175,7 +175,7 @@
       "marksCorrect": 3,
       "marksWrong": -1,
       "stem": "The value of the definite integral $\\int_{0}^{\\pi} x \\sin x\\,dx$ is:",
-      "options": ["$\\pi$", "$2\\pi$", "$\\frac{\\pi}{2}$", "$0$"]
+      "options": ["$\\frac{\\pi}{2}$", "$2\\pi$", "$0$", "$\\pi$"]
     },
     {
       "id": "pack-ja-2022-phy-1",
@@ -194,7 +194,7 @@
       "marksCorrect": 4,
       "marksWrong": 0,
       "stem": "[Non-Negative Integer (+4 / 0)] A uniform thin rod of length $L = 3\\text{ m}$ is hinged smoothly at one end and released from rest in a horizontal position. Taking $g = 10\\text{ m/s}^2$, the magnitude of its initial angular acceleration (in $\\text{rad/s}^2$) is:",
-      "options": ["5", "10", "3", "15"]
+      "options": []
     }
   ]
 }

@@ -241,8 +241,8 @@ export const GLOBAL_PPP_PRICING: Record<SupportedCurrency, GlobalCurrencyPricing
   INR: {
     currency: 'INR',
     symbol: '₹',
-    proMonthly: 299,
-    proAnnual: 2499,
+    proMonthly: 499,
+    proAnnual: 2999,
     instituteMonthly: 1499,
     label: 'India (INR)',
   },

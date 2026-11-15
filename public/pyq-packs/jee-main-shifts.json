@@ -29,9 +29,9 @@
       "marksWrong": -1,
       "stem": "A projectile is launched from horizontal ground with speed $u = 20\\text{ m/s}$ at an angle $\\theta = 60^\\circ$ above the horizontal. Ignoring air resistance, its speed at the highest point of the trajectory is:",
       "options": [
-        "$10\\text{ m/s}$",
         "$10\\sqrt{3}\\text{ m/s}$",
         "$20\\text{ m/s}$",
+        "$10\\text{ m/s}$",
         "$0\\text{ m/s}$"
       ]
     },
@@ -53,8 +53,8 @@
       "marksWrong": -1,
       "stem": "A first-order reaction has a half-life period $t_{1/2} = 20\\text{ min}$. The time required for $75\\%$ completion of the reaction is:",
       "options": [
-        "$40\\text{ min}$",
         "$30\\text{ min}$",
+        "$40\\text{ min}$",
         "$60\\text{ min}$",
         "$80\\text{ min}$"
       ]
@@ -76,7 +76,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "If a complex number $z$ satisfies $|z - 3| = 2$, then the maximum possible value of $|z|$ is:",
-      "options": ["5", "3", "2", "1"]
+      "options": []
     },
     {
       "id": "pack-jm-2026-phy-2",
@@ -96,10 +96,10 @@
       "marksWrong": -1,
       "stem": "The escape velocity from the surface of Earth is $11.2\\text{ km/s}$. What is the escape velocity from the surface of a planet having twice the mass and twice the radius of Earth?",
       "options": [
-        "$11.2\\text{ km/s}$",
         "$22.4\\text{ km/s}$",
         "$5.6\\text{ km/s}$",
-        "$15.8\\text{ km/s}$"
+        "$15.8\\text{ km/s}$",
+        "$11.2\\text{ km/s}$"
       ]
     },
     {
@@ -119,7 +119,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "The total number of distinct real roots of the equation $x^2 + 5|x| + 6 = 0$ is:",
-      "options": ["0", "2", "4", "1"]
+      "options": ["2", "0", "4", "1"]
     },
     {
       "id": "pack-jm-math-1",
@@ -139,9 +139,9 @@
       "marksWrong": -1,
       "stem": "The value of the definite integral $I = \\int_{0}^{\\pi/2} \\frac{\\sin^{2025}x}{\\sin^{2025}x + \\cos^{2025}x}\\,dx$ is:",
       "options": [
-        "$\\frac{\\pi}{4}$",
         "$\\frac{\\pi}{2}$",
         "$\\pi$",
+        "$\\frac{\\pi}{4}$",
         "$0$"
       ]
     },
@@ -187,10 +187,10 @@
       "marksWrong": -1,
       "stem": "According to VSEPR theory, the hybridisation of the central $\\text{Xe}$ atom and molecular geometry of $\\text{XeF}_4$ are respectively:",
       "options": [
-        "$sp^3d^2$, Square planar",
         "$sp^3$, Tetrahedral",
         "$sp^3d$, See-saw",
-        "$dsp^2$, Square planar"
+        "$dsp^2$, Square planar",
+        "$sp^3d^2$, Square planar"
       ]
     },
     {
@@ -210,7 +210,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "The coefficient of $x^3$ in the binomial expansion of $(1 + 2x)^5$ is:",
-      "options": ["80", "40", "160", "20"]
+      "options": []
     },
     {
       "id": "pack-jm-phy-1",
@@ -230,8 +230,8 @@
       "marksWrong": -1,
       "stem": "A solid cylinder of mass $M = 4\\text{ kg}$ and radius $R = 0.5\\text{ m}$ rolls without slipping down an inclined plane of inclination $\\theta = 30^\\circ$. The magnitude of static friction force acting on the cylinder is ($g = 10\\text{ m/s}^2$):",
       "options": [
-        "$\\frac{20}{3}\\text{ N}$",
         "$\\frac{10}{3}\\text{ N}$",
+        "$\\frac{20}{3}\\text{ N}$",
         "$10\\text{ N}$",
         "$\\frac{40}{3}\\text{ N}$"
       ]
@@ -253,7 +253,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "A $6\\text{ }\\mu\\text{F}$ capacitor charged to $20\\text{ V}$ is connected in parallel with an uncharged $4\\text{ }\\mu\\text{F}$ capacitor. The loss in electrostatic potential energy during charge redistribution (in $\\mu\\text{J}$) is:",
-      "options": ["480", "240", "720", "120"]
+      "options": []
     },
     {
       "id": "pack-jm-chem-1",
@@ -273,9 +273,9 @@
       "marksWrong": -1,
       "stem": "The spin-only magnetic moment (in BM) of the octahedral complex ion $[\\text{Fe}(\\text{CN})_6]^{3-}$ is:",
       "options": [
-        "$1.73\\text{ BM}$",
         "$5.92\\text{ BM}$",
         "$0.00\\text{ BM}$",
+        "$1.73\\text{ BM}$",
         "$4.90\\text{ BM}$"
       ]
     },
@@ -296,7 +296,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "Among the hydrogen halides $\\text{HF}, \\text{HCl}, \\text{HBr}$, and $\\text{HI}$, which is the strongest reducing agent in aqueous and thermal conditions?",
-      "options": ["$\\text{HI}$", "$\\text{HF}$", "$\\text{HCl}$", "$\\text{HBr}$"]
+      "options": ["$\\text{HF}$", "$\\text{HCl}$", "$\\text{HBr}$", "$\\text{HI}$"]
     },
     {
       "id": "pack-jm-2024-math-2",
@@ -315,7 +315,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "The perpendicular distance between the two parallel straight lines $3x + 4y - 5 = 0$ and $3x + 4y + 15 = 0$ is:",
-      "options": ["4", "2", "5", "20"]
+      "options": []
     },
     {
       "id": "pack-jm-2023-phy-1",
@@ -334,7 +334,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "An ideal Carnot engine operates between a source at $600\\text{ K}$ and a sink at $300\\text{ K}$. Its thermal efficiency is:",
-      "options": ["$50\\%$", "$25\\%$", "$75\\%$", "$33.3\\%$"]
+      "options": ["$25\\%$", "$50\\%$", "$75\\%$", "$33.3\\%$"]
     },
     {
       "id": "pack-jm-2023-chem-1",
@@ -353,7 +353,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "The pH of a $0.001\\text{ M}$ aqueous solution of $\\text{HCl}$ at $298\\text{ K}$ (assuming complete dissociation) is:",
-      "options": ["3", "1", "2", "4"]
+      "options": []
     },
     {
       "id": "pack-jm-2023-math-1",
@@ -372,7 +372,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "If $y(x)$ satisfies the differential equation $\\frac{dy}{dx} = \\frac{y}{x}$ for $x > 0$ with $y(1) = 2$, then $y(3)$ equals:",
-      "options": ["6", "3", "9", "4"]
+      "options": ["3", "9", "6", "4"]
     },
     {
       "id": "pack-jm-2022-phy-1",
@@ -411,10 +411,10 @@
       "marksWrong": -1,
       "stem": "Which of the following alkyl bromides undergoes $\\text{S}_\\text{N}1$ solvolysis at the fastest rate?",
       "options": [
-        "$(\\text{CH}_3)_3\\text{CBr}$",
         "$\\text{CH}_3\\text{Br}$",
         "$\\text{CH}_3\\text{CH}_2\\text{Br}$",
-        "$(\\text{CH}_3)_2\\text{CHBr}$"
+        "$(\\text{CH}_3)_2\\text{CHBr}$",
+        "$(\\text{CH}_3)_3\\text{CBr}$"
       ]
     },
     {
@@ -434,7 +434,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "Two coherent light waves of intensities $I$ and $4I$ interfere on a screen. The ratio of maximum intensity to minimum intensity $\\frac{I_{\\max}}{I_{\\min}}$ is:",
-      "options": ["9", "5", "4", "3"]
+      "options": []
     },
     {
       "id": "pack-jm-2021-math-1",
@@ -454,8 +454,8 @@
       "marksWrong": -1,
       "stem": "The area (in square units) of the region bounded by the parabola $y = x^2$ and the line $y = x$ is:",
       "options": [
-        "$\\frac{1}{6}$",
         "$\\frac{1}{3}$",
+        "$\\frac{1}{6}$",
         "$\\frac{1}{2}$",
         "$\\frac{1}{12}$"
       ]
@@ -478,9 +478,9 @@
       "marksWrong": -1,
       "stem": "Planck’s constant $h$ has the same dimensional formula as which of the following physical quantities?",
       "options": [
-        "Angular momentum",
         "Linear momentum",
         "Torque",
+        "Angular momentum",
         "Impulse"
       ]
     },
@@ -501,7 +501,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "The total number of $\\sigma$ (sigma) covalent bonds present in one molecule of benzene ($\\text{C}_6\\text{H}_6$) is:",
-      "options": ["12", "6", "9", "15"]
+      "options": []
     },
     {
       "id": "pack-jm-2020-math-1",
@@ -520,7 +520,7 @@
       "marksCorrect": 4,
       "marksWrong": -1,
       "stem": "If the vectors $\\vec{a} = \\hat{i} + 2\\hat{j} - \\hat{k}$ and $\\vec{b} = 2\\hat{i} - \\hat{j} + \\lambda\\hat{k}$ are mutually perpendicular, then the value of $\\lambda$ is:",
-      "options": ["0", "1", "-1", "2"]
+      "options": ["1", "-1", "2", "0"]
     }
   ]
 }

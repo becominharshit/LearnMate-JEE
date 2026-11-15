@@ -5,7 +5,6 @@ import {
   evaluateSingleQuestionMarks,
   calculateCBTSummary,
   calculateSM2Schedule,
-  predictNtaPercentileAndAir,
   generateChapterShardZ,
   CBTQuestion,
 } from './jeeEngine.ts';
@@ -226,7 +225,7 @@ test('evaluateSingleQuestionMarks enforces JEE Advanced partial marking (+4/-2/+
   );
 });
 
-test('SuperMemo SM-2 algorithm and Shift Percentile Predictor compute accurate intervals and ranks', () => {
+test('SM-2 review intervals and chapter sprint generation', () => {
   // First review with Good (quality=4) -> interval 1, repetition 1
   const r1 = calculateSM2Schedule({
     quality: 4,
@@ -267,20 +266,18 @@ test('SuperMemo SM-2 algorithm and Shift Percentile Predictor compute accurate i
   assert.equal(lapsed.interval, 1);
   assert.equal(lapsed.repetition, 0);
 
-  // Shift Percentile Predictor
-  const predHigh = predictNtaPercentileAndAir({
-    score: 245,
-    maxScore: 300,
-    shiftDifficulty: 'Tough',
-  });
-  assert.ok(predHigh.percentile >= 99.8);
-  assert.equal(predHigh.cutoffCleared, true);
-
-  // ShardZ generator
+  // ShardZ generator (syllabus-only questions, varied answer positions)
   const shards = generateChapterShardZ('Electrostatics', 'Physics');
   assert.equal(shards.length, 3);
   assert.equal(shards[0].durationMinutes, 15);
   assert.equal(shards[0].masteryQuestions.length, 3);
+  const allShardQuestions = shards.flatMap((s) => s.masteryQuestions);
+  for (const sq of allShardQuestions) {
+    assert.equal(/how many marks|negative mark|marking scheme|meta|exam rule/i.test(sq.prompt), false);
+    assert.equal(sq.options.length, 4);
+  }
+  const shardIndices = new Set(allShardQuestions.map((sq) => sq.correctIndex));
+  assert.ok(shardIndices.size >= 2, 'ShardZ questions should not all share the same option index');
 });
 
 test('generateMaterialStudyBundle builds source-grounded pages without boilerplate formula injection and validates PYQ provenance', () => {
@@ -307,7 +304,11 @@ test('generateMaterialStudyBundle builds source-grounded pages without boilerpla
   assert.equal(bundle.formulas.some((f) => f.formula.includes('varepsilon_0')), false);
   assert.equal(/katex/i.test(JSON.stringify(bundle)), false);
   assert.equal(CBT_MOCK_QUESTIONS.length, 75);
-  assert.ok(CBT_MOCK_QUESTIONS.some((q) => q.provenanceType === 'LEARNMATE_ORIGINAL'));
+  assert.ok(
+    CBT_MOCK_QUESTIONS.every(
+      (q) => q.provenanceType === 'RECONSTRUCTED_WITH_SOURCE' || q.provenanceType === 'LEARNMATE_ORIGINAL'
+    )
+  );
 
   const packRes = validateAndIngestPYQPack([
     {
@@ -440,14 +441,24 @@ test('buildBalancedCustomTestQuestions allocates evenly across Physics, Chemistr
   assert.equal(balanced12.filter((q) => q.subject === 'Mathematics').length, 5);
 });
 
-test('CBT_MOCK_QUESTIONS has 15 distinct Section B numerical stems with zero duplicate drill prefixes', () => {
+test('CBT_MOCK_QUESTIONS has 75 unique stems, balanced correctIndex distribution, and empty options on numericals', () => {
+  assert.equal(CBT_MOCK_QUESTIONS.length, 75);
+  const allStems = CBT_MOCK_QUESTIONS.map((q) => q.stem.trim());
+  assert.equal(new Set(allStems).size, 75);
+
+  const sectionA = CBT_MOCK_QUESTIONS.filter((q) => q.section === 'Section A');
+  assert.equal(sectionA.length, 60);
+  const dist = [0, 1, 2, 3].map((idx) => sectionA.filter((q) => q.correctIndex === idx).length);
+  for (const count of dist) {
+    assert.ok(count >= 10 && count <= 20, `Expected balanced option distribution, got ${dist.join('/')}`);
+  }
+
   const sectionB = CBT_MOCK_QUESTIONS.filter((q) => q.section === 'Section B');
   assert.equal(sectionB.length, 15);
-  const stems = sectionB.map((q) => q.stem.trim());
-  assert.equal(new Set(stems).size, 15);
   for (const q of sectionB) {
-    assert.equal(/Compulsory Numerical Drill/i.test(q.stem), false);
+    assert.equal(/Compulsory Numerical Drill|Practice Variant/i.test(q.stem), false);
     assert.equal(q.numericalAnswer !== undefined, true);
+    assert.deepEqual(q.options, []);
   }
 });
 
@@ -509,4 +520,12 @@ test('resolveCbtSessionInit prevents custom tests from inheriting interrupted mo
   assert.equal(resumedInit.shouldResumeDraft, true);
   assert.equal(resumedInit.initialQNumber, 1);
   assert.equal(resumedInit.initialSecondsRemaining, 10789);
+
+  // NEET UG official duration is 180 minutes (10800s), not 200 minutes
+  const neetInit = resolveCbtSessionInit({
+    initialExamMode: 'NEET UG',
+    resumeFromDraft: false,
+    existingDraft: null,
+  });
+  assert.equal(neetInit.initialSecondsRemaining, 180 * 60);
 });

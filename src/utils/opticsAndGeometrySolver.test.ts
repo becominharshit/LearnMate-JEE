@@ -49,6 +49,17 @@ test('solveInclinedPlaneForces enforces static friction equilibrium and kinetic 
   const slidingCase = solveInclinedPlaneForces({ massKg: 2, thetaDeg: 45, muStatic: 0.2, muKinetic: 0.2, g: 10 });
   assert.equal(slidingCase.isSliding, true);
   assert.ok(slidingCase.accelerationMs2 > 5);
+
+  // Vertical wall boundary: theta = 90 deg => N = 0, a = g
+  const wallCase = solveInclinedPlaneForces({ massKg: 2, thetaDeg: 90, muStatic: 0.4, muKinetic: 0.3, g: 10 });
+  assert.equal(wallCase.normalN, 0);
+  assert.equal(wallCase.actualFrictionN, 0);
+  assert.equal(wallCase.isSliding, true);
+  assert.ok(Math.abs(wallCase.accelerationMs2 - 10) < 1e-6);
+  const wallSvg = synthesizeTopicAccurateSvg({ prompt: 'Inclined Plane FBD', thetaDeg: 90 });
+  assert.equal(wallSvg.matched, true);
+  assert.ok(wallSvg.svg.includes('Vertical Limit'));
+  assert.ok(wallSvg.svg.includes('mg cos 90° = 0 N'));
 });
 
 test('detectDiagramTopic and synthesizeTopicAccurateSvg render topic-accurate geometry without unrelated substitutions', () => {

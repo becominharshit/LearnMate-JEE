@@ -117,14 +117,16 @@ export interface InclinedPlaneSolution {
 
 export function solveInclinedPlaneForces(input: InclinedPlaneInput): InclinedPlaneSolution {
   const massKg = Math.max(0.1, Number.isFinite(input.massKg) ? input.massKg : 2);
-  const thetaDeg = Math.max(1, Math.min(85, Number.isFinite(input.thetaDeg) ? input.thetaDeg : 30));
+  const thetaDeg = Math.max(1, Math.min(90, Number.isFinite(input.thetaDeg) ? input.thetaDeg : 30));
   const muStatic = Math.max(0, Number.isFinite(input.muStatic) ? Number(input.muStatic) : 0.25);
   const muKinetic = Math.max(0, Number.isFinite(input.muKinetic) ? Number(input.muKinetic) : Math.min(muStatic, 0.2));
   const g = Number.isFinite(input.g) && Number(input.g) > 0 ? Number(input.g) : 9.8;
 
   const rad = (thetaDeg * Math.PI) / 180;
   const weightN = massKg * g;
-  const normalN = weightN * Math.cos(rad);
+  const rawCos = Math.cos(rad);
+  const cosTheta = Math.abs(rawCos) < 1e-6 ? 0 : rawCos;
+  const normalN = weightN * cosTheta;
   const parallelGravityN = weightN * Math.sin(rad);
   const maxStaticFrictionN = muStatic * normalN;
   const isSliding = parallelGravityN > maxStaticFrictionN + 1e-6;
@@ -265,35 +267,66 @@ export function synthesizeTopicAccurateSvg(opts: TopicSvgOptions): {
   </defs>`;
 
   if (topic === 'incline') {
-    const theta = opts.thetaDeg ?? 25;
+    const theta = Math.max(1, Math.min(90, Number.isFinite(opts.thetaDeg) ? Number(opts.thetaDeg) : 25));
     const sol = solveInclinedPlaneForces({ massKg: 2, thetaDeg: theta, muStatic: 0.25, muKinetic: 0.2 });
     const slideShift = opts.animateMotion ? Math.sin(t * 1.9) * 44 : 0;
     const rad = (theta * Math.PI) / 180;
-    const baseRightX = 560;
+    const isVertical = theta >= 89.5;
     const baseY = 345;
-    const baseLeftX = 110;
-    const topY = Math.max(95, Math.round(baseY - (baseRightX - baseLeftX) * Math.tan(rad)));
-    const midX = 340 + slideShift * Math.cos(rad);
-    const midY = baseY - (midX - baseLeftX) * ((baseY - topY) / (baseRightX - baseLeftX));
+
+    if (isVertical) {
+      const wallX = 330;
+      const wallTopY = 95;
+      const midY = 220 + slideShift * 0.7;
+      const svg = `<svg viewBox="0 0 680 420" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" font-family="Plus Jakarta Sans, Inter, sans-serif">
+        ${sharedDefs}
+        <rect width="680" height="420" fill="#FFFFFF"/>
+        <text x="24" y="34" font-size="15" font-weight="700" fill="#0F172A">Inclined Plane FBD · θ = 90° (Vertical Limit) | N = 0.0 N | f = 0.0 N</text>
+        <line x1="120" y1="${baseY}" x2="540" y2="${baseY}" stroke="#0F172A" stroke-width="3"/>
+        <rect x="${wallX}" y="${wallTopY}" width="170" height="${baseY - wallTopY}" fill="#F1F5F9" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
+        <rect x="${wallX - 24}" y="${baseY - 24}" width="24" height="24" fill="#DBEAFE" fill-opacity="0.7" stroke="#1E40AF" stroke-width="2"/>
+        <text x="${wallX - 96}" y="${baseY - 14}" font-family="Georgia, serif" font-style="italic" font-size="20" fill="#1E40AF">θ = 90°</text>
+        <g transform="translate(${wallX}, ${midY.toFixed(1)}) rotate(-90)">
+          <rect x="-46" y="-56" width="92" height="56" rx="5" fill="#E0E7FF" stroke="#1E1B4B" stroke-width="3"/>
+          <text x="-8" y="-22" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="20" fill="#1E1B4B">m</text>
+        </g>
+        <line x1="${wallX - 28}" y1="${midY.toFixed(1)}" x2="${wallX - 28}" y2="${(midY + 95).toFixed(1)}" stroke="#DC2626" stroke-width="3.2" marker-end="url(#arr-rose)"/>
+        <text x="${wallX - 108}" y="${(midY + 72).toFixed(1)}" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="18" fill="#DC2626">mg (a = g)</text>
+        <text x="24" y="396" font-size="13" font-weight="700" fill="#059669">Free-fall vertical limit: N = mg cos 90° = 0 N, a = g = ${sol.accelerationMs2.toFixed(2)} m/s²</text>
+      </svg>`;
+      return { svg: sanitizeSvgMarkup(svg), topic, matched: true };
+    }
+
+    const maxRun = 450;
+    const maxRise = 245;
+    const naturalRise = maxRun * Math.tan(rad);
+    const rise = naturalRise <= maxRise ? naturalRise : maxRise;
+    const run = naturalRise <= maxRise ? maxRun : rise / Math.tan(rad);
+    const baseRightX = naturalRise <= maxRise ? 560 : Math.round(340 + run / 2 + 40);
+    const baseLeftX = Math.round(baseRightX - run);
+    const topY = Math.round(baseY - rise);
+    const midX = (baseLeftX + baseRightX) / 2 + slideShift * Math.cos(rad);
+    const midY = baseY - (midX - baseLeftX) * ((baseY - topY) / Math.max(1, baseRightX - baseLeftX));
+    const arcR = Math.min(75, Math.max(36, Math.round(run * 0.45)));
 
     const svg = `<svg viewBox="0 0 680 420" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" font-family="Plus Jakarta Sans, Inter, sans-serif">
       ${sharedDefs}
       <rect width="680" height="420" fill="#FFFFFF"/>
       <text x="24" y="34" font-size="15" font-weight="700" fill="#0F172A">Inclined Plane FBD · θ = ${theta}° | N = ${sol.normalN.toFixed(1)} N | f = ${sol.actualFrictionN.toFixed(1)} N</text>
       <polygon points="${baseLeftX},${baseY} ${baseRightX},${baseY} ${baseRightX},${topY}" fill="#F1F5F9" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M ${baseLeftX + 75},${baseY} A 75,75 0 0,0 ${baseLeftX + Math.round(75 * Math.cos(rad))},${baseY - Math.round(75 * Math.sin(rad))}" fill="#DBEAFE" fill-opacity="0.7" stroke="#1E40AF" stroke-width="2"/>
-      <text x="${baseLeftX + 86}" y="${baseY - 12}" font-family="Georgia, serif" font-style="italic" font-size="20" fill="#1E40AF">θ = ${theta}°</text>
+      <path d="M ${baseLeftX + arcR},${baseY} A ${arcR},${arcR} 0 0,0 ${baseLeftX + Math.round(arcR * Math.cos(rad))},${baseY - Math.round(arcR * Math.sin(rad))}" fill="#DBEAFE" fill-opacity="0.7" stroke="#1E40AF" stroke-width="2"/>
+      <text x="${Math.max(24, baseLeftX - 18)}" y="${baseY - 12}" font-family="Georgia, serif" font-style="italic" font-size="19" fill="#1E40AF" text-anchor="${run < 180 ? 'end' : 'start'}">θ = ${theta}°</text>
       <g transform="translate(${midX.toFixed(1)}, ${midY.toFixed(1)}) rotate(${(-theta).toFixed(2)})">
         <rect x="-54" y="-58" width="108" height="58" rx="5" fill="#E0E7FF" stroke="#1E1B4B" stroke-width="3"/>
         <text x="-10" y="-22" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="20" fill="#1E1B4B">m</text>
-        <line x1="0" y1="-58" x2="0" y2="-155" stroke="#059669" stroke-width="3.2" marker-end="url(#arr-emerald)"/>
-        <text x="8" y="-142" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="18" fill="#059669">N = mg cos θ</text>
-        <line x1="54" y1="-29" x2="142" y2="-29" stroke="#4F46E5" stroke-width="3" marker-end="url(#arr-indigo)"/>
+        <line x1="0" y1="-58" x2="0" y2="-142" stroke="#059669" stroke-width="3.2" marker-end="url(#arr-emerald)"/>
+        <text x="8" y="-128" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="17" fill="#059669">N = mg cos θ</text>
+        <line x1="54" y1="-29" x2="132" y2="-29" stroke="#4F46E5" stroke-width="3" marker-end="url(#arr-indigo)"/>
         <text x="80" y="-40" font-family="Georgia, serif" font-style="italic" font-size="16" fill="#4F46E5">f</text>
-        <line x1="-54" y1="-29" x2="-142" y2="-29" stroke="#DC2626" stroke-width="2.4" stroke-dasharray="5,3" marker-end="url(#arr-rose)"/>
-        <text x="-152" y="-42" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#DC2626">mg sin θ</text>
-        <line x1="0" y1="0" x2="0" y2="85" stroke="#64748B" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#arr-dark)"/>
-        <text x="10" y="78" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#334155">mg cos θ</text>
+        <line x1="-54" y1="-29" x2="-132" y2="-29" stroke="#DC2626" stroke-width="2.4" stroke-dasharray="5,3" marker-end="url(#arr-rose)"/>
+        <text x="-142" y="-42" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#DC2626">mg sin θ</text>
+        <line x1="0" y1="0" x2="0" y2="78" stroke="#64748B" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#arr-dark)"/>
+        <text x="10" y="72" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#334155">mg cos θ</text>
       </g>
       <line x1="${midX.toFixed(1)}" y1="${(midY - 29).toFixed(1)}" x2="${midX.toFixed(1)}" y2="${(midY + 92).toFixed(1)}" stroke="#DC2626" stroke-width="3.2" marker-end="url(#arr-rose)"/>
       <text x="${(midX - 34).toFixed(1)}" y="${(midY + 108).toFixed(1)}" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="20" fill="#DC2626">mg</text>

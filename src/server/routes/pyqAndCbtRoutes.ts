@@ -188,7 +188,7 @@ pyqAndCbtRouter.post('/pyq/verify-answer', (req: Request, res: Response) => {
   });
 });
 
-// 3. Server-Verified CBT Grading & Shift Percentile Calculation (/api/cbt/grade)
+// 3. Server-Verified CBT Grading (/api/cbt/grade)
 pyqAndCbtRouter.post('/cbt/grade', (req: Request, res: Response) => {
   const {
     questions,
@@ -196,7 +196,6 @@ pyqAndCbtRouter.post('/cbt/grade', (req: Request, res: Response) => {
     attemptType = 'official_mock',
     responses = {},
     examMode = 'JEE Main',
-    shiftDifficulty = 'Moderate',
   } = req.body || {};
 
   const hasQuestions = Array.isArray(questions) && questions.length > 0;
@@ -224,7 +223,6 @@ pyqAndCbtRouter.post('/cbt/grade', (req: Request, res: Response) => {
       attemptType: attemptType === 'custom_drill' ? 'custom_drill' : 'official_mock',
       responses,
       examMode,
-      shiftDifficulty,
     });
 
     res.json(graded);
