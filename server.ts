@@ -54,6 +54,7 @@ export function createLearnMateExpressApp() {
   app.use('/api/ai/transcribe', heavyUploadJson);
   app.use('/api/ai/image-edit', heavyUploadJson);
   app.use('/api/ingest', heavyUploadJson);
+  app.use('/api/cbt/convert-paper', heavyUploadJson);
 
   // Preserve raw body for HMAC webhook verification on /api/commercial/webhook
   app.use(

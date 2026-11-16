@@ -17,6 +17,7 @@ import { DashboardView } from './components/dashboard/DashboardView';
 import { StudyWorkbenchView } from './components/study/StudyWorkbenchView';
 import { JeeCbtExamModal } from './components/cbt/JeeCbtExamModal';
 import { CustomTestGeneratorModal } from './components/cbt/CustomTestGeneratorModal';
+import { OfflineTestToCbtModal } from './components/cbt/OfflineTestToCbtModal';
 import { ProgressAndRankView } from './components/analytics/ProgressAndRankView';
 import { CompactStudyUtilitiesDrawer } from './components/utilities/CompactStudyUtilitiesDrawer';
 import { PracticeWorkspaceView } from './components/PracticeWorkspaceView';
@@ -84,7 +85,6 @@ export function App() {
         customDurationMinutes={s.customCbtConfig?.durationMinutes}
         customPaperTitle={s.customCbtConfig?.paperTitle}
         onSubmitMock={(summary, focusEvents, questions, responses) => {
-          s.setCustomCbtConfig(null);
           s.handleSubmitCBTMock(summary, focusEvents, questions, responses);
         }}
         onExitMock={() => {
@@ -312,6 +312,10 @@ export function App() {
               s.startCBTMockSession(mode, options);
             }}
             onOpenCustomTestModal={() => s.setCustomTestModalOpen(true)}
+            onOpenConvertOfflineModal={() => s.setOfflinePaperModalOpen(true)}
+            convertedTests={s.convertedTests}
+            onLaunchConvertedTest={s.handleLaunchConvertedTest}
+            onDeleteConvertedTest={s.handleDeleteConvertedTest}
             onOpenInstantPractice={(paperTitle, customQuestions) =>
               s.setInstantPracticeConfig({
                 isOpen: true,
@@ -409,7 +413,7 @@ export function App() {
         isOpen={s.customTestModalOpen}
         mistakesNotebook={s.mistakesNotebook}
         onClose={() => s.setCustomTestModalOpen(false)}
-        onLaunchCustomCBT={(questionsOrConfig, durationMinutes = 60, paperTitle = 'Custom Test') => {
+            onLaunchCustomCBT={(questionsOrConfig, durationMinutes = 60, paperTitle = 'Custom Test') => {
           s.setCustomTestModalOpen(false);
           if (Array.isArray(questionsOrConfig)) {
             s.launchCustomCBTSession({
@@ -424,6 +428,16 @@ export function App() {
               paperTitle: questionsOrConfig.title,
             });
           }
+        }}
+      />
+
+      <OfflineTestToCbtModal
+        isOpen={s.offlinePaperModalOpen}
+        onClose={() => s.setOfflinePaperModalOpen(false)}
+        onSaveConvertedTest={s.handleSaveConvertedTest}
+        onSaveAndStartCbt={async (record) => {
+          await s.handleSaveConvertedTest(record);
+          s.handleLaunchConvertedTest(record);
         }}
       />
 

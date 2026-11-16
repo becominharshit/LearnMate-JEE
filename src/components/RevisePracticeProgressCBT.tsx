@@ -15,6 +15,8 @@ import {
   Check,
   CornerDownRight,
   Delete,
+  Camera,
+  Trash2,
 } from 'lucide-react';
 import {
   MindMapNodeItem,
@@ -31,6 +33,7 @@ import {
   CBTQuestion,
   CBTQuestionResponse,
   CBTMockSummary,
+  ConvertedTestRecord,
   QuestionAttemptDetail,
   ErrorRootCauseTag,
   SM2FlashcardItem,
@@ -1525,6 +1528,10 @@ interface PracticeViewProps {
   onStartCBTMock: (examMode?: ExamTrack, options?: { resume?: boolean }) => void;
   onOpenInstantPractice: (paperTitle: string, customQuestions?: CBTQuestion[]) => void;
   onOpenCustomTestModal?: () => void;
+  onOpenConvertOfflineModal?: () => void;
+  convertedTests?: ConvertedTestRecord[];
+  onLaunchConvertedTest?: (record: ConvertedTestRecord) => void;
+  onDeleteConvertedTest?: (testId: string) => void;
   mistakesNotebook?: MistakeNotebookEntry[];
   onRecordMistake?: (question: CBTQuestion, userAnswer: string) => void;
 }
@@ -1533,11 +1540,15 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
   onStartCBTMock,
   onOpenInstantPractice,
   onOpenCustomTestModal,
+  onOpenConvertOfflineModal,
+  convertedTests = [],
+  onLaunchConvertedTest,
+  onDeleteConvertedTest,
   mistakesNotebook = [],
   onRecordMistake,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<
-    'Official Papers' | 'PYQs' | 'Custom Set' | 'Analysis'
+    'Official Papers' | 'PYQs' | 'Custom Set' | 'My Converted Tests' | 'Analysis'
   >('Official Papers');
   const [paperFilter, setPaperFilter] = useState<
     | 'All'
@@ -1756,23 +1767,44 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          {(['Official Papers', 'PYQs', 'Custom Set', 'Analysis'] as const).map((tab) => {
+          {(['Official Papers', 'PYQs', 'Custom Set', 'My Converted Tests', 'Analysis'] as const).map((tab) => {
             const active = activeSubTab === tab;
             return (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveSubTab(tab)}
-                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
                   active
                     ? 'bg-[#2563EB] text-white'
                     : 'text-[#475569] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B]'
                 }`}
               >
-                {tab}
+                <span>{tab}</span>
+                {tab === 'My Converted Tests' && convertedTests.length > 0 && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] tabular-nums font-bold ${
+                      active
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA]'
+                    }`}
+                  >
+                    {convertedTests.length}
+                  </span>
+                )}
               </button>
             );
           })}
+          {onOpenConvertOfflineModal && (
+            <button
+              type="button"
+              onClick={onOpenConvertOfflineModal}
+              className="ml-1 inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg border border-[#CBD5E1] dark:border-white/[0.14] bg-white dark:bg-[#1E293B] hover:bg-[#F8FAFF] dark:hover:bg-[#283548] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Camera className="w-3.5 h-3.5 text-[#00A86B]" />
+              <span>Convert Offline Test → CBT</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1849,6 +1881,16 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
               className="px-3.5 py-2 rounded-lg btn-brand-secondary text-xs font-semibold transition-colors cursor-pointer"
             >
               Custom Test →
+            </button>
+          )}
+          {onOpenConvertOfflineModal && (
+            <button
+              type="button"
+              onClick={onOpenConvertOfflineModal}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#00A86B] hover:bg-[#059669] text-white text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>Convert Offline Test → CBT</span>
             </button>
           )}
           <button
@@ -2484,6 +2526,122 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
         </div>
       )}
 
+      {/* SUB-TAB 3b: MY CONVERTED OFFLINE TESTS */}
+      {activeSubTab === 'My Converted Tests' && (
+        <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] p-6 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#2563EB] dark:text-[#60A5FA]">
+                Offline Paper Digitizer
+              </span>
+              <h2 className="text-base sm:text-lg font-bold tracking-[-0.02em] text-[#0F172A] dark:text-[#F8FAFC]">
+                My Converted Tests ({convertedTests.length})
+              </h2>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
+                Offline coaching PDFs &amp; multi-photo papers converted into proctored CBT mocks (saved per account).
+              </p>
+            </div>
+            {onOpenConvertOfflineModal && (
+              <button
+                type="button"
+                onClick={onOpenConvertOfflineModal}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg btn-brand text-xs font-semibold cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Convert Offline Test → CBT</span>
+              </button>
+            )}
+          </div>
+
+          {convertedTests.length === 0 ? (
+            <div className="p-8 rounded-xl border border-dashed border-[#CBD5E1] dark:border-white/[0.12] bg-[#F8FAFF] dark:bg-[#1E293B]/40 text-center space-y-3">
+              <p className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+                No converted offline tests yet
+              </p>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] max-w-md mx-auto">
+                Upload an Allen / Resonance / NTA paper PDF or click multi-page photos with your camera to convert any offline paper into a timed CBT exam.
+              </p>
+              {onOpenConvertOfflineModal && (
+                <button
+                  type="button"
+                  onClick={onOpenConvertOfflineModal}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg btn-brand text-xs font-semibold cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Convert Offline Test → CBT</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="divide-y divide-[#E2E8F0] dark:divide-white/[0.06] border border-[#E2E8F0] dark:border-white/[0.08] rounded-xl overflow-hidden">
+              {convertedTests.map((test) => (
+                <div
+                  key={test.id}
+                  className="p-4 flex flex-wrap items-center justify-between gap-4 hover:bg-[#F8FAFF] dark:hover:bg-[#1E293B]/50 transition-colors"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-[#2563EB]/10 border border-[#2563EB]/25 text-[#2563EB] dark:text-[#60A5FA]">
+                        {test.pattern}
+                      </span>
+                      <span className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+                        {test.title}
+                      </span>
+                      {test.summary.needsReviewCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-300 tabular-nums">
+                          {test.summary.needsReviewCount} needs_review
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-[#64748B] dark:text-[#94A3B8] flex flex-wrap items-center gap-2 tabular-nums">
+                      <span>{test.summary.totalQuestions} Qs · {test.summary.maxMarks} Marks</span>
+                      <span>·</span>
+                      <span>{test.durationMinutes} mins</span>
+                      <span>·</span>
+                      <span>
+                        P {test.summary.physicsCount} / C {test.summary.chemistryCount} / M {test.summary.mathematicsCount}
+                        {test.summary.biologyCount ? ` / Bio ${test.summary.biologyCount}` : ''}
+                      </span>
+                      <span>·</span>
+                      <span>{test.pageCount} {test.sourceMode === 'pdf' ? 'PDF page(s)' : 'photo(s)'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenInstantPractice(test.title, test.questions)}
+                      className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-[#283548] text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
+                    >
+                      Instant Solver
+                    </button>
+                    {onLaunchConvertedTest && (
+                      <button
+                        type="button"
+                        onClick={() => onLaunchConvertedTest(test)}
+                        className="px-3.5 py-2 rounded-lg btn-brand text-xs font-semibold cursor-pointer"
+                      >
+                        Retake CBT →
+                      </button>
+                    )}
+                    {onDeleteConvertedTest && (
+                      <button
+                        type="button"
+                        aria-label={`Delete converted test ${test.title}`}
+                        onClick={() => onDeleteConvertedTest(test.id)}
+                        className="p-2 rounded-lg border border-rose-500/20 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* SUB-TAB 4: ANALYSIS & MY MISTAKES NOTEBOOK */}
       {activeSubTab === 'Analysis' && (
         <div className="bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] p-6 space-y-4">
@@ -2747,6 +2905,7 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
   const [submittedSummary, setSubmittedSummary] = useState<CBTMockSummary | null>(null);
   const [submittingCbt, setSubmittingCbt] = useState<boolean>(false);
   const [submitCbtError, setSubmitCbtError] = useState<string | null>(null);
+  const [zoomedDiagramUrl, setZoomedDiagramUrl] = useState<string | null>(null);
   const [serverSolutions, setServerSolutions] = useState<
     Record<
       string,
@@ -3090,7 +3249,9 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
             ? questionsList.map((q) => q.id)
             : undefined,
         questions:
-          customQuestions && customQuestions.length > 0 ? questionsList : undefined,
+          customQuestions && customQuestions.length > 0
+            ? questionsList.map(({ diagramImageUrl: _img, ...rest }) => rest)
+            : undefined,
         responses,
         examMode,
       });
@@ -3366,12 +3527,17 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                     Question {currentQuestion.number} of {questionsList.length}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-md bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-semibold">
-                    {currentQuestion.subject} • {currentQuestion.chapter}
+                    {currentQuestion.subTrackLabel || currentQuestion.subject} • {currentQuestion.chapter}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-md bg-[#F8FAFF] dark:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] text-xs font-semibold uppercase">
                     {currentQuestion.advancedFormat ||
                       (currentQuestion.section === 'Section B' ? 'NUMERICAL' : 'SINGLE MCQ')}
                   </span>
+                  {currentQuestion.keySource === 'needs_review' && (
+                    <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                      needs_review
+                    </span>
+                  )}
                   {customPaperTitle && (
                     <span className="px-2.5 py-0.5 rounded-md bg-[#00A86B]/10 border border-[#00A86B]/25 text-[#00A86B] text-[10px] font-semibold">
                       {customPaperTitle}
@@ -3463,6 +3629,29 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                   }
                 />
               </div>
+
+              {/* Original Uploaded Page Diagram Reference (when hasDiagramReference is true) */}
+              {currentQuestion.hasDiagramReference && currentQuestion.diagramImageUrl && (
+                <div className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.1] bg-[#F8FAFF] dark:bg-[#1E293B]/60 space-y-2 max-w-2xl">
+                  <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8]">
+                    <span>
+                      Reference Figure from Uploaded Paper (Page {currentQuestion.sourcePageNumber || 1})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setZoomedDiagramUrl(currentQuestion.diagramImageUrl || null)}
+                      className="text-[#2563EB] dark:text-[#60A5FA] hover:underline cursor-pointer"
+                    >
+                      Zoom Image
+                    </button>
+                  </div>
+                  <img
+                    src={currentQuestion.diagramImageUrl}
+                    alt={`Question ${currentQuestion.number} diagram reference`}
+                    className="max-h-72 w-auto rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white object-contain"
+                  />
+                </div>
+              )}
 
               {/* Options or Section B Numerical Keypad */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -3848,6 +4037,21 @@ export const CBTMockExamView: React.FC<CBTMockExamProps> = ({
                 Finish &amp; Go to Progress Dashboard →
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Zoomed Diagram Lightbox */}
+      {zoomedDiagramUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setZoomedDiagramUrl(null)}
+        >
+          <div className="max-w-4xl max-h-[90vh] bg-white rounded-2xl p-3 overflow-auto">
+            <img
+              src={zoomedDiagramUrl}
+              alt="Zoomed question paper reference"
+              className="max-w-full max-h-[82vh] object-contain mx-auto"
+            />
           </div>
         </div>
       )}

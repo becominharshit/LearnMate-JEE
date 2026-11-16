@@ -40,6 +40,7 @@ import {
 import {
   CBTMockSummary,
   CBTQuestion,
+  ConvertedTestRecord,
   SM2FlashcardItem,
   ErrorRootCauseTag,
   ExamTrack,
@@ -49,13 +50,19 @@ import {
   clearAllIndexedDbDocuments,
   createBillingCheckoutSession,
   deleteAccountOnServer,
+  deleteConvertedTestFromDevice,
+  deleteConvertedTestFromFirestore,
   fetchCommercialEntitlements,
   ingestDocumentOnServer,
+  listConvertedTestsFromFirestore,
+  listConvertedTestsOnDevice,
   listStudyMaterialsOnDevice,
   removeStudyMaterialFromDevice,
+  saveConvertedTestOnDevice,
   saveStudyMaterialOnDevice,
   purgeUserFirestoreData,
   syncChunkedMaterialToFirestore,
+  syncConvertedTestToFirestore,
   syncRevisionStateToFirestore,
   syncStudyOriginalToCloud,
 } from '../services/workspaceService';
@@ -155,6 +162,8 @@ export function useLearnMateAppState() {
   const [mistakesNotebook, setMistakesNotebook] = useState<MistakeNotebookEntry[]>([]);
   const [sm2Cards, setSm2Cards] = useState<SM2FlashcardItem[]>([]);
   const [customTestModalOpen, setCustomTestModalOpen] = useState<boolean>(false);
+  const [offlinePaperModalOpen, setOfflinePaperModalOpen] = useState<boolean>(false);
+  const [convertedTests, setConvertedTests] = useState<ConvertedTestRecord[]>([]);
   const [customCbtConfig, setCustomCbtConfig] = useState<{
     questions: CBTQuestion[];
     durationMinutes: number;
@@ -173,9 +182,15 @@ export function useLearnMateAppState() {
     questions: CBTQuestion[];
     durationMinutes: number;
     paperTitle: string;
+    examMode?: ExamTrack;
   }) => {
-    setCustomCbtConfig(config);
-    setCbtExamMode('JEE Main');
+    const resolvedMode: ExamTrack = config.examMode || 'JEE Main';
+    setCustomCbtConfig({
+      questions: config.questions,
+      durationMinutes: config.durationMinutes,
+      paperTitle: config.paperTitle,
+    });
+    setCbtExamMode(resolvedMode);
     setCbtResumeFromDraft(false);
     setCbtSessionId(`custom-cbt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`);
     setInCBTMockMode(true);
@@ -241,6 +256,7 @@ export function useLearnMateAppState() {
       setTasks([]);
       setMistakesNotebook([]);
       setSm2Cards([]);
+      setConvertedTests([]);
       setSubscriptionTier('free');
       setSubscriptionStatus('active');
       setBillingError(null);
@@ -319,6 +335,30 @@ export function useLearnMateAppState() {
         setPaymentsConfigured(false);
       }
     });
+
+    let convertedActive = true;
+    void (async () => {
+      const localList = await listConvertedTestsOnDevice(uid).catch(() => []);
+      if (!convertedActive) return;
+      setConvertedTests(localList);
+
+      if (!isLocalOrDemoUid(uid) && isFirebaseConfigured && db) {
+        const cloudList = await listConvertedTestsFromFirestore(uid).catch(() => []);
+        if (!convertedActive || cloudList.length === 0) return;
+        setConvertedTests((prev) => {
+          const map = new Map<string, ConvertedTestRecord>();
+          for (const item of cloudList) map.set(item.id, item);
+          for (const item of prev) map.set(item.id, item); // keep full-resolution device version (with diagrams)
+          return Array.from(map.values()).sort((a, b) =>
+            b.createdAtIso.localeCompare(a.createdAtIso)
+          );
+        });
+      }
+    })();
+
+    return () => {
+      convertedActive = false;
+    };
   }, [currentUser?.uid]);
 
   useEffect(() => {
@@ -1152,6 +1192,10 @@ export function useLearnMateAppState() {
       showToast(`CBT Submitted! Score: ${summary.totalScore}/${maxMarks} (Scaled: ${scaledScore}/300)`);
     }
 
+    const activePaperTitle = customCbtConfig?.paperTitle || `${cbtExamMode} CBT Mock`;
+    const activeDurationMins = customCbtConfig?.durationMinutes || 180;
+    setCustomCbtConfig(null);
+
     if (currentUser && !isLocalOrDemoUid(currentUser.uid) && isFirebaseConfigured && db) {
       const attemptRef = doc(db, 'users', currentUser.uid, 'mockAttempts', attemptId);
       const mappedExamType =
@@ -1165,13 +1209,13 @@ export function useLearnMateAppState() {
       try {
         await setDoc(attemptRef, {
           userId: currentUser.uid,
-          mockTitle: `${cbtExamMode} CBT Mock`.slice(0, 190),
+          mockTitle: activePaperTitle.slice(0, 190),
           examType: mappedExamType,
           examVersion: 'jee-main-2027-paper1',
           score: Math.max(-100, Math.min(720, Math.round(summary.totalScore))),
           maxMarks,
           accuracy: Math.max(0, Math.min(100, Number(summary.accuracyPct || 0))),
-          durationMinutes: 180,
+          durationMinutes: Math.max(1, Math.min(360, Math.round(activeDurationMins))),
           correctCount: summary.correctCount ?? 0,
           incorrectCount: summary.incorrectCount ?? 0,
           skippedCount: summary.unansweredCount ?? 0,
@@ -1184,6 +1228,33 @@ export function useLearnMateAppState() {
         // Non-blocking
       }
     }
+  };
+
+  const handleSaveConvertedTest = async (record: ConvertedTestRecord) => {
+    const uid = currentUser?.uid;
+    if (!uid) return;
+    await saveConvertedTestOnDevice(uid, record);
+    setConvertedTests((prev) => [record, ...prev.filter((t) => t.id !== record.id)]);
+    showToast(`Saved "${record.title}" (${record.summary.totalQuestions} Qs) to My Converted Tests!`);
+    void syncConvertedTestToFirestore(uid, record);
+  };
+
+  const handleDeleteConvertedTest = async (testId: string) => {
+    const uid = currentUser?.uid;
+    if (!uid) return;
+    await deleteConvertedTestFromDevice(uid, testId);
+    setConvertedTests((prev) => prev.filter((t) => t.id !== testId));
+    showToast('Removed converted test.');
+    void deleteConvertedTestFromFirestore(uid, testId);
+  };
+
+  const handleLaunchConvertedTest = (record: ConvertedTestRecord) => {
+    launchCustomCBTSession({
+      questions: record.questions,
+      durationMinutes: record.durationMinutes,
+      paperTitle: record.title,
+      examMode: record.examMode,
+    });
   };
 
   return {
@@ -1263,6 +1334,9 @@ export function useLearnMateAppState() {
     sm2Cards,
     customTestModalOpen,
     setCustomTestModalOpen,
+    offlinePaperModalOpen,
+    setOfflinePaperModalOpen,
+    convertedTests,
     customCbtConfig,
     setCustomCbtConfig,
     streakDays,
@@ -1294,5 +1368,8 @@ export function useLearnMateAppState() {
     handleSaveCreation,
     handleAddFlashcard,
     handleSubmitCBTMock,
+    handleSaveConvertedTest,
+    handleDeleteConvertedTest,
+    handleLaunchConvertedTest,
   };
 }

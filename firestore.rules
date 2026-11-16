@@ -296,6 +296,34 @@ service cloud.firestore {
       data.createdAt is timestamp;
     }
 
+    // Entity Blueprint 11: ConvertedTest (/users/{userId}/convertedTests/{testId})
+    function isValidConvertedTest(data, userId) {
+      return data.keys().hasAll([
+        'userId', 'title', 'pattern', 'examMode', 'durationMinutes',
+        'sourceMode', 'pageCount', 'hasAttachedAnswerKey',
+        'summaryJson', 'questionsJson', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'title', 'pattern', 'examMode', 'durationMinutes',
+        'sourceMode', 'pageCount', 'hasAttachedAnswerKey',
+        'summaryJson', 'questionsJson', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == userId && data.userId == request.auth.uid &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+      data.pattern is string &&
+      (data.pattern == 'JEE Main +4/-1' || data.pattern == 'JEE Advanced +4/-2 Partial' || data.pattern == 'NEET +4/-1') &&
+      data.examMode is string &&
+      (data.examMode == 'JEE Main' || data.examMode == 'JEE Advanced' || data.examMode == 'NEET UG' || data.examMode == 'BITSAT') &&
+      data.durationMinutes is int && data.durationMinutes >= 5 && data.durationMinutes <= 360 &&
+      data.sourceMode is string && (data.sourceMode == 'pdf' || data.sourceMode == 'photos') &&
+      data.pageCount is int && data.pageCount >= 1 && data.pageCount <= 250 &&
+      data.hasAttachedAnswerKey is bool &&
+      data.summaryJson is string && data.summaryJson.size() >= 2 && data.summaryJson.size() <= 5000 &&
+      data.questionsJson is string && data.questionsJson.size() >= 2 && data.questionsJson.size() <= 750000 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
     // Canonical Tenant-Scoped User Root & Subcollections: /users/{userId}/...
     match /users/{userId} {
       allow get: if isOwner(userId);
@@ -457,6 +485,20 @@ service cloud.firestore {
           incoming().createdAt == existing().createdAt &&
           incoming().updatedAt == request.time;
         allow delete: if isVerifiedOwner(userId) && isValidId(draftId);
+      }
+
+      match /convertedTests/{testId} {
+        allow get, list: if isOwner(userId) && (testId == null || isValidId(testId));
+        allow create: if isVerifiedOwner(userId) && isValidId(testId) &&
+          isValidConvertedTest(incoming(), userId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time;
+        allow update: if isVerifiedOwner(userId) && isValidId(testId) &&
+          isValidConvertedTest(incoming(), userId) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time;
+        allow delete: if isVerifiedOwner(userId) && isValidId(testId);
       }
 
       // Server Admin SDK only writes for billing/entitlements (clients can read own)

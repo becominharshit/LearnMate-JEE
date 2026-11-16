@@ -70,6 +70,42 @@ export interface CBTQuestion {
   verificationStatus?: 'verified' | 'reconstructed' | 'unverified';
   licenseStatus?: string;
   conceptTags?: string[];
+  sourcePageNumber?: number;
+  keySource?: 'official_key_attached' | 'ai_verified' | 'needs_review';
+  hasDiagramReference?: boolean;
+  diagramImageUrl?: string;
+  convertedQuestionType?: 'MCQ' | 'NUMERICAL' | 'MULTI_CORRECT' | 'COMPREHENSION' | 'MATRIX_MATCH';
+}
+
+export type ConvertedPaperPattern =
+  | 'JEE Main +4/-1'
+  | 'JEE Advanced +4/-2 Partial'
+  | 'NEET +4/-1';
+
+export interface ConvertedTestSummary {
+  physicsCount: number;
+  chemistryCount: number;
+  mathematicsCount: number;
+  biologyCount?: number;
+  totalQuestions: number;
+  maxMarks: number;
+  needsReviewCount: number;
+  diagramQuestionCount: number;
+}
+
+export interface ConvertedTestRecord {
+  id: string;
+  title: string;
+  pattern: ConvertedPaperPattern;
+  examMode: ExamTrack;
+  durationMinutes: number;
+  questions: CBTQuestion[];
+  summary: ConvertedTestSummary;
+  sourceMode: 'pdf' | 'photos';
+  pageCount: number;
+  hasAttachedAnswerKey: boolean;
+  createdAtIso: string;
+  updatedAtIso: string;
 }
 
 export interface QuestionResponseState {

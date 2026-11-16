@@ -235,6 +235,30 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "questionId", "issueType", "details", "status", "createdAt"]
+    },
+    "ConvertedTest": {
+      "title": "ConvertedTest",
+      "description": "Offline question paper or multi-photo test converted into a proctored CBT mock",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "pattern": { "type": "string", "enum": ["JEE Main +4/-1", "JEE Advanced +4/-2 Partial", "NEET +4/-1"] },
+        "examMode": { "type": "string", "enum": ["JEE Main", "JEE Advanced", "NEET UG", "BITSAT"] },
+        "durationMinutes": { "type": "integer" },
+        "sourceMode": { "type": "string", "enum": ["pdf", "photos"] },
+        "pageCount": { "type": "integer" },
+        "hasAttachedAnswerKey": { "type": "boolean" },
+        "summaryJson": { "type": "string", "maxLength": 5000 },
+        "questionsJson": { "type": "string", "maxLength": 750000 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "title", "pattern", "examMode", "durationMinutes",
+        "sourceMode", "pageCount", "hasAttachedAnswerKey",
+        "summaryJson", "questionsJson", "createdAt", "updatedAt"
+      ]
     }
   },
   "firestore": {
@@ -277,6 +301,10 @@
     "/users/{userId}/cbtDrafts/{draftId}": {
       "schema": { "$ref": "#/entities/CbtDraft" },
       "description": "Tenant-scoped in-progress CBT auto-save drafts"
+    },
+    "/users/{userId}/convertedTests/{testId}": {
+      "schema": { "$ref": "#/entities/ConvertedTest" },
+      "description": "Tenant-scoped offline question papers converted into proctored CBT mocks"
     },
     "/users/{userId}/entitlements/{docId}": {
       "schema": { "$ref": "#/entities/Entitlement" },

@@ -9,9 +9,19 @@ import {
   BITSAT_PAPER_QUESTIONS,
 } from '../../data/jeeInitialContent';
 import { EXPANDED_NTA_58_CHAPTERS } from '../../data/expandedNta58Chapters';
-import { gradeCbtAttemptOnServer } from '../coreStudyEngine';
+import { Type } from '@google/genai';
+import {
+  buildThinkingFallbackChain,
+  generateWithModelFallback,
+  getValidatedGenAIClient,
+  gradeCbtAttemptOnServer,
+  sendStructuredUpstreamError,
+} from '../coreStudyEngine';
 import { AuthenticatedRequest, requireAuthenticatedStudent } from '../middleware/authAndSecurity';
-import { createRouteRateLimiter } from '../middleware/rateLimiterAndQuotas';
+import {
+  createRouteRateLimiter,
+  rateLimiterAndQuotaMiddleware,
+} from '../middleware/rateLimiterAndQuotas';
 import { OFFICIAL_EXAM_SPECS } from '../../config/examSpecs';
 import {
   AUTHORITATIVE_KEY_VERSION,
@@ -19,6 +29,11 @@ import {
   stripQuestionAnswerKeys,
 } from '../data/authoritativeAnswerKeys';
 import { adminListCollection, adminSetDoc } from '../persistence/firestoreAdminStore';
+import {
+  normalizeConvertedCbtPaper,
+  parseModelJsonPayload,
+} from '../convertedPaperNormalizer';
+import { ConvertedPaperPattern } from '../../utils/jeeEngine';
 
 export const pyqAndCbtRouter = Router();
 
@@ -318,6 +333,206 @@ pyqAndCbtRouter.get(
         message: err?.message || 'Unable to load issue reports.',
         requestId: req.requestId,
       });
+    }
+  }
+);
+
+const ALLOWED_CONVERSION_PATTERNS = new Set<ConvertedPaperPattern>([
+  'JEE Main +4/-1',
+  'JEE Advanced +4/-2 Partial',
+  'NEET +4/-1',
+]);
+
+// 5. Offline Question Paper / Multi-Photo -> CBT Converter (/api/cbt/convert-paper)
+pyqAndCbtRouter.post(
+  '/cbt/convert-paper',
+  requireAuthenticatedStudent,
+  rateLimiterAndQuotaMiddleware,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const {
+      pages,
+      pattern = 'JEE Main +4/-1',
+      answerKeyText = '',
+      answerKeyImages,
+      questionNumberOffset = 0,
+    } = req.body || {};
+
+    if (!Array.isArray(pages) || pages.length === 0 || pages.length > 6) {
+      res.status(400).json({
+        errorCode: 'INVALID_PAPER_PAGES',
+        message: 'Provide between 1 and 6 pages per conversion batch.',
+        requestId: req.requestId,
+      });
+      return;
+    }
+
+    const safePattern: ConvertedPaperPattern = ALLOWED_CONVERSION_PATTERNS.has(pattern)
+      ? pattern
+      : 'JEE Main +4/-1';
+
+    const cleanAnswerKeyText = String(answerKeyText || '').slice(0, 40_000).trim();
+    const safeKeyImages = Array.isArray(answerKeyImages)
+      ? answerKeyImages
+          .filter(
+            (img: any) =>
+              img &&
+              typeof img.imageBase64 === 'string' &&
+              img.imageBase64.trim().length > 20
+          )
+          .slice(0, 4)
+      : [];
+
+    const hasAnyContent = pages.some(
+      (p: any) =>
+        (typeof p?.text === 'string' && p.text.trim().length >= 10) ||
+        (typeof p?.imageBase64 === 'string' && p.imageBase64.trim().length > 20)
+    );
+
+    if (!hasAnyContent) {
+      res.status(400).json({
+        errorCode: 'EMPTY_PAPER_CONTENT',
+        message: 'Each batch must contain readable text or page images.',
+        requestId: req.requestId,
+      });
+      return;
+    }
+
+    try {
+      const ai = getValidatedGenAIClient();
+      const chapterReferenceList = EXPANDED_NTA_58_CHAPTERS.map(
+        (c) => `${c.subject}: ${c.chapterName}`
+      ).join('\n');
+
+      const contentParts: Array<
+        { text: string } | { inlineData: { mimeType: string; data: string } }
+      > = [
+        {
+          text: [
+            `You are an expert ${safePattern} exam parser and physics/chemistry/math/biology solver.`,
+            `Extract EVERY complete question visible on the provided paper page(s) in sequential order.`,
+            `Rules:`,
+            `1. Format all equations, units, ions, vectors, and formulas using standard $...$ LaTeX.`,
+            `2. Classify subject strictly as Physics, Chemistry, Mathematics${safePattern === 'NEET +4/-1' ? ', or Biology' : ''}.`,
+            `3. Map chapter to the closest chapter name from this official NTA syllabus list:\n${chapterReferenceList}`,
+            `4. Classify type strictly as MCQ, NUMERICAL, MULTI_CORRECT, COMPREHENSION, or MATRIX_MATCH.`,
+            `5. For MCQ, MULTI_CORRECT, COMPREHENSION, and MATRIX_MATCH provide exactly 4 option strings (without "(A)" prefixes). For NUMERICAL provide options as [].`,
+            `6. If an official answer key is attached below, match the exact answer from the official key and write a concise derivation explaining why it is correct. Otherwise solve carefully step by step and verify your answer.`,
+            `7. Set hasDiagramReference: true ONLY if the question explicitly references a figure, circuit, graph, ray diagram, organic structure image, or table shown on the page. Never invent SVG diagrams.`,
+            `8. Set needsReview: true if the question text, options, diagram, or answer is partially cut off, blurry, or ambiguous.`,
+            `9. Set sourcePageNumber to the exact 1-based page number header for that question.`,
+            cleanAnswerKeyText
+              ? `\nATTACHED OFFICIAL ANSWER KEY TEXT (strict precedence):\n${cleanAnswerKeyText}`
+              : '',
+          ]
+            .filter(Boolean)
+            .join('\n'),
+        },
+      ];
+
+      for (const page of pages) {
+        const pageNum = Math.max(1, Number(page?.pageNumber || 1));
+        contentParts.push({ text: `\n--- QUESTION PAPER PAGE ${pageNum} ---` });
+        if (typeof page?.text === 'string' && page.text.trim()) {
+          contentParts.push({
+            text: `Extracted Page ${pageNum} Text:\n${page.text.trim().slice(0, 24_000)}`,
+          });
+        }
+        if (typeof page?.imageBase64 === 'string' && page.imageBase64.trim()) {
+          const cleanBase64 = page.imageBase64.replace(/^data:[^;]+;base64,/, '').trim();
+          const mime =
+            typeof page?.mimeType === 'string' && page.mimeType.startsWith('image/')
+              ? page.mimeType
+              : 'image/jpeg';
+          contentParts.push({
+            inlineData: { mimeType: mime, data: cleanBase64 },
+          });
+        }
+      }
+
+      if (safeKeyImages.length > 0) {
+        contentParts.push({
+          text: `\n--- ATTACHED OFFICIAL ANSWER KEY IMAGES (strict precedence over AI guessing) ---`,
+        });
+        for (const keyImg of safeKeyImages) {
+          const cleanBase64 = String(keyImg.imageBase64)
+            .replace(/^data:[^;]+;base64,/, '')
+            .trim();
+          const mime =
+            typeof keyImg.mimeType === 'string' && keyImg.mimeType.startsWith('image/')
+              ? keyImg.mimeType
+              : 'image/jpeg';
+          contentParts.push({
+            inlineData: { mimeType: mime, data: cleanBase64 },
+          });
+        }
+      }
+
+      const responseSchema = {
+        type: Type.OBJECT,
+        properties: {
+          questions: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                questionNumber: { type: Type.INTEGER },
+                subject: { type: Type.STRING },
+                chapter: { type: Type.STRING },
+                type: { type: Type.STRING },
+                stem: { type: Type.STRING },
+                paragraphContext: { type: Type.STRING },
+                matrixListI: { type: Type.ARRAY, items: { type: Type.STRING } },
+                matrixListII: { type: Type.ARRAY, items: { type: Type.STRING } },
+                options: { type: Type.ARRAY, items: { type: Type.STRING } },
+                correctIndex: { type: Type.INTEGER },
+                correctIndices: { type: Type.ARRAY, items: { type: Type.INTEGER } },
+                numericalAnswer: { type: Type.NUMBER },
+                solution: { type: Type.STRING },
+                sourcePageNumber: { type: Type.INTEGER },
+                hasDiagramReference: { type: Type.BOOLEAN },
+                needsReview: { type: Type.BOOLEAN },
+              },
+              required: ['subject', 'chapter', 'type', 'stem', 'options', 'sourcePageNumber'],
+            },
+          },
+        },
+        required: ['questions'],
+      };
+
+      const models = buildThinkingFallbackChain();
+      const { result, modelUsed, fallbackUsed } = await generateWithModelFallback(
+        models,
+        (model) =>
+          ai.models.generateContent({
+            model,
+            contents: contentParts,
+            config: {
+              temperature: 0.1,
+              responseMimeType: 'application/json',
+              responseSchema,
+            },
+          })
+      );
+
+      const parsedPayload = parseModelJsonPayload(result.text || '');
+      const normalized = normalizeConvertedCbtPaper({
+        rawPayload: parsedPayload,
+        pattern: safePattern,
+        attachedAnswerKeyText: cleanAnswerKeyText,
+        questionNumberOffset: Number(questionNumberOffset || 0),
+        batchIdPrefix: `conv-${crypto.randomUUID().slice(0, 8)}`,
+      });
+
+      res.json({
+        ok: true,
+        pattern: safePattern,
+        questions: normalized.questions,
+        summary: normalized.summary,
+        modelUsed,
+        fallbackUsed,
+      });
+    } catch (error: any) {
+      sendStructuredUpstreamError(res, error, '/api/cbt/convert-paper', req.requestId);
     }
   }
 );

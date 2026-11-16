@@ -20,6 +20,12 @@ import { computeStableContentHash, splitSourceIntoPages } from './studyBundleBui
 import { apiFetch, apiUrl } from '../config/apiConfig';
 import type { MaterialItem } from '../components/HomeAndStudyViews';
 import type { MaterialStudyBundle } from '../data/jeeInitialContent';
+import type {
+  CBTQuestion,
+  ConvertedPaperPattern,
+  ConvertedTestRecord,
+  ConvertedTestSummary,
+} from '../utils/jeeEngine';
 
 export interface DriveFileItem {
   id: string;
@@ -51,13 +57,14 @@ export interface StructuredUpstreamError {
 const IDB_NAME = 'learnmate_jee_storage_v1';
 const IDB_STORE_DOCS = 'binary_documents';
 const IDB_STORE_BUNDLES = 'material_bundles';
+const IDB_STORE_CONVERTED_TESTS = 'converted_tests';
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
 function getIndexedDb(): Promise<IDBPDatabase> | null {
   if (typeof window === 'undefined' || !('indexedDB' in window)) return null;
   if (!dbPromise) {
-    dbPromise = openDB(IDB_NAME, 1, {
+    dbPromise = openDB(IDB_NAME, 2, {
       upgrade(database) {
         if (!database.objectStoreNames.contains(IDB_STORE_DOCS)) {
           const store = database.createObjectStore(IDB_STORE_DOCS, { keyPath: 'id' });
@@ -66,6 +73,12 @@ function getIndexedDb(): Promise<IDBPDatabase> | null {
         if (!database.objectStoreNames.contains(IDB_STORE_BUNDLES)) {
           const bundleStore = database.createObjectStore(IDB_STORE_BUNDLES, { keyPath: 'id' });
           bundleStore.createIndex('by_uid', 'uid', { unique: false });
+        }
+        if (!database.objectStoreNames.contains(IDB_STORE_CONVERTED_TESTS)) {
+          const convertedStore = database.createObjectStore(IDB_STORE_CONVERTED_TESTS, {
+            keyPath: 'storageKey',
+          });
+          convertedStore.createIndex('by_uid', 'uid', { unique: false });
         }
       },
     });
@@ -112,6 +125,136 @@ export async function listStudyMaterialsOnDevice(uid: string): Promise<StoredStu
 export async function removeStudyMaterialFromDevice(uid: string, materialId: string): Promise<void> {
   const database = await getIndexedDb();
   await database?.delete(IDB_STORE_BUNDLES, `learnmate_${uid}_${materialId}`);
+}
+
+interface StoredConvertedTest {
+  storageKey: string;
+  uid: string;
+  record: ConvertedTestRecord;
+  savedAt: number;
+}
+
+export async function saveConvertedTestOnDevice(
+  uid: string,
+  record: ConvertedTestRecord
+): Promise<void> {
+  const database = await getIndexedDb();
+  if (!database) return;
+  await database.put(IDB_STORE_CONVERTED_TESTS, {
+    storageKey: `learnmate_${uid}_${record.id}`,
+    uid,
+    record,
+    savedAt: Date.now(),
+  } satisfies StoredConvertedTest);
+}
+
+export async function listConvertedTestsOnDevice(uid: string): Promise<ConvertedTestRecord[]> {
+  const database = await getIndexedDb();
+  if (!database) return [];
+  const items = (await database.getAllFromIndex(
+    IDB_STORE_CONVERTED_TESTS,
+    'by_uid',
+    uid
+  )) as StoredConvertedTest[];
+  return items
+    .sort((a, b) => b.savedAt - a.savedAt)
+    .map((item) => item.record);
+}
+
+export async function deleteConvertedTestFromDevice(uid: string, testId: string): Promise<void> {
+  const database = await getIndexedDb();
+  await database?.delete(IDB_STORE_CONVERTED_TESTS, `learnmate_${uid}_${testId}`);
+}
+
+export async function syncConvertedTestToFirestore(
+  uid: string,
+  record: ConvertedTestRecord
+): Promise<{ synced: boolean; error?: string }> {
+  if (!isFirebaseConfigured || !db || !uid || uid.startsWith('local_') || uid === 'demo_guest_student') {
+    return { synced: false };
+  }
+  try {
+    const safeId = record.id.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
+    const testRef = doc(db, 'users', uid, 'convertedTests', safeId);
+    const existingSnap = await getDoc(testRef).catch(() => null);
+    const createdAtVal = existingSnap?.exists()
+      ? existingSnap.data()?.createdAt || serverTimestamp()
+      : serverTimestamp();
+
+    // Keep Firestore doc safely under 750KB by stripping heavy inline diagram data URLs if large
+    let questionsJson = JSON.stringify(record.questions);
+    if (questionsJson.length > 680_000) {
+      const compactQuestions = record.questions.map(({ diagramImageUrl: _img, ...rest }) => rest);
+      questionsJson = JSON.stringify(compactQuestions);
+    }
+
+    await setDoc(testRef, {
+      userId: uid,
+      title: record.title.slice(0, 190) || 'Converted Offline Test',
+      pattern: record.pattern,
+      examMode: record.examMode,
+      durationMinutes: Math.max(5, Math.min(360, Math.round(record.durationMinutes))),
+      sourceMode: record.sourceMode,
+      pageCount: Math.max(1, Math.min(250, Math.round(record.pageCount))),
+      hasAttachedAnswerKey: Boolean(record.hasAttachedAnswerKey),
+      summaryJson: JSON.stringify(record.summary).slice(0, 4800),
+      questionsJson: questionsJson.slice(0, 745_000),
+      createdAt: createdAtVal,
+      updatedAt: serverTimestamp(),
+    });
+    return { synced: true };
+  } catch (err: any) {
+    return { synced: false, error: err?.message || 'Firestore converted test sync failed.' };
+  }
+}
+
+export async function listConvertedTestsFromFirestore(uid: string): Promise<ConvertedTestRecord[]> {
+  if (!isFirebaseConfigured || !db || !uid || uid.startsWith('local_') || uid === 'demo_guest_student') {
+    return [];
+  }
+  try {
+    const snap = await getDocs(collection(db, 'users', uid, 'convertedTests'));
+    const out: ConvertedTestRecord[] = [];
+    for (const d of snap.docs) {
+      const data = d.data();
+      try {
+        const questions = JSON.parse(String(data.questionsJson || '[]')) as CBTQuestion[];
+        const summary = JSON.parse(String(data.summaryJson || '{}')) as ConvertedTestSummary;
+        if (!Array.isArray(questions) || questions.length === 0) continue;
+        out.push({
+          id: d.id,
+          title: String(data.title || 'Converted Offline Test'),
+          pattern: (data.pattern as ConvertedPaperPattern) || 'JEE Main +4/-1',
+          examMode: data.examMode || 'JEE Main',
+          durationMinutes: Number(data.durationMinutes || 180),
+          questions,
+          summary,
+          sourceMode: data.sourceMode === 'photos' ? 'photos' : 'pdf',
+          pageCount: Number(data.pageCount || 1),
+          hasAttachedAnswerKey: Boolean(data.hasAttachedAnswerKey),
+          createdAtIso: data.createdAt?.toDate?.()?.toISOString?.() || new Date().toISOString(),
+          updatedAtIso: data.updatedAt?.toDate?.()?.toISOString?.() || new Date().toISOString(),
+        });
+      } catch {
+        // skip malformed doc
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+export async function deleteConvertedTestFromFirestore(uid: string, testId: string): Promise<void> {
+  if (!isFirebaseConfigured || !db || !uid || uid.startsWith('local_') || uid === 'demo_guest_student') {
+    return;
+  }
+  try {
+    const safeId = testId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
+    await deleteDoc(doc(db, 'users', uid, 'convertedTests', safeId));
+  } catch {
+    // non-blocking
+  }
 }
 
 /**
@@ -503,6 +646,92 @@ export async function extractScannedPdfPagesViaOcr(
 }
 
 /**
+ * Extracts text per page AND renders compressed JPEG previews (max 1800px) for scanned pages
+ * or diagram-bearing pages in offline question papers.
+ */
+export async function extractPdfPagesForCbtConversion(
+  file: File,
+  options?: {
+    maxPages?: number;
+    maxDimensionPx?: number;
+    onProgress?: (currentPage: number, totalPages: number) => void;
+    signal?: AbortSignal;
+  }
+): Promise<{
+  totalPages: number;
+  pages: Array<{
+    pageNumber: number;
+    text: string;
+    isScanned: boolean;
+    imageDataUrl?: string;
+    imageBase64?: string;
+    mimeType: string;
+  }>;
+}> {
+  const maxPages = options?.maxPages ?? 40;
+  const maxDim = options?.maxDimensionPx ?? 1800;
+  const pdfjsLib = await loadPdfJsConfigured();
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const totalPages = Math.min(pdf.numPages || 1, maxPages);
+  const pages: Array<{
+    pageNumber: number;
+    text: string;
+    isScanned: boolean;
+    imageDataUrl?: string;
+    imageBase64?: string;
+    mimeType: string;
+  }> = [];
+
+  for (let i = 1; i <= totalPages; i++) {
+    options?.signal?.throwIfAborted();
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const text = (content.items as any[])
+      .map((item) => item.str || '')
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const isScanned = text.length < 40;
+
+    let imageDataUrl: string | undefined;
+    let imageBase64: string | undefined;
+
+    if (typeof document !== 'undefined') {
+      const baseViewport = page.getViewport({ scale: 1 });
+      const longestSide = Math.max(baseViewport.width, baseViewport.height, 1);
+      const targetMax = isScanned ? maxDim : Math.min(maxDim, 1400);
+      const scale = Math.min(2.0, targetMax / longestSide);
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(viewport.width));
+      canvas.height = Math.max(1, Math.round(viewport.height));
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+        imageDataUrl = canvas.toDataURL('image/jpeg', isScanned ? 0.84 : 0.78);
+        imageBase64 = imageDataUrl.split(',')[1] || '';
+      }
+    }
+
+    pages.push({
+      pageNumber: i,
+      text,
+      isScanned,
+      imageDataUrl,
+      imageBase64,
+      mimeType: 'image/jpeg',
+    });
+
+    options?.onProgress?.(i, totalPages);
+  }
+
+  return { totalPages: pdf.numPages || totalPages, pages };
+}
+
+/**
  * Purges all IndexedDB stores on user sign-out so zero binary PDFs or study bundles remain on shared devices.
  */
 export async function clearAllIndexedDbDocuments(): Promise<void> {
@@ -512,6 +741,9 @@ export async function clearAllIndexedDbDocuments(): Promise<void> {
     const database = await idb;
     await database.clear(IDB_STORE_DOCS);
     await database.clear(IDB_STORE_BUNDLES);
+    if (database.objectStoreNames.contains(IDB_STORE_CONVERTED_TESTS)) {
+      await database.clear(IDB_STORE_CONVERTED_TESTS);
+    }
   } catch {
     // ignore clear errors
   }
@@ -1189,6 +1421,33 @@ export async function gradeCbtAttemptOnServerApi(params: {
   }>('/api/cbt/grade', params);
 }
 
+export async function convertOfflinePaperBatchApi(
+  params: {
+    pages: Array<{
+      pageNumber: number;
+      text?: string;
+      imageBase64?: string;
+      mimeType?: string;
+    }>;
+    pattern: ConvertedPaperPattern;
+    answerKeyText?: string;
+    answerKeyImages?: Array<{ imageBase64: string; mimeType: string }>;
+    questionNumberOffset?: number;
+  },
+  signal?: AbortSignal
+) {
+  return apiFetchWithAuth<{
+    ok: boolean;
+    pattern: ConvertedPaperPattern;
+    questions: CBTQuestion[];
+    summary: ConvertedTestSummary;
+    modelUsed?: string;
+    fallbackUsed?: boolean;
+  }>('/api/cbt/convert-paper', params, 'POST', {
+    signal,
+  });
+}
+
 export async function ingestDocumentOnServer(params: {
   materialId?: string;
   title: string;
@@ -1312,6 +1571,7 @@ export async function purgeUserFirestoreData(uid: string): Promise<number> {
     'flashcards',
     'studyJobs',
     'cbtDrafts',
+    'convertedTests',
   ];
   for (const sub of subcollections) {
     try {

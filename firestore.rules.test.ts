@@ -85,6 +85,11 @@ test('firestore.rules & storage.rules enforce tenant subcollections, migration l
     rulesText.includes('match /entitlements/{docId} {\n        allow get, list: if isOwner(userId);\n        allow write: if false;\n      }'),
     'Entitlements must be client read-only'
   );
+  assert.ok(
+    rulesText.includes('match /convertedTests/{testId}') &&
+      rulesText.includes('function isValidConvertedTest(data, userId)'),
+    'Must enforce tenant-scoped convertedTests rules'
+  );
 
   // Storage rules checks
   assert.ok(storageRulesText.includes('service firebase.storage'));
