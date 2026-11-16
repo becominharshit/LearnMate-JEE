@@ -15,8 +15,8 @@
     --accent-highlight: #7C3AED;
     --accent-emerald: #00A86B;
     --accent-soft: rgba(37, 99, 235, 0.10);
-    --font-display: 'Inter', 'Geist', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-sans: 'Inter', 'Geist', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Mangal', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
   .dark {
