@@ -55,6 +55,8 @@ export interface StudyWorkbenchViewProps {
     customQuestions?: CBTQuestion[]
   ) => void;
   onEarnXp?: (xp: number, reason?: string) => void;
+  clueCoins?: number;
+  onAdjustClueCoins?: (delta: number) => void;
 }
 
 export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => {
@@ -73,8 +75,14 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
   // Socratic "Clue Coins" 3-Step Progressive Hint state
   const [socraticOpen, setSocraticOpen] = useState<boolean>(false);
   const [socraticPrompt, setSocraticPrompt] = useState<string>('');
-  const [clueCoins, setClueCoins] = useState<number>(6);
+  const [localClueCoins, setLocalClueCoins] = useState<number>(6);
+  const clueCoins = props.clueCoins ?? localClueCoins;
+  const adjustCoins = (delta: number) => {
+    if (props.onAdjustClueCoins) props.onAdjustClueCoins(delta);
+    else setLocalClueCoins((c) => Math.max(0, c + delta));
+  };
   const [hintStep, setHintStep] = useState<1 | 2 | 3 | 'full'>(1);
+  const [hintLanguage, setHintLanguage] = useState<'Hinglish' | 'English' | 'Pure Hindi'>('Hinglish');
   const [tutorDifficulty, setTutorDifficulty] = useState<'board' | 'jee_main' | 'jee_advanced'>('jee_main');
   const [tutorContextMode, setTutorContextMode] = useState<'strict_material' | 'open_jee'>('strict_material');
   const [socraticOutput, setSocraticOutput] = useState<string>('');
@@ -97,17 +105,30 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
     setSocraticLoading(true);
     setUpstreamError(null);
 
+    const mappedPersona =
+      hintLanguage === 'Pure Hindi'
+        ? 'pure_hindi'
+        : hintLanguage === 'Hinglish'
+        ? 'hinglish_faculty'
+        : 'indian_english';
+
     const res = await apiFetchWithAuth<{
       text: string;
       citations?: { pageNumber: number; excerpt: string }[];
     }>('/api/ai/tutor', {
       prompt: queryText,
+      chapter: activeChapter,
+      subject: activeSubject,
       materialId: props.selectedMaterial?.id,
       context: props.selectedMaterial?.contentSummary || activeChapter,
       contextMode: tutorContextMode,
-      difficulty: tutorDifficulty,
+      difficultyLevel: tutorDifficulty,
+      language: hintLanguage,
+      socraticMode: targetStep !== 'full' && actionKind === 'socratic',
+      hintLevel: targetStep === 'full' ? undefined : targetStep,
       socraticHintStep: targetStep,
-      teacherPersona: 'hinglish_faculty',
+      action: actionKind === 'unit_check' ? 'unit_check' : 'explain',
+      teacherPersona: mappedPersona,
     });
 
     setSocraticLoading(false);
@@ -116,7 +137,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
       return;
     }
     if (targetStep !== 'full' && clueCoins > 0) {
-      setClueCoins((c) => Math.max(0, c - 1));
+      adjustCoins(-1);
     }
     setSocraticOutput(res.data.text || '');
     setSocraticCitations(Array.isArray(res.data.citations) ? res.data.citations : []);
@@ -257,7 +278,7 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                   onClick={() => {
                     if (!completedShardIds.includes(activeShard.id)) {
                       setCompletedShardIds((prev) => [...prev, activeShard.id]);
-                      setClueCoins((c) => c + 2);
+                      adjustCoins(2);
                       if (props.onEarnXp) props.onEarnXp(30);
                     }
                     setActiveShardIdx(null);
@@ -327,6 +348,18 @@ export const StudyWorkbenchView: React.FC<StudyWorkbenchViewProps> = (props) => 
                   ))}
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
+                  <select
+                    aria-label="Hint Language"
+                    value={hintLanguage}
+                    onChange={(e) =>
+                      setHintLanguage(e.target.value as 'Hinglish' | 'English' | 'Pure Hindi')
+                    }
+                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] text-[#0F172A] dark:text-[#F8FAFC] font-medium cursor-pointer"
+                  >
+                    <option value="Hinglish">Hinglish</option>
+                    <option value="English">English</option>
+                    <option value="Pure Hindi">Pure Hindi</option>
+                  </select>
                   <button
                     type="button"
                     onClick={() =>

@@ -13,6 +13,8 @@ import {
   Lock,
   Maximize2,
   Check,
+  CornerDownRight,
+  Delete,
 } from 'lucide-react';
 import {
   MindMapNodeItem,
@@ -35,6 +37,8 @@ import {
   ExamTrack,
   formatCountdownTimer,
   calculateNextSRSReview,
+  calculateSM2Schedule,
+  formatSM2IntervalShort,
   sanitizeNumericalInputValue,
   resolveCbtSessionInit,
   filterCustomTestQuestions,
@@ -108,6 +112,8 @@ interface ReviseViewProps {
   materialBundles: Record<string, MaterialStudyBundle>;
   mistakesNotebook: MistakeNotebookEntry[];
   sm2Cards?: SM2FlashcardItem[];
+  sm2ReviewedCount?: number;
+  onIncrementSm2Reviewed?: () => void;
   onUpdateSM2Card?: (card: SM2FlashcardItem) => void;
   onAddSM2Card?: (card: Omit<SM2FlashcardItem, 'id'>) => void;
   onTagMistakeRootCause?: (id: string, cause: ErrorRootCauseTag) => void;
@@ -125,6 +131,8 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
   materialBundles,
   mistakesNotebook,
   sm2Cards = [],
+  sm2ReviewedCount = 0,
+  onIncrementSm2Reviewed,
   onUpdateSM2Card,
   onAddSM2Card,
   onTagMistakeRootCause,
@@ -173,7 +181,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
   }>({
     intervalDays: 1,
     easeFactor: 2.5,
-    repetition: 1,
+    repetition: 0,
   });
 
   // Custom Sticky Notes added by student
@@ -213,19 +221,68 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
   const selectedNode =
     mindMapNodes.find((n) => n.id === selectedNodeId) || mindMapNodes[0] || null;
   const activeFlashcard = mindMapNodes[cardIndex % Math.max(1, mindMapNodes.length)] || null;
+  const matchedSm2Card = useMemo(() => {
+    if (!activeFlashcard) return undefined;
+    return sm2Cards.find(
+      (c) =>
+        c.frontPrompt.includes(activeFlashcard.title) &&
+        (!activeMaterial?.chapter || c.chapter === activeMaterial.chapter)
+    );
+  }, [sm2Cards, activeFlashcard, activeMaterial?.chapter]);
+
+  const effectiveSrs = {
+    intervalDays: matchedSm2Card?.intervalDays ?? srsStats.intervalDays,
+    easeFactor: matchedSm2Card?.easeFactor ?? srsStats.easeFactor,
+    repetition: matchedSm2Card?.repetitionCount ?? srsStats.repetition,
+  };
 
   const handleRateFlashcard = (rating: 'Again' | 'Hard' | 'Good' | 'Easy') => {
+    const qualityMap: Record<'Again' | 'Hard' | 'Good' | 'Easy', 1 | 3 | 4 | 5> = {
+      Again: 1,
+      Hard: 3,
+      Good: 4,
+      Easy: 5,
+    };
     const next = calculateNextSRSReview(
       rating,
-      srsStats.intervalDays,
-      srsStats.easeFactor,
-      srsStats.repetition
+      effectiveSrs.intervalDays,
+      effectiveSrs.easeFactor,
+      effectiveSrs.repetition
+    );
+    const sm2Schedule = calculateSM2Schedule(
+      {
+        intervalDays: effectiveSrs.intervalDays,
+        repetitionCount: effectiveSrs.repetition,
+        easeFactor: effectiveSrs.easeFactor,
+      },
+      qualityMap[rating]
     );
     setSrsStats({
       intervalDays: next.nextIntervalDays,
       easeFactor: next.nextEaseFactor,
       repetition: next.nextRepetition,
     });
+    if (matchedSm2Card && onUpdateSM2Card) {
+      onUpdateSM2Card({
+        ...matchedSm2Card,
+        intervalDays: sm2Schedule.intervalDays,
+        repetitionCount: sm2Schedule.repetitionCount,
+        easeFactor: sm2Schedule.easeFactor,
+        nextReviewIso: sm2Schedule.nextReviewIso,
+      });
+    } else if (activeFlashcard && activeMaterial && onAddSM2Card) {
+      onAddSM2Card({
+        chapter: activeMaterial.chapter,
+        subject: activeMaterial.subject,
+        frontPrompt: `Define & Explain: **${activeFlashcard.title}**`,
+        backAnswer: `${activeFlashcard.definition}\n\n**Example:** ${activeFlashcard.example}\n\n**Exam Trap:** ${activeFlashcard.commonTrap}`,
+        intervalDays: sm2Schedule.intervalDays,
+        repetitionCount: sm2Schedule.repetitionCount,
+        easeFactor: sm2Schedule.easeFactor,
+        nextReviewIso: sm2Schedule.nextReviewIso,
+      });
+    }
+    onIncrementSm2Reviewed?.();
     setIsCardFlipped(false);
     if (mindMapNodes.length > 0) {
       setCardIndex((prev) => (prev + 1) % mindMapNodes.length);
@@ -425,7 +482,7 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
           {activeSubTab === 'Mind Map' && activeMaterial && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left 8 Cols: Multi-Level Hierarchical Mind Map Canvas */}
-              <div className="lg:col-span-8 bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] overflow-hidden flex flex-col">
+              <div className="lg:col-span-8 min-w-0 bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] overflow-hidden flex flex-col">
                 <div className="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3 bg-[#F8FAFF] dark:bg-[#0D1322]">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
@@ -495,20 +552,20 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                               setSelectedNodeId(node.id);
                               setSelectedSubNodeId(node.subNodes?.[0]?.id || null);
                             }}
-                            className={`rounded-2xl border p-4 transition-colors duration-150 cursor-pointer flex flex-col justify-between ${
+                            className={`min-w-0 overflow-hidden rounded-2xl border p-4 transition-colors duration-150 cursor-pointer flex flex-col justify-between [&_.katex]:whitespace-normal [&_.katex-display]:whitespace-nowrap ${
                               isSelected
                                 ? 'border-[#2563EB] dark:border-[#3B82F6] bg-[#EFF6FF]/60 dark:bg-[#1E293B]'
                                 : 'border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#F8FAFF] dark:hover:bg-[#1E293B]'
                             }`}
                           >
-                            <div>
+                            <div className="min-w-0">
                               <div className="flex items-center justify-between gap-2 mb-1.5">
                                 <span className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] tabular-nums">
                                   Branch {idx + 1} · {node.pageRef}
                                 </span>
                                 {node.badgeType && (
                                   <span
-                                    className={`text-[11px] font-semibold ${
+                                    className={`text-[11px] font-semibold shrink-0 ${
                                       node.badgeType === 'High Weightage'
                                         ? 'text-amber-600 dark:text-amber-400'
                                         : node.badgeType === 'Exception Trap'
@@ -521,16 +578,16 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                                 )}
                               </div>
 
-                              <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+                              <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC] break-words">
                                 {node.title}
                               </h3>
 
-                              <div className="text-xs text-[#475569] dark:text-[#CBD5E1] mt-1.5 leading-relaxed">
+                              <div className="text-xs text-[#475569] dark:text-[#CBD5E1] mt-1.5 leading-relaxed min-w-0 break-words [overflow-wrap:anywhere]">
                                 <MathRichText content={node.definition} />
                               </div>
 
                               {node.formulaLatex && (
-                                <div className="mt-2.5 p-2.5 rounded-xl bg-[#F8FAFF] dark:bg-[#0D1322] border border-[#E2E8F0] dark:border-white/[0.08] text-xs">
+                                <div className="mt-2.5 p-2.5 rounded-xl bg-[#F8FAFF] dark:bg-[#0D1322] border border-[#E2E8F0] dark:border-white/[0.08] text-xs min-w-0 overflow-x-auto break-words [overflow-wrap:anywhere]">
                                   <MathRichText content={node.formulaLatex} />
                                 </div>
                               )}
@@ -553,22 +610,23 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                                           setSelectedNodeId(node.id);
                                           setSelectedSubNodeId(sub.id);
                                         }}
-                                        className={`p-2.5 rounded-xl border text-xs transition-colors duration-150 ${
+                                        className={`min-w-0 overflow-hidden p-2.5 rounded-xl border text-xs transition-colors duration-150 ${
                                           subActive
                                             ? 'border-[#2563EB] dark:border-[#3B82F6] bg-white dark:bg-[#1E293B]'
                                             : 'border-[#E2E8F0] dark:border-white/[0.06] bg-[#F8FAFF] dark:bg-[#0D1322] hover:bg-white dark:hover:bg-[#1E293B]'
                                         }`}
                                       >
-                                        <div className="flex items-center justify-between gap-2">
-                                          <span className="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
-                                            ↳ {sub.label}
+                                        <div className="flex items-center justify-between gap-2 min-w-0">
+                                          <span className="inline-flex items-center gap-1.5 font-semibold text-[#0F172A] dark:text-[#F8FAFC] min-w-0 break-words">
+                                            <CornerDownRight className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
+                                            <span className="break-words">{sub.label}</span>
                                           </span>
                                         </div>
-                                        <div className="text-[11px] text-[#475569] dark:text-[#94A3B8] mt-1">
+                                        <div className="text-[11px] text-[#475569] dark:text-[#94A3B8] mt-1 min-w-0 break-words [overflow-wrap:anywhere]">
                                           <MathRichText content={sub.microNote} />
                                         </div>
                                         {sub.formulaLatex && (
-                                          <div className="mt-1 text-[11px] font-medium text-[#0F172A] dark:text-[#E2E8F0]">
+                                          <div className="mt-1 text-[11px] font-medium text-[#0F172A] dark:text-[#E2E8F0] min-w-0 overflow-x-auto break-words [overflow-wrap:anywhere]">
                                             <MathRichText content={sub.formulaLatex} />
                                           </div>
                                         )}
@@ -587,61 +645,61 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
               </div>
 
               {/* Right 4 Cols: Selected Node Deep-Dive & Flashcard Action */}
-              <div className="lg:col-span-4 bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] p-5 space-y-4 sticky top-20">
+              <div className="lg:col-span-4 min-w-0 overflow-hidden bg-white dark:bg-[#111827] rounded-2xl border border-[#E2E8F0] dark:border-white/[0.08] p-5 space-y-4 sticky top-20 [&_.katex]:whitespace-normal [&_.katex-display]:whitespace-nowrap">
                 {selectedNode ? (
                   <>
-                    <div className="flex items-center justify-between gap-2 border-b border-[#E2E8F0] dark:border-white/[0.08] pb-3">
-                      <div>
+                    <div className="flex items-center justify-between gap-2 border-b border-[#E2E8F0] dark:border-white/[0.08] pb-3 min-w-0">
+                      <div className="min-w-0">
                         <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-[#94A3B8] tabular-nums">
                           NODE · {selectedNode.pageRef}
                         </span>
-                        <h2 className="text-base font-semibold tracking-[-0.02em] text-[#0F172A] dark:text-[#F8FAFC] mt-0.5">
+                        <h2 className="text-base font-semibold tracking-[-0.02em] text-[#0F172A] dark:text-[#F8FAFC] mt-0.5 break-words">
                           {selectedNode.title}
                         </h2>
                       </div>
                       {selectedNode.badgeType && (
-                        <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                        <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 shrink-0">
                           {selectedNode.badgeType}
                         </span>
                       )}
                     </div>
 
-                    <div className="space-y-3 text-xs">
-                      <div className="p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-1">
+                    <div className="space-y-3 text-xs min-w-0">
+                      <div className="p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-1 min-w-0 overflow-hidden">
                         <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-[#94A3B8]">
                           Core Law
                         </div>
-                        <div className="text-[#0F172A] dark:text-[#F8FAFC] leading-relaxed">
+                        <div className="text-[#0F172A] dark:text-[#F8FAFC] leading-relaxed min-w-0 break-words [overflow-wrap:anywhere]">
                           <MathRichText content={selectedNode.definition} />
                         </div>
                       </div>
 
                       {selectedNode.formulaLatex && (
-                        <div className="p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-1">
+                        <div className="p-3.5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-1 min-w-0 overflow-x-auto">
                           <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-[#94A3B8]">
                             Expression
                           </div>
-                          <div className="text-[#0F172A] dark:text-[#F8FAFC]">
+                          <div className="text-[#0F172A] dark:text-[#F8FAFC] min-w-0 break-words [overflow-wrap:anywhere]">
                             <MathRichText content={selectedNode.formulaLatex} />
                           </div>
                         </div>
                       )}
 
-                      <div className="p-3.5 rounded-xl bg-[#00A86B]/5 border border-[#00A86B]/25 space-y-1">
+                      <div className="p-3.5 rounded-xl bg-[#00A86B]/5 border border-[#00A86B]/25 space-y-1 min-w-0 overflow-hidden">
                         <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#00A86B]">
                           Application
                         </div>
-                        <div className="text-[#0F172A] dark:text-[#E2E8F0] leading-relaxed">
+                        <div className="text-[#0F172A] dark:text-[#E2E8F0] leading-relaxed min-w-0 break-words [overflow-wrap:anywhere]">
                           <MathRichText content={selectedNode.example} />
                         </div>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-1">
+                      <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-1 min-w-0 overflow-hidden">
                         <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                          <AlertTriangle className="w-3.5 h-3.5" />
+                          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                           Exam Trap
                         </div>
-                        <div className="text-[#0F172A] dark:text-[#E2E8F0] leading-relaxed">
+                        <div className="text-[#0F172A] dark:text-[#E2E8F0] leading-relaxed min-w-0 break-words [overflow-wrap:anywhere]">
                           <MathRichText content={selectedNode.commonTrap} />
                         </div>
                       </div>
@@ -1070,12 +1128,14 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
                 ).map((btn) => {
                   const preview = calculateNextSRSReview(
                     btn.label,
-                    srsStats.intervalDays,
-                    srsStats.easeFactor,
-                    srsStats.repetition
+                    effectiveSrs.intervalDays,
+                    effectiveSrs.easeFactor,
+                    effectiveSrs.repetition
                   );
                   const sub =
-                    btn.label === 'Again' ? '< 10m' : `${preview.nextIntervalDays}d`;
+                    btn.label === 'Again'
+                      ? '< 10m'
+                      : formatSM2IntervalShort(preview.nextIntervalDays);
                   return (
                     <button
                       key={btn.label}
@@ -1438,6 +1498,8 @@ export const ReviseWorkspaceView: React.FC<ReviseViewProps> = ({
         <SpacedRepetitionHub
           sm2Cards={sm2Cards}
           mistakes={mistakesNotebook}
+          reviewedTodayCount={sm2ReviewedCount}
+          onIncrementReviewed={onIncrementSm2Reviewed}
           onUpdateSM2Card={(updated) => {
             if (onUpdateSM2Card) onUpdateSM2Card(updated);
           }}
@@ -1566,11 +1628,18 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
     'All' | 'Beginner' | 'Must-Do' | 'Advanced Climb'
   >('All');
   const [selectedPyqOptions, setSelectedPyqOptions] = useState<Record<string, number>>({});
+  const [pyqNumericalInputs, setPyqNumericalInputs] = useState<Record<string, string>>({});
   const [revealedPyqSolutions, setRevealedPyqSolutions] = useState<Record<string, boolean>>({});
   const [verifiedPyqSolutions, setVerifiedPyqSolutions] = useState<
     Record<
       string,
-      { isCorrect: boolean; correctIndex: number; explanation: string; keyVersion?: string }
+      {
+        isCorrect: boolean;
+        correctIndex: number;
+        numericalAnswer?: number;
+        explanation: string;
+        keyVersion?: string;
+      }
     >
   >({});
   const [verifyingPyqId, setVerifyingPyqId] = useState<string | null>(null);
@@ -2061,80 +2130,208 @@ export const PracticeDashboardView: React.FC<PracticeViewProps> = ({
                     <MathRichText content={q.stem} />
                   </div>
 
-                  {q.options.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                      {q.options.map((opt, optIdx) => {
-                        const selected = chosen === optIdx;
-                        let cls =
-                          'border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#1E293B]/60 text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F8FAFF] dark:hover:bg-[#283548]';
-                        if (isRevealed) {
-                          if (optIdx === resolvedCorrectIndex) {
-                            cls =
-                              'border-[#00A86B]/50 bg-[#00A86B]/10 text-[#065F46] dark:text-emerald-200';
-                          } else if (selected) {
-                            cls =
-                              'border-rose-500/50 bg-rose-500/10 text-rose-800 dark:text-rose-200';
+                  {(() => {
+                    const isNumericalPyq =
+                      q.options.length === 0 ||
+                      q.section === 'Section B' ||
+                      q.advancedFormat === 'numerical';
+                    if (isNumericalPyq) {
+                      const numVal = pyqNumericalInputs[q.id] || '';
+                      const handleVerifyNumerical = async () => {
+                        const cleanVal = sanitizeNumericalInputValue(numVal);
+                        if (!cleanVal || cleanVal === '-' || cleanVal === '.') return;
+                        setVerifyingPyqId(q.id);
+                        try {
+                          const srv = await verifySinglePyqAnswerOnServer({
+                            questionId: q.id,
+                            numericalValue: cleanVal,
+                          });
+                          if (srv.ok) {
+                            setVerifiedPyqSolutions((prev) => ({
+                              ...prev,
+                              [q.id]: {
+                                isCorrect: srv.data.isCorrect,
+                                correctIndex: srv.data.correctIndex,
+                                numericalAnswer: srv.data.numericalAnswer,
+                                explanation: srv.data.explanation,
+                                keyVersion: srv.data.keyVersion,
+                              },
+                            }));
+                            setRevealedPyqSolutions((prev) => ({ ...prev, [q.id]: true }));
+                            if (!srv.data.isCorrect && onRecordMistake) {
+                              onRecordMistake(q, cleanVal);
+                            }
+                          } else {
+                            setReportFeedback((prev) => ({
+                              ...prev,
+                              [q.id]: srv.error.message || 'Server answer verification failed.',
+                            }));
                           }
-                        } else if (selected) {
-                          cls =
-                            'border-[#2563EB]/50 bg-[#2563EB]/10 text-[#1E40AF] dark:text-blue-200';
+                        } finally {
+                          setVerifyingPyqId(null);
                         }
-                        return (
-                          <button
-                            key={optIdx}
-                            type="button"
-                            disabled={verifyingPyqId === q.id}
-                            onClick={async () => {
-                              setSelectedPyqOptions((prev) => ({ ...prev, [q.id]: optIdx }));
-                              setVerifyingPyqId(q.id);
-                              try {
-                                const srv = await verifySinglePyqAnswerOnServer({
-                                  questionId: q.id,
-                                  selectedOption: optIdx,
-                                });
-                                if (srv.ok) {
-                                  setVerifiedPyqSolutions((prev) => ({
-                                    ...prev,
-                                    [q.id]: {
-                                      isCorrect: srv.data.isCorrect,
-                                      correctIndex: srv.data.correctIndex,
-                                      explanation: srv.data.explanation,
-                                      keyVersion: srv.data.keyVersion,
-                                    },
-                                  }));
-                                  setRevealedPyqSolutions((prev) => ({ ...prev, [q.id]: true }));
-                                  if (!srv.data.isCorrect && onRecordMistake) {
-                                    onRecordMistake(q, opt);
-                                  }
-                                } else {
-                                  setReportFeedback((prev) => ({
-                                    ...prev,
-                                    [q.id]: srv.error.message || 'Server answer verification failed.',
-                                  }));
-                                }
-                              } finally {
-                                setVerifyingPyqId(null);
-                              }
-                            }}
-                            className={`p-3 rounded-xl border text-left text-xs sm:text-sm font-medium flex items-center justify-between cursor-pointer transition-colors ${cls}`}
-                          >
-                            <span className="flex items-center gap-2">
-                              <strong className="tabular-nums">
-                                ({String.fromCharCode(65 + optIdx)})
-                              </strong>
-                              <MathRichText content={opt} inline />
-                            </span>
-                            {isRevealed && optIdx === resolvedCorrectIndex && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#00A86B]">
-                                <Check className="w-3.5 h-3.5" />
-                                Correct
+                      };
+                      const appendKey = (token: string) => {
+                        setPyqNumericalInputs((prev) => ({
+                          ...prev,
+                          [q.id]: sanitizeNumericalInputValue((prev[q.id] || '') + token),
+                        }));
+                      };
+                      return (
+                        <div className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B]/60 space-y-3 max-w-md">
+                          <div className="flex items-center justify-between gap-2 text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+                            <span>Numerical / Integer Answer</span>
+                            {isRevealed && verified?.numericalAnswer !== undefined && (
+                              <span className="px-2 py-0.5 rounded bg-[#00A86B]/10 text-[#00A86B] tabular-nums">
+                                Key: {verified.numericalAnswer}
                               </span>
                             )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              aria-label={`Numerical answer for PYQ ${idx + 1}`}
+                              value={numVal}
+                              onChange={(e) =>
+                                setPyqNumericalInputs((prev) => ({
+                                  ...prev,
+                                  [q.id]: sanitizeNumericalInputValue(e.target.value),
+                                }))
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  void handleVerifyNumerical();
+                                }
+                              }}
+                              placeholder="Enter integer or decimal..."
+                              className="flex-1 px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#111827] text-sm font-mono text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
+                            />
+                            <button
+                              type="button"
+                              disabled={!numVal || verifyingPyqId === q.id}
+                              onClick={() => void handleVerifyNumerical()}
+                              className="px-4 py-2 rounded-lg btn-brand disabled:opacity-50 text-xs font-semibold cursor-pointer"
+                            >
+                              Check Answer
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-7 gap-1.5 text-xs font-mono">
+                            {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '-'].map((k) => (
+                              <button
+                                key={k}
+                                type="button"
+                                onClick={() => appendKey(k)}
+                                className="py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-[#EEF2FF] dark:hover:bg-[#283548] font-semibold text-[#0F172A] dark:text-[#F8FAFC] cursor-pointer"
+                              >
+                                {k}
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              aria-label="Backspace"
+                              onClick={() =>
+                                setPyqNumericalInputs((prev) => ({
+                                  ...prev,
+                                  [q.id]: (prev[q.id] || '').slice(0, -1),
+                                }))
+                              }
+                              className="py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[#475569] dark:text-[#94A3B8] flex items-center justify-center cursor-pointer"
+                            >
+                              <Delete className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPyqNumericalInputs((prev) => ({
+                                  ...prev,
+                                  [q.id]: '',
+                                }))
+                              }
+                              className="col-span-2 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#111827] hover:bg-slate-100 dark:hover:bg-[#283548] font-sans text-[11px] font-semibold text-[#475569] dark:text-[#94A3B8] cursor-pointer"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                        {q.options.map((opt, optIdx) => {
+                          const selected = chosen === optIdx;
+                          let cls =
+                            'border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#1E293B]/60 text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F8FAFF] dark:hover:bg-[#283548]';
+                          if (isRevealed) {
+                            if (optIdx === resolvedCorrectIndex) {
+                              cls =
+                                'border-[#00A86B]/50 bg-[#00A86B]/10 text-[#065F46] dark:text-emerald-200';
+                            } else if (selected) {
+                              cls =
+                                'border-rose-500/50 bg-rose-500/10 text-rose-800 dark:text-rose-200';
+                            }
+                          } else if (selected) {
+                            cls =
+                              'border-[#2563EB]/50 bg-[#2563EB]/10 text-[#1E40AF] dark:text-blue-200';
+                          }
+                          return (
+                            <button
+                              key={optIdx}
+                              type="button"
+                              disabled={verifyingPyqId === q.id}
+                              onClick={async () => {
+                                setSelectedPyqOptions((prev) => ({ ...prev, [q.id]: optIdx }));
+                                setVerifyingPyqId(q.id);
+                                try {
+                                  const srv = await verifySinglePyqAnswerOnServer({
+                                    questionId: q.id,
+                                    selectedOption: optIdx,
+                                  });
+                                  if (srv.ok) {
+                                    setVerifiedPyqSolutions((prev) => ({
+                                      ...prev,
+                                      [q.id]: {
+                                        isCorrect: srv.data.isCorrect,
+                                        correctIndex: srv.data.correctIndex,
+                                        explanation: srv.data.explanation,
+                                        keyVersion: srv.data.keyVersion,
+                                      },
+                                    }));
+                                    setRevealedPyqSolutions((prev) => ({ ...prev, [q.id]: true }));
+                                    if (!srv.data.isCorrect && onRecordMistake) {
+                                      onRecordMistake(q, opt);
+                                    }
+                                  } else {
+                                    setReportFeedback((prev) => ({
+                                      ...prev,
+                                      [q.id]: srv.error.message || 'Server answer verification failed.',
+                                    }));
+                                  }
+                                } finally {
+                                  setVerifyingPyqId(null);
+                                }
+                              }}
+                              className={`p-3 rounded-xl border text-left text-xs sm:text-sm font-medium flex items-center justify-between cursor-pointer transition-colors ${cls}`}
+                            >
+                              <span className="flex items-center gap-2">
+                                <strong className="tabular-nums">
+                                  ({String.fromCharCode(65 + optIdx)})
+                                </strong>
+                                <MathRichText content={opt} inline />
+                              </span>
+                              {isRevealed && optIdx === resolvedCorrectIndex && (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#00A86B]">
+                                  <Check className="w-3.5 h-3.5" />
+                                  Correct
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
 
                   {verifyingPyqId === q.id && (
                     <div className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">

@@ -9,16 +9,25 @@ import {
 
 export type { ContentProvenance, ExtractionQuality };
 
+export interface QuickNotesData {
+  formulasAndConstants: string[];
+  keyPrinciples: string[];
+  specialCases: string[];
+  topMistakes: string[];
+}
+
 export interface NotePageData {
   pageNumber: number;
   heading: string;
   timestampRange?: string; // For up to 12-hour YouTube marathon lectures
   sections: {
     numberTitle: string;
+    tone?: 'concept' | 'formula' | 'derivation' | 'example' | 'trap';
     paragraphs?: string[];
     bullets?: string[];
     formulas?: string[];
   }[];
+  quickNotes?: QuickNotesData;
   aiTutorSummary: {
     english: string;
     hinglish: string;

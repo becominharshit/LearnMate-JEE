@@ -20,6 +20,8 @@ export interface DynamicCompanionProps {
   onEarnXp?: (xp: number, reason?: string) => void;
   sidebarCollapsed?: boolean;
   variant?: 'sidebar' | 'mobile-icon';
+  clueCoins?: number;
+  onSpendClueCoin?: () => void;
 }
 
 export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
@@ -28,11 +30,14 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
   onEarnXp,
   sidebarCollapsed = false,
   variant = 'sidebar',
+  clueCoins: controlledClueCoins,
+  onSpendClueCoin,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [modeTab, setModeTab] = useState<'socratic' | 'shardz' | 'ocr'>('socratic');
   const [language, setLanguage] = useState<'English' | 'Hinglish' | 'Hindi'>('Hinglish');
-  const [clueCoins, setClueCoins] = useState<number>(3);
+  const [localClueCoins, setLocalClueCoins] = useState<number>(6);
+  const clueCoins = controlledClueCoins ?? localClueCoins;
   const [socraticMode, setSocraticMode] = useState<boolean>(true);
   const [questionInput, setQuestionInput] = useState<string>('');
   const [aiReply, setAiReply] = useState<string>('');
@@ -78,7 +83,8 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
         setAiReply(`[${res.error.errorCode}] ${res.error.message}`);
       } else {
         if (hintLevel) {
-          setClueCoins((c) => Math.max(0, c - 1));
+          if (onSpendClueCoin) onSpendClueCoin();
+          else setLocalClueCoins((c) => Math.max(0, c - 1));
         }
         setAiReply(res.data.answer || res.data.text || 'Done.');
         if (Array.isArray(res.data.citations)) {
@@ -163,7 +169,7 @@ export const DynamicCompanion: React.FC<DynamicCompanionProps> = ({
             <div className="flex items-center gap-2 shrink-0">
               <span className="inline-flex items-center gap-1 tabular-nums text-[11px] font-semibold text-[#7C3AED] dark:text-violet-400">
                 <Coins className="w-3 h-3" />
-                {clueCoins}/3
+                {clueCoins}
               </span>
               <button
                 type="button"

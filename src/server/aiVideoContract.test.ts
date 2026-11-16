@@ -3,9 +3,14 @@ import assert from 'node:assert/strict';
 
 process.env.LEARNMATE_SKIP_AUTO_LISTEN = 'true';
 
-const { buildAnimatedLessonPromptRequest, synthesizeAnimatedLessonSvg } = await import(
-  './routes/aiTutorRoutes'
-);
+const {
+  buildAnimatedLessonPromptRequest,
+  synthesizeAnimatedLessonSvg,
+  normalizeSvgMathLabels,
+  buildLanguageInstruction,
+  buildSocraticActionRule,
+} = await import('./routes/aiTutorRoutes');
+const { resolveLiveVoicePersonaConfig } = await import('./ws/voiceLiveServer');
 const { ALLOWED_GEMINI_MODELS } = await import('./coreStudyEngine');
 
 test('buildAnimatedLessonPromptRequest uses GEMINI_MODEL_FAST and never calls retired omni model', () => {
@@ -31,31 +36,65 @@ test('buildAnimatedLessonPromptRequest uses GEMINI_MODEL_FAST and never calls re
   assert.equal(imgReq.contents.parts[0].inlineData.data, 'AAAA');
 });
 
-test('synthesizeAnimatedLessonSvg produces sanitized animated SVG keyframes', () => {
+test('synthesizeAnimatedLessonSvg strips raw LaTeX backslashes and produces sanitized animated SVG', () => {
+  assert.equal(
+    normalizeSvgMathLabels('$f \\le \\mu mg \\cos\\theta + \\frac{1}{2}$'),
+    'f ≤ μ mg cosθ + (1)/(2)'
+  );
+
   const svg = synthesizeAnimatedLessonSvg({
-    lessonTitle: 'Simple Harmonic Motion Phase Orbit',
+    lessonTitle: 'Block on Incline: $\\theta$ Equilibrium',
     durationSec: 12,
-    summary: 'Relating circular projection to sinusoidal displacement x = A sin(ωt).',
+    summary: 'Condition $f \\le \\mu N$ governs static equilibrium.',
     keyframes: [
       {
         timeSec: 0,
-        title: 'Mean Position',
-        formula: 'x = 0, v = Aω',
-        visualCue: 'Maximum kinetic energy pulse',
-        caption: 'Particle passes equilibrium with peak velocity.',
+        title: 'Normal Force',
+        formula: 'N = mg\\cos\\theta',
+        visualCue: 'Perpendicular reaction vector',
+        caption: 'Resolve weight normal to the plane.',
       },
       {
         timeSec: 4,
-        title: 'Positive Extreme',
-        formula: 'x = +A, a = -ω²A',
-        visualCue: 'Restoring force peaks toward center',
-        caption: 'Velocity vanishes momentarily at amplitude.',
+        title: 'Friction Limit',
+        formula: 'f \\le \\mu N',
+        visualCue: 'Static friction cap',
+        caption: 'Prevent slipping below threshold angle.',
       },
     ],
   });
 
   assert.match(svg, /^<svg[\s\S]*<\/svg>$/i);
   assert.match(svg, /<animate/);
-  assert.match(svg, /Simple Harmonic Motion Phase Orbit/);
+  assert.equal(/\\cos|\\le|\\mu|\\frac/.test(svg), false);
+  assert.match(svg, /mgcosθ|cosθ|≤/);
   assert.equal(/<script/i.test(svg), false);
 });
+
+test('Socratic Hint 1 anti-spoiler and Live Voice persona configs enforce strict separation', () => {
+  const hint1Rule = buildSocraticActionRule(1, 'explain', true);
+  assert.match(hint1Rule, /1 to 2 concise sentences/i);
+  assert.match(hint1Rule, /NEVER show derivation steps/i);
+  assert.match(hint1Rule, /NEVER reveal the final/i);
+
+  const hindiLang = buildLanguageInstruction('Pure Hindi', 'pure_hindi');
+  const hinglishLang = buildLanguageInstruction('Hinglish', 'hinglish_faculty');
+  const englishLang = buildLanguageInstruction('English', 'pure_english');
+  assert.match(hindiLang, /Devanagari/);
+  assert.match(hinglishLang, /Hinglish/i);
+  assert.match(englishLang, /PURE ENGLISH/);
+
+  const hindiPersona = resolveLiveVoicePersonaConfig('pure_hindi');
+  const indianEnPersona = resolveLiveVoicePersonaConfig('indian_english');
+  const pureEnPersona = resolveLiveVoicePersonaConfig('pure_english');
+  const hinglishPersona = resolveLiveVoicePersonaConfig('hinglish_faculty');
+
+  assert.equal(new Set([
+    hindiPersona.voiceName,
+    indianEnPersona.voiceName,
+    pureEnPersona.voiceName,
+    hinglishPersona.voiceName,
+  ]).size, 4);
+  assert.match(hindiPersona.systemInstruction, /देवनागरी/);
+});
+

@@ -35,6 +35,44 @@ export function extractWsAuthToken(request: http.IncomingMessage): string {
   return '';
 }
 
+export function resolveLiveVoicePersonaConfig(rawPersona?: string | null): {
+  personaId: string;
+  voiceName: string;
+  systemInstruction: string;
+} {
+  const personaId = String(rawPersona || 'hinglish_faculty').trim();
+  const baseMathRule =
+    'Walk through every concept or question step-by-step in clear paragraphs, write equations using $...$ in the transcript without ever mentioning the word KaTeX, and ask a brief encouraging check-in question.';
+
+  switch (personaId) {
+    case 'pure_hindi':
+      return {
+        personaId,
+        voiceName: 'Aoede',
+        systemInstruction: `You are LearnMate JEE Pure Hindi Classroom Teacher (शुद्ध हिंदी शिक्षक). Speak naturally and warmly in complete Hindi (देवनागरी लिपि में सरल और स्पष्ट व्याख्या), keeping only standard physical constants/symbols in LaTeX ($...$). ${baseMathRule}`,
+      };
+    case 'indian_english':
+      return {
+        personaId,
+        voiceName: 'Charon',
+        systemInstruction: `You are LearnMate JEE Indian English IIT-JEE Professor. Speak with an articulate, warm Indian academic English classroom cadence ("Let us write down the governing equation first..."). Avoid Hindi phrases unless requested. ${baseMathRule}`,
+      };
+    case 'pure_english':
+      return {
+        personaId,
+        voiceName: 'Puck',
+        systemInstruction: `You are LearnMate JEE Standard Academic English Professor. Speak strictly in crisp, clear standard academic English suitable for international/English-medium JEE aspirants. Do not switch to Hindi or Hinglish. ${baseMathRule}`,
+      };
+    case 'hinglish_faculty':
+    default:
+      return {
+        personaId: 'hinglish_faculty',
+        voiceName: 'Zephyr',
+        systemInstruction: `You are LearnMate JEE Hinglish IIT Faculty from Kota. Speak in a warm, energetic Hinglish classroom blend (conversational Hindi words written cleanly paired with English JEE technical terms and equations). ${baseMathRule}`,
+      };
+  }
+}
+
 export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketServer {
   const wss = new WebSocketServer({
     noServer: true,
@@ -105,10 +143,19 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
     });
   });
 
-  wss.on('connection', async (clientWs: WebSocket, _request: http.IncomingMessage, uid?: string) => {
+  wss.on('connection', async (clientWs: WebSocket, request: http.IncomingMessage, uid?: string) => {
     let liveSession: any = null;
     let lastActivityAt = Date.now();
     let isAlive = true;
+
+    let requestedPersona: string | null = null;
+    try {
+      const parsedUrl = new URL(request.url || '', `http://${request.headers.host || 'localhost'}`);
+      requestedPersona = parsedUrl.searchParams.get('persona');
+    } catch {
+      requestedPersona = null;
+    }
+    const personaCfg = resolveLiveVoicePersonaConfig(requestedPersona);
 
     clientWs.on('pong', () => {
       isAlive = true;
@@ -145,11 +192,10 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
           outputAudioTranscription: {},
           speechConfig: {
             voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: 'Zephyr' },
+              prebuiltVoiceConfig: { voiceName: personaCfg.voiceName },
             },
           },
-          systemInstruction:
-            'You are LearnMate JEE Live Classroom Voice Teacher. Speak like a warm, patient, and articulate IIT-JEE professor in Indian English, Hinglish, or Hindi according to the student request. Walk through every concept or question step-by-step in clear paragraphs, write equations using $...$ in the transcript without ever mentioning the word KaTeX, and ask encouraging check-in questions to verify student understanding.',
+          systemInstruction: personaCfg.systemInstruction,
         },
         callbacks: {
           onmessage: (message: LiveServerMessage) => {
@@ -191,7 +237,7 @@ export function attachVoiceLiveWebSocketServer(server: http.Server): WebSocketSe
       });
 
       liveSession = await sessionPromise;
-      safeWsSend(clientWs, { status: 'connected' });
+      safeWsSend(clientWs, { status: 'connected', persona: personaCfg.personaId });
 
       clientWs.on('message', (raw) => {
         lastActivityAt = Date.now();

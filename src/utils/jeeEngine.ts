@@ -830,11 +830,22 @@ export function calculateSM2Schedule(
     nextInterval = 1;
   } else {
     if (repetition === 0) {
-      nextInterval = 1;
+      if (quality === 3) nextInterval = 0.5;
+      else if (quality === 5) nextInterval = 3;
+      else nextInterval = 1;
     } else if (repetition === 1) {
-      nextInterval = 6;
+      if (quality === 3) nextInterval = 3;
+      else if (quality === 5) nextInterval = 10;
+      else nextInterval = 6;
     } else {
-      nextInterval = Math.max(1, Math.round(interval * efactor));
+      const base = Math.max(1, Math.round(interval * efactor));
+      if (quality === 3) {
+        nextInterval = Math.max(1, Math.round(interval * 1.25));
+      } else if (quality === 4) {
+        nextInterval = Math.max(2, Math.round(base * 0.85));
+      } else {
+        nextInterval = base;
+      }
     }
     nextRepetition = repetition + 1;
   }
@@ -853,6 +864,14 @@ export function calculateSM2Schedule(
     easeFactor: nextEfactor,
     nextReviewIso: nextDate,
   };
+}
+
+export function formatSM2IntervalShort(days: number): string {
+  if (days < 1) {
+    const hours = Math.max(1, Math.round(days * 24));
+    return `${hours}h`;
+  }
+  return `${days}d`;
 }
 
 export function calculateNextSRSReview(
@@ -877,7 +896,12 @@ export function calculateNextSRSReview(
     nextIntervalDays: sm2.interval,
     nextEaseFactor: sm2.efactor,
     nextRepetition: sm2.repetition,
-    label: rating === 'Again' ? '< 10 mins (Reset to 1d)' : `${sm2.interval} day(s)`,
+    label:
+      rating === 'Again'
+        ? '< 10 mins (Reset to 1d)'
+        : sm2.interval < 1
+        ? `${Math.max(1, Math.round(sm2.interval * 24))} hour(s)`
+        : `${sm2.interval} day(s)`,
   };
 }
 

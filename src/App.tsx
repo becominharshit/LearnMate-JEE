@@ -174,6 +174,8 @@ export function App() {
             activeMaterialId={s.selectedMaterial?.id}
             sidebarCollapsed={s.sidebarCollapsed}
             variant="sidebar"
+            clueCoins={s.clueCoins}
+            onSpendClueCoin={() => s.handleAdjustClueCoins(-1)}
             onEarnXp={(earned, reason) => {
               s.setXp((x) => x + earned);
               if (reason) s.showToast(reason);
@@ -185,6 +187,8 @@ export function App() {
             activeChapterName={s.selectedMaterial?.chapter || 'Rotational Motion'}
             activeMaterialId={s.selectedMaterial?.id}
             variant="mobile-icon"
+            clueCoins={s.clueCoins}
+            onSpendClueCoin={() => s.handleAdjustClueCoins(-1)}
             onEarnXp={(earned, reason) => {
               s.setXp((x) => x + earned);
               if (reason) s.showToast(reason);
@@ -293,6 +297,8 @@ export function App() {
                 customQuestions,
               });
             }}
+            clueCoins={s.clueCoins}
+            onAdjustClueCoins={s.handleAdjustClueCoins}
             onEarnXp={(earned, reason) => {
               s.setXp((x) => x + earned);
               s.showToast(reason || `+${earned} XP earned!`);
@@ -327,6 +333,8 @@ export function App() {
             materialBundles={s.materialBundles}
             mistakesNotebook={s.mistakesNotebook}
             sm2Cards={s.sm2Cards}
+            sm2ReviewedCount={s.sm2ReviewedCount}
+            onIncrementSm2Reviewed={s.handleIncrementSm2Reviewed}
             onUpdateSM2Card={s.handleUpdateSM2Card}
             onAddSM2Card={s.handleAddSM2Card}
             onTagMistakeRootCause={s.handleTagMistakeRootCause}

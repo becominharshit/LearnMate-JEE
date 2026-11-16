@@ -1209,7 +1209,9 @@ export async function ingestYouTubeOnServer(params: {
   transcriptText?: string;
   title?: string;
 }) {
-  return apiFetchWithAuth('/api/ingest/youtube', params);
+  return apiFetchWithAuth('/api/ingest/youtube', params, 'POST', {
+    signal: AbortSignal.timeout(10_000),
+  });
 }
 
 export async function fetchCommercialPlans() {

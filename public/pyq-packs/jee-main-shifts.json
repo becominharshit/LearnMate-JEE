@@ -137,7 +137,7 @@
       "shift": "2025 Session 1 Shift 1",
       "marksCorrect": 4,
       "marksWrong": -1,
-      "stem": "The value of the definite integral $I = \\int_{0}^{\\pi/2} \\frac{\\sin^{2025}x}{\\sin^{2025}x + \\cos^{2025}x}\\,dx$ is:",
+      "stem": "The value of the definite integral $$I = \\int_{0}^{\\pi/2} \\dfrac{\\sin^{2025}x}{\\sin^{2025}x + \\cos^{2025}x}\\,dx$$ is:",
       "options": [
         "$\\frac{\\pi}{2}$",
         "$\\pi$",

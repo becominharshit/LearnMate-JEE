@@ -14,17 +14,47 @@ import { escapeXmlText, sanitizeSvgMarkup } from '../../utils/svgSanitizer';
 
 export const aiTutorRouter = Router();
 
-function buildLanguageInstruction(language = 'English', teacherPersona = 'hinglish_faculty'): string {
-  if (teacherPersona === 'pure_hindi' || language === 'Pure Hindi' || language === 'Hindi') {
-    return 'Respond as an experienced Indian classroom teacher speaking in clear, natural Hindi (देवनागरी या सरल हिंदी शब्दों के साथ वैज्ञानिक सूत्र), explaining every step warmly.';
+export function buildLanguageInstruction(language = 'English', teacherPersona?: string): string {
+  const normalizedLang = String(language || '').trim().toLowerCase();
+  const normalizedPersona = String(teacherPersona || '').trim().toLowerCase();
+
+  if (
+    normalizedLang === 'pure hindi' ||
+    normalizedLang === 'hindi' ||
+    normalizedPersona === 'pure_hindi'
+  ) {
+    return 'LANGUAGE REQUIREMENT (PURE HINDI): Respond strictly in clear, natural Hindi written in Devanagari script (देवनागरी हिंदी में सरल और स्पष्ट व्याख्या), keeping only equations and symbols in LaTeX. Never default to English prose.';
   }
-  if (teacherPersona === 'indian_english') {
-    return 'Respond as a warm, articulate Indian IIT-JEE professor speaking in natural Indian English classroom cadence ("Let us write the governing equation step by step...").';
+  if (normalizedPersona === 'indian_english') {
+    return 'LANGUAGE REQUIREMENT (INDIAN ENGLISH): Respond as a warm, articulate Indian IIT-JEE professor speaking in natural Indian English classroom cadence ("Let us write the governing equation step by step..."). Do not mix Hindi words.';
   }
-  if (language === 'Hinglish' || teacherPersona === 'hinglish_faculty') {
-    return 'Respond as a senior Kota/IIT-JEE faculty mentor in natural Hinglish (warm classroom mix of Hindi and English technical terms, formulas, and step-by-step board explanations).';
+  if (normalizedLang === 'hinglish' || normalizedPersona === 'hinglish_faculty') {
+    return 'LANGUAGE REQUIREMENT (HINGLISH): Respond as a senior Kota/IIT-JEE faculty mentor in natural Hinglish (warm conversational Hindi words in Latin script mixed smoothly with English technical JEE terms and formulas).';
   }
-  return 'Respond as a clear, encouraging academic professor in standard English tailored for JEE Main & Advanced.';
+  return 'LANGUAGE REQUIREMENT (PURE ENGLISH): Respond strictly in clear, encouraging standard academic English tailored for JEE Main & Advanced.';
+}
+
+export function buildSocraticActionRule(
+  effectiveHintStep: number | 'full' | undefined,
+  action: string,
+  socraticMode: boolean
+): string {
+  if (action === 'unit_check') {
+    return 'DIMENSIONAL & UNIT AUDIT: Explicitly verify LHS and RHS SI dimensions $[M^a L^b T^c]$ and common unit pitfalls.';
+  }
+  if (action === 'recheck_quiz') {
+    return 'CONCEPT RECHECK: Provide a crisp recap followed by 1 quick self-check numerical/MCQ problem and its hidden verification key.';
+  }
+  if (effectiveHintStep === 1 || (socraticMode && !effectiveHintStep)) {
+    return 'SOCRATIC HINT 1 OF 3 (CONCEPTUAL NUDGE ONLY — STRICT ANTI-SPOILER): Reply in STRICTLY 1 to 2 concise sentences. Name ONLY the single governing law or starting formula/principle and ask 1 diagnostic check-in question. NEVER show derivation steps, NEVER substitute numbers, and NEVER reveal the final numerical or symbolic answer.';
+  }
+  if (effectiveHintStep === 2) {
+    return 'SOCRATIC HINT 2 OF 3 (EQUATION SETUP & BOUNDARY CONDITIONS): In 2 to 4 concise lines, show how to set up the governing equation and substitute known variables or boundary conditions. Do NOT compute or reveal the final answer.';
+  }
+  if (effectiveHintStep === 3) {
+    return 'SOCRATIC HINT 3 OF 3 (KEY INTERMEDIATE STEP): Show the crucial algebraic/calculus transformation and warn of one common JEE exam trap, leaving the final arithmetic evaluation for the student.';
+  }
+  return 'Structure clearly: 1) Core Law & Citations, 2) Step-by-Step Derivation, 3) Common Exam Trap.';
 }
 
 const MATH_FORMAT_INSTRUCTION =
@@ -43,15 +73,44 @@ aiTutorRouter.post('/tutor', async (req: AuthenticatedRequest, res: Response) =>
       currentPage,
       context = '',
       contextMode = 'open_jee',
-      difficultyLevel = 'jee_main',
-      language = 'Hinglish',
-      teacherPersona = 'hinglish_faculty',
+      difficultyLevel,
+      difficulty,
+      language,
+      teacherPersona,
       socraticMode = false,
       hintLevel,
+      socraticHintStep,
       action = 'explain',
       imageBase64,
       imageMimeType = 'image/png',
     } = req.body || {};
+
+    const resolvedDifficulty = String(difficultyLevel || difficulty || 'jee_main');
+    const resolvedLanguage = String(
+      language ||
+        (teacherPersona === 'pure_hindi'
+          ? 'Pure Hindi'
+          : teacherPersona === 'hinglish_faculty'
+          ? 'Hinglish'
+          : 'English')
+    );
+    const resolvedPersona = String(
+      teacherPersona ||
+        (resolvedLanguage.toLowerCase().includes('hindi') && !resolvedLanguage.toLowerCase().includes('hinglish')
+          ? 'pure_hindi'
+          : resolvedLanguage.toLowerCase() === 'hinglish'
+          ? 'hinglish_faculty'
+          : 'indian_english')
+    );
+    const rawStep = socraticHintStep ?? hintLevel;
+    const effectiveHintStep: 1 | 2 | 3 | 'full' | undefined =
+      rawStep === 'full'
+        ? 'full'
+        : rawStep === 1 || rawStep === 2 || rawStep === 3
+        ? rawStep
+        : socraticMode
+        ? 1
+        : undefined;
 
     const queryText = String(question || prompt || '').trim();
     if (!queryText) {
@@ -105,12 +164,12 @@ aiTutorRouter.post('/tutor', async (req: AuthenticatedRequest, res: Response) =>
 
     const models = getModelRoutingConfig();
     const ai = getValidatedGenAIClient();
-    const langInstruction = buildLanguageInstruction(language, teacherPersona);
+    const langInstruction = buildLanguageInstruction(resolvedLanguage, resolvedPersona);
 
     const difficultyRule =
-      difficultyLevel === 'board'
+      resolvedDifficulty === 'board'
         ? 'DIFFICULTY CALIBRATION (NCERT / BOARD LEVEL): Focus on crystal-clear intuitive fundamentals and direct NCERT formula steps.'
-        : difficultyLevel === 'jee_advanced'
+        : resolvedDifficulty === 'jee_advanced'
         ? 'DIFFICULTY CALIBRATION (JEE ADVANCED LEVEL): Emphasize multi-concept coupling, differential derivations, degenerate/boundary cases, and rigor.'
         : 'DIFFICULTY CALIBRATION (JEE MAIN 2027 LEVEL): Balance conceptual speed, +4/-1 elimination traps, and Section B numerical rounding precision.';
 
@@ -119,14 +178,11 @@ aiTutorRouter.post('/tutor', async (req: AuthenticatedRequest, res: Response) =>
         ? 'STRICT MATERIAL CONTEXT MODE: Answer ONLY using the Source Context excerpts below. Cite page numbers inline as [Page N]. If a detail is absent from the source excerpts, explicitly state that it is not present in the provided source.'
         : 'OPEN JEE TUTOR MODE: Ground explanations in the student’s material citations ([Page N]) where relevant and extend freely across the full JEE Main/Advanced syllabus.';
 
-    const actionRule =
-      action === 'unit_check'
-        ? 'DIMENSIONAL & UNIT AUDIT: Explicitly verify LHS and RHS SI dimensions $[M^a L^b T^c]$ and common unit pitfalls.'
-        : action === 'recheck_quiz'
-        ? 'CONCEPT RECHECK: Provide a crisp recap followed by 1 quick self-check numerical/MCQ problem and its hidden verification key.'
-        : socraticMode || hintLevel
-        ? `SOCRATIC HINT STEP ${hintLevel || 1} OF 3: Guide with a conceptual clue and governing formula without spoiling the final numeric answer.`
-        : 'Structure clearly: 1) Core Law & Citations, 2) Step-by-Step Derivation, 3) Common Exam Trap.';
+    const actionRule = buildSocraticActionRule(
+      effectiveHintStep,
+      String(action || 'explain'),
+      Boolean(socraticMode)
+    );
 
     const parts: any[] = [];
     if (typeof imageBase64 === 'string' && imageBase64.trim()) {
@@ -148,7 +204,7 @@ aiTutorRouter.post('/tutor', async (req: AuthenticatedRequest, res: Response) =>
     });
 
     const tutorModels =
-      difficultyLevel === 'jee_advanced'
+      resolvedDifficulty === 'jee_advanced'
         ? buildThinkingFallbackChain(models.thinking)
         : [models.fast, ...buildThinkingFallbackChain(models.thinking)];
     const { result, modelUsed, fallbackUsed } = await generateWithModelFallback(
@@ -169,7 +225,9 @@ aiTutorRouter.post('/tutor', async (req: AuthenticatedRequest, res: Response) =>
       text: answerText,
       citations,
       contextMode,
-      difficultyLevel,
+      difficultyLevel: resolvedDifficulty,
+      hintStep: effectiveHintStep ?? null,
+      language: resolvedLanguage,
       verificationStatus: citations.length > 0 ? 'grounded_with_citations' : 'open_jee_syllabus',
       modelUsed,
       fallbackUsed,
@@ -290,11 +348,11 @@ aiTutorRouter.post('/think', async (req: AuthenticatedRequest, res: Response) =>
 
     const socraticInstruction =
       socraticHintStep === 1
-        ? 'SOCRATIC CLUE COIN — HINT 1 OF 3 (CONCEPT & GOVERNING LAW CUE ONLY): Do NOT reveal the final numerical answer or full derivation yet. Give ONLY Hint 1 and ask a guiding question.'
+        ? 'SOCRATIC HINT 1 OF 3 (CONCEPTUAL NUDGE ONLY — STRICT ANTI-SPOILER): Reply in STRICTLY 1 to 2 concise sentences. Name ONLY the single governing law or starting formula and ask 1 diagnostic question. NEVER show derivation steps, NEVER substitute numbers, and NEVER reveal the final numerical or symbolic answer.'
         : socraticHintStep === 2
-        ? 'SOCRATIC CLUE COIN — HINT 2 OF 3 (EQUATION SETUP & BOUNDARY CONDITIONS): Do NOT reveal the final answer yet. Show variable substitution and ask the student to simplify.'
+        ? 'SOCRATIC HINT 2 OF 3 (EQUATION SETUP & BOUNDARY CONDITIONS): Do NOT reveal the final answer yet. Show variable substitution in 2 to 4 concise lines and ask the student to simplify.'
         : socraticHintStep === 3
-        ? 'SOCRATIC CLUE COIN — HINT 3 OF 3 (INTERMEDIATE STEP): Show the key intermediate algebraic/calculus step and exam trap, leaving final arithmetic to the student.'
+        ? 'SOCRATIC HINT 3 OF 3 (INTERMEDIATE STEP): Show the key intermediate algebraic/calculus step and exam trap, leaving final arithmetic to the student.'
         : isVoiceTeacher
         ? 'Act like a dedicated live classroom teacher standing at the board. Walk through the derivation step-by-step in cohesive spoken paragraphs and finish with a warm check-in question.'
         : 'Break down every solution into: 1) **Core Concept & Governing Formula**, 2) **Step-by-Step Derivation & Solution**, and 3) *Common JEE Exam Trap to Avoid*, followed by a brief check-in question.';
@@ -637,6 +695,58 @@ export interface AnimatedConceptLessonPlan {
   keyframes: AnimatedLessonKeyframe[];
 }
 
+export function normalizeSvgMathLabels(raw: string): string {
+  return String(raw || '')
+    .replace(/\$\$/g, '')
+    .replace(/\$/g, '')
+    .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)')
+    .replace(/\\dfrac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)')
+    .replace(/\\sqrt\{([^{}]+)\}/g, '√($1)')
+    .replace(/\\vec\{([^{}]+)\}/g, '$1')
+    .replace(/\\hat\{([^{}]+)\}/g, '$1̂')
+    .replace(/\\text\{([^{}]*)\}/g, '$1')
+    .replace(/\\cos\b/g, 'cos')
+    .replace(/\\sin\b/g, 'sin')
+    .replace(/\\tan\b/g, 'tan')
+    .replace(/\\cot\b/g, 'cot')
+    .replace(/\\sec\b/g, 'sec')
+    .replace(/\\csc\b/g, 'csc')
+    .replace(/\\ln\b/g, 'ln')
+    .replace(/\\log\b/g, 'log')
+    .replace(/\\theta\b/g, 'θ')
+    .replace(/\\phi\b/g, 'φ')
+    .replace(/\\alpha\b/g, 'α')
+    .replace(/\\beta\b/g, 'β')
+    .replace(/\\gamma\b/g, 'γ')
+    .replace(/\\omega\b/g, 'ω')
+    .replace(/\\Omega\b/g, 'Ω')
+    .replace(/\\mu\b/g, 'μ')
+    .replace(/\\lambda\b/g, 'λ')
+    .replace(/\\sigma\b/g, 'σ')
+    .replace(/\\Sigma\b/g, 'Σ')
+    .replace(/\\Delta\b/g, 'Δ')
+    .replace(/\\pi\b/g, 'π')
+    .replace(/\\varepsilon_0\b/g, 'ε₀')
+    .replace(/\\varepsilon\b/g, 'ε')
+    .replace(/\\le\b|\\leq\b/g, '≤')
+    .replace(/\\ge\b|\\geq\b/g, '≥')
+    .replace(/\\neq\b/g, '≠')
+    .replace(/\\approx\b/g, '≈')
+    .replace(/\\times\b/g, '×')
+    .replace(/\\cdot\b/g, '·')
+    .replace(/\\pm\b/g, '±')
+    .replace(/\\to\b|\\rightarrow\b/g, '→')
+    .replace(/\\implies\b/g, '⇒')
+    .replace(/\\infty\b/g, '∞')
+    .replace(/\\int\b/g, '∫')
+    .replace(/\\partial\b/g, '∂')
+    .replace(/\\degree\b|\^\\circ/g, '°')
+    .replace(/[{}]/g, '')
+    .replace(/\\+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function buildAnimatedLessonPromptRequest(params: {
   prompt: string;
   aspectRatio?: string;
@@ -650,7 +760,7 @@ export function buildAnimatedLessonPromptRequest(params: {
     : '16:9';
   const promptText = `Design an interactive 12-second animated IIT-JEE concept lesson for: "${String(
     params.prompt
-  ).slice(0, 600)}". Return a structured lesson title, concise summary, and 4 sequential animation keyframes (t = 0s, 4s, 8s, 12s) with exact physics/chemistry/math formulas, visual motion cues, and classroom captions. Aspect ratio context: ${safeAspect}.`;
+  ).slice(0, 600)}". Return a structured lesson title, concise summary, and 4 sequential animation keyframes (t = 0s, 4s, 8s, 12s) with exact physics/chemistry/math formulas, visual motion cues, and classroom captions. IMPORTANT: Inside title, formula, visualCue, and summary fields for SVG text rendering, use clean readable Unicode math symbols (e.g. "cos θ", "≤ μN", "ΣF = ma", "ΔK", "π") and NEVER output raw LaTeX backslashes like \\cos, \\le, or \\frac. Aspect ratio context: ${safeAspect}.`;
 
   const cleanedImg =
     typeof params.imageBase64 === 'string'
@@ -676,8 +786,12 @@ export function buildAnimatedLessonPromptRequest(params: {
 }
 
 export function synthesizeAnimatedLessonSvg(plan: AnimatedConceptLessonPlan): string {
-  const safeTitle = escapeXmlText((plan.lessonTitle || 'JEE Animated Concept Lesson').slice(0, 68));
-  const safeSummary = escapeXmlText((plan.summary || 'Step-by-step animated visual derivation').slice(0, 120));
+  const safeTitle = escapeXmlText(
+    normalizeSvgMathLabels(plan.lessonTitle || 'JEE Animated Concept Lesson').slice(0, 68)
+  );
+  const safeSummary = escapeXmlText(
+    normalizeSvgMathLabels(plan.summary || 'Step-by-step animated visual derivation').slice(0, 120)
+  );
   const frames = (Array.isArray(plan.keyframes) && plan.keyframes.length > 0
     ? plan.keyframes
     : [
@@ -716,15 +830,18 @@ export function synthesizeAnimatedLessonSvg(plan: AnimatedConceptLessonPlan): st
     .map((kf, idx) => {
       const x = 32 + idx * 158;
       const delaySec = idx * 2.4;
+      const cleanTitle = normalizeSvgMathLabels(String(kf.title || '')).slice(0, 20);
+      const cleanFormula = normalizeSvgMathLabels(String(kf.formula || '')).slice(0, 21);
+      const cleanCue = normalizeSvgMathLabels(String(kf.visualCue || '')).slice(0, 22);
       return `
         <g transform="translate(${x}, 276)">
           <rect x="0" y="0" width="144" height="104" rx="10" fill="#111827" stroke="#334155" stroke-width="1.5">
             <animate attributeName="stroke" values="#334155;#2563EB;#00A86B;#334155" keyTimes="0;0.25;0.65;1" dur="9.6s" begin="${delaySec}s" repeatCount="indefinite" />
           </rect>
           <text x="10" y="20" font-size="11" font-weight="700" fill="#60A5FA">t = ${Math.round(Number(kf.timeSec) || idx * 4)}s</text>
-          <text x="10" y="39" font-size="11" font-weight="700" fill="#F8FAFC">${escapeXmlText(String(kf.title || '').slice(0, 20))}</text>
-          <text x="10" y="61" font-size="11" font-weight="600" fill="#34D399">${escapeXmlText(String(kf.formula || '').slice(0, 20))}</text>
-          <text x="10" y="83" font-size="10" fill="#94A3B8">${escapeXmlText(String(kf.visualCue || '').slice(0, 22))}</text>
+          <text x="10" y="39" font-size="11" font-weight="700" fill="#F8FAFC">${escapeXmlText(cleanTitle)}</text>
+          <text x="10" y="61" font-size="11" font-weight="600" fill="#34D399">${escapeXmlText(cleanFormula)}</text>
+          <text x="10" y="83" font-size="10" fill="#94A3B8">${escapeXmlText(cleanCue)}</text>
         </g>`;
     })
     .join('');

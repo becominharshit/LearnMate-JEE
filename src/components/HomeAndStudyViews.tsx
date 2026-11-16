@@ -63,6 +63,8 @@ import {
 import {
   sanitizeSvgMarkup,
 } from '../utils/svgSanitizer';
+import { buildQuickNotesForPage } from '../services/studyBundleBuilder';
+import { speakWithLocaleVoice } from '../utils/speechVoice';
 import { synthesizeTopicAccurateSvg } from '../utils/opticsAndGeometrySolver';
 import { CreateStudioPanel, CreateStudioTabId } from './study/CreateStudioPanel';
 import { ResourcesAndGuidePanel } from './study/ResourcesAndGuidePanel';
@@ -1638,16 +1640,11 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
       const textToSpeak =
         lastTutor?.text ||
         currentPageData.aiTutorSummary[tutorLang === 'Hinglish' ? 'hinglish' : 'english'];
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(
-          textToSpeak.replace(/\$\$[^$]+\$\$/g, ' formula ').replace(/[*#$_]/g, '')
-        );
-        utter.onend = () => setTtsPlaying(false);
-        window.speechSynthesis.speak(utter);
-      } else {
-        setTtsPlaying(false);
-      }
+      speakWithLocaleVoice({
+        text: textToSpeak,
+        target: tutorLang === 'Hinglish' ? 'hinglish_faculty' : 'pure_english',
+        onEnd: () => setTtsPlaying(false),
+      });
     } catch {
       setTtsPlaying(false);
     }
@@ -2790,62 +2787,174 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             <h2 className="font-semibold tracking-[-0.02em] text-lg sm:text-xl text-[#0F172A] dark:text-[#F8FAFC]">
                               <MathRichText content={currentPageData.heading} inline />
                             </h2>
-                            {currentPageData.sections.map((sec, idx) => (
-                              <div
-                                key={idx}
-                                className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2.5"
-                              >
-                                <h3 className="font-semibold text-sm text-[#0F172A] dark:text-[#F8FAFC]">
-                                  <MathRichText content={sec.numberTitle} inline />
-                                </h3>
-                                {sec.paragraphs?.map((p, pIdx) => (
-                                  <div
-                                    key={pIdx}
-                                    className="text-xs sm:text-sm text-[#475569] dark:text-[#94A3B8] leading-relaxed"
-                                  >
-                                    <MathRichText content={p} />
+                            {currentPageData.sections.map((sec, idx) => {
+                              const isFormulaBox =
+                                sec.tone === 'formula' ||
+                                /Governing Laws|Formula/i.test(sec.numberTitle);
+                              const isTrapBox =
+                                sec.tone === 'trap' ||
+                                /Trap|Edge Case/i.test(sec.numberTitle);
+                              const isExampleBox =
+                                sec.tone === 'example' ||
+                                /Solved Example/i.test(sec.numberTitle);
+                              const boxCls = isFormulaBox
+                                ? 'bg-[#EFF6FF]/75 dark:bg-[#172554]/30 border border-[#BFDBFE] dark:border-blue-500/30 border-l-4 border-l-[#2563EB]'
+                                : isTrapBox
+                                ? 'bg-[#F5F3FF]/80 dark:bg-[#2E1065]/25 border border-[#DDD6FE] dark:border-violet-500/30 border-l-4 border-l-[#7C3AED]'
+                                : isExampleBox
+                                ? 'bg-[#ECFDF5]/70 dark:bg-[#064E3B]/20 border border-[#A7F3D0] dark:border-emerald-500/30 border-l-4 border-l-[#00A86B]'
+                                : 'bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]';
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-4 rounded-xl space-y-2.5 ${boxCls}`}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <h3 className="font-bold text-sm text-[#0F172A] dark:text-[#F8FAFC]">
+                                      <MathRichText content={sec.numberTitle} inline />
+                                    </h3>
+                                    {isFormulaBox && (
+                                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#2563EB]/10 text-[#2563EB] dark:text-blue-300">
+                                        Key Formulas
+                                      </span>
+                                    )}
+                                    {isTrapBox && (
+                                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#7C3AED]/10 text-[#7C3AED] dark:text-violet-300">
+                                        Exam Trap
+                                      </span>
+                                    )}
                                   </div>
-                                ))}
-                                {sec.bullets && (
-                                  <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#475569] dark:text-[#94A3B8]">
-                                    {sec.bullets.map((b, bIdx) => (
-                                      <li key={bIdx}>
-                                        <MathRichText content={b} inline />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                                {sec.formulas && sec.formulas.length > 0 && (
-                                  <div className="p-3.5 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2 text-xs sm:text-sm text-[#0F172A] dark:text-[#F8FAFC]">
-                                    {sec.formulas.map((f, fIdx) => (
-                                      <div key={fIdx}>
-                                        <MathRichText content={f} />
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                                  {sec.paragraphs?.map((p, pIdx) => (
+                                    <div
+                                      key={pIdx}
+                                      className="text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed"
+                                    >
+                                      <MathRichText content={p} />
+                                    </div>
+                                  ))}
+                                  {sec.bullets && (
+                                    <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1]">
+                                      {sec.bullets.map((b, bIdx) => (
+                                        <li key={bIdx}>
+                                          <MathRichText content={b} inline />
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                  {sec.formulas && sec.formulas.length > 0 && (
+                                    <div className="p-3.5 rounded-xl bg-white dark:bg-[#0F172A] border border-[#BFDBFE]/70 dark:border-blue-500/25 border-l-4 border-l-[#00A86B] space-y-2 text-xs sm:text-sm text-[#0F172A] dark:text-[#F8FAFC]">
+                                      {sec.formulas.map((f, fIdx) => (
+                                        <div key={fIdx}>
+                                          <MathRichText content={f} />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
                     )}
 
-                    {notesDensity === 'Quick' && (
-                      <section aria-label="Quick Notes" className="space-y-3 rounded-xl border border-[#E2E8F0] p-4 dark:border-white/10">
-                        <h2 className="text-lg font-semibold">Quick Notes</h2>
-                        <p className="text-xs text-[#475569] dark:text-[#94A3B8]">
-                          Source excerpt · {currentPageData.timestampRange || `Page ${currentPageData.pageNumber}`}
-                        </p>
-                        <MathRichText content={currentPageData.aiTutorSummary.english} />
-                        {Array.from(new Set(currentPageData.sections.flatMap((section) => section.formulas || [])))
-                          .slice(0, 4)
-                          .map((formula) => <MathRichText key={formula} content={formula} />)}
-                      </section>
-                    )}
+                    {notesDensity === 'Quick' && (() => {
+                      const fallbackQuick = buildQuickNotesForPage({
+                        pageNumber: currentPageData.pageNumber,
+                        chapter: selectedMaterial.chapter,
+                        subject: selectedMaterial.subject,
+                        rawPageText: currentPageData.sections
+                          .flatMap((s) => [...(s.paragraphs || []), ...(s.bullets || [])])
+                          .join(' '),
+                        formulas: currentPageData.sections.flatMap((s) => s.formulas || []),
+                        summaryEnglish: currentPageData.aiTutorSummary.english,
+                      });
+                      const quick = currentPageData.quickNotes || fallbackQuick;
+                      return (
+                        <section
+                          aria-label="Quick Notes"
+                          data-testid="quick-notes-sheet"
+                          className="space-y-4 rounded-2xl border border-[#E2E8F0] dark:border-white/[0.1] bg-white dark:bg-[#0F172A] p-4 sm:p-6"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#E2E8F0] dark:border-white/[0.08]">
+                            <div>
+                              <h2 className="text-lg sm:text-xl font-bold tracking-[-0.02em] text-[#0F172A] dark:text-[#F8FAFC]">
+                                Quick Notes · High-Yield Revision Sheet
+                              </h2>
+                              <p className="text-xs text-[#475569] dark:text-[#94A3B8] mt-0.5">
+                                {selectedMaterial.chapter} ·{' '}
+                                {currentPageData.timestampRange || `Page ${currentPageData.pageNumber}`}
+                              </p>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#2563EB]/10 text-[#2563EB] dark:text-blue-300 border border-[#2563EB]/20">
+                              1-Page Sprint
+                            </span>
+                          </div>
+
+                          {/* 1. Core Formulas & Constants */}
+                          <div className="p-4 rounded-xl bg-[#EFF6FF]/75 dark:bg-[#172554]/30 border border-[#BFDBFE] dark:border-blue-500/30 border-l-4 border-l-[#2563EB] space-y-2.5">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1E40AF] dark:text-blue-300">
+                              1. Core Formulas &amp; Constants
+                            </h3>
+                            <div className="space-y-2 text-xs sm:text-sm text-[#0F172A] dark:text-[#F8FAFC]">
+                              {quick.formulasAndConstants.map((formula, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-2.5 rounded-lg bg-white/90 dark:bg-[#0F172A]/80 border border-[#E2E8F0] dark:border-white/[0.08]"
+                                >
+                                  <MathRichText content={formula} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* 2. 5-7 Bold Key Principles */}
+                          <div className="p-4 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2.5">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#0F172A] dark:text-[#F8FAFC]">
+                              2. Key Principles ({quick.keyPrinciples.length})
+                            </h3>
+                            <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed">
+                              {quick.keyPrinciples.map((kp, idx) => (
+                                <li key={idx}>
+                                  <MathRichText content={kp} inline />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 3. Special Cases & Limiting Conditions */}
+                          <div className="p-4 rounded-xl bg-[#ECFDF5]/65 dark:bg-[#064E3B]/20 border border-[#A7F3D0] dark:border-emerald-500/30 border-l-4 border-l-[#00A86B] space-y-2">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#065F46] dark:text-emerald-300">
+                              3. Special Cases &amp; Limiting Conditions
+                            </h3>
+                            <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed">
+                              {quick.specialCases.map((sc, idx) => (
+                                <li key={idx}>
+                                  <MathRichText content={sc} inline />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 4. Top 3 JEE Mistakes to Avoid */}
+                          <div className="p-4 rounded-xl bg-[#F5F3FF]/80 dark:bg-[#2E1065]/25 border border-[#DDD6FE] dark:border-violet-500/30 border-l-4 border-l-[#7C3AED] space-y-2">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#5B21B6] dark:text-violet-300">
+                              4. Top 3 JEE Mistakes to Avoid
+                            </h3>
+                            <div className="space-y-1.5 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed">
+                              {quick.topMistakes.map((mistake, idx) => (
+                                <div key={idx}>
+                                  <MathRichText content={mistake} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </section>
+                      );
+                    })()}
                     {notesDensity === 'Full' && (
                       <>
-                        <h2 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl text-[#0F172A] dark:text-[#F8FAFC]">
+                        <h2 className="font-bold tracking-[-0.02em] text-xl sm:text-2xl text-[#0F172A] dark:text-[#F8FAFC]">
                           <MathRichText content={currentPageData.heading} inline />
                         </h2>
 
@@ -2878,42 +2987,72 @@ export const StudyWorkspaceView: React.FC<StudyViewProps> = ({
                             </button>
                           </div>
                         ) : (
-                          currentPageData.sections.map((sec, idx) => (
-                            <div
-                              key={idx}
-                              className="p-4 sm:p-5 rounded-xl bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08] space-y-3"
-                            >
-                              <h3 className="font-semibold text-sm sm:text-base text-[#0F172A] dark:text-[#F8FAFC]">
-                                <MathRichText content={sec.numberTitle} inline />
-                              </h3>
-                              {sec.paragraphs?.map((p, pIdx) => (
+                          currentPageData.sections.map((sec, idx) => {
+                            const isFormulaBox =
+                              sec.tone === 'formula' ||
+                              /Governing Laws|Formula/i.test(sec.numberTitle);
+                            const isTrapBox =
+                              sec.tone === 'trap' ||
+                              /Trap|Edge Case/i.test(sec.numberTitle);
+                            const isExampleBox =
+                              sec.tone === 'example' ||
+                              /Solved Example/i.test(sec.numberTitle);
+                            const boxCls = isFormulaBox
+                              ? 'bg-[#EFF6FF]/75 dark:bg-[#172554]/30 border border-[#BFDBFE] dark:border-blue-500/30 border-l-4 border-l-[#2563EB]'
+                              : isTrapBox
+                              ? 'bg-[#F5F3FF]/80 dark:bg-[#2E1065]/25 border border-[#DDD6FE] dark:border-violet-500/30 border-l-4 border-l-[#7C3AED]'
+                              : isExampleBox
+                              ? 'bg-[#ECFDF5]/70 dark:bg-[#064E3B]/20 border border-[#A7F3D0] dark:border-emerald-500/30 border-l-4 border-l-[#00A86B]'
+                              : 'bg-[#F8FAFF] dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-white/[0.08]';
+                            return (
+                              <div
+                                key={idx}
+                                className={`p-4 sm:p-5 rounded-xl space-y-3 ${boxCls}`}
+                              >
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <h3 className="font-bold text-sm sm:text-base text-[#0F172A] dark:text-[#F8FAFC]">
+                                    <MathRichText content={sec.numberTitle} inline />
+                                  </h3>
+                                  {isFormulaBox && (
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#2563EB]/10 text-[#2563EB] dark:text-blue-300">
+                                      Key Formulas &amp; Laws
+                                    </span>
+                                  )}
+                                  {isTrapBox && (
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#7C3AED]/10 text-[#7C3AED] dark:text-violet-300">
+                                      Exam Traps &amp; Edge Cases
+                                    </span>
+                                  )}
+                                </div>
+                                {sec.paragraphs?.map((p, pIdx) => (
                                   <div
                                     key={pIdx}
-                                    className="text-xs sm:text-sm text-[#475569] dark:text-[#CBD5E1] leading-relaxed"
+                                    className="text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed"
                                   >
                                     <MathRichText content={p} />
                                   </div>
                                 ))}
-                              {sec.bullets && (
-                                <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#475569] dark:text-[#CBD5E1]">
-                                  {sec.bullets.map((b, bIdx) => (
-                                    <li key={bIdx}>
-                                      <MathRichText content={b} inline />
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                              {sec.formulas && sec.formulas.length > 0 && (
-                                <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-white/[0.08] space-y-2 text-xs sm:text-sm text-[#0F172A] dark:text-[#F8FAFC]">
-                                  {sec.formulas.map((f, fIdx) => (
-                                    <div key={fIdx}>
-                                      <MathRichText content={f} />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))
+                                {sec.bullets && (
+                                  <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1]">
+                                    {sec.bullets.map((b, bIdx) => (
+                                      <li key={bIdx}>
+                                        <MathRichText content={b} inline />
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                                {sec.formulas && sec.formulas.length > 0 && (
+                                  <div className="p-4 rounded-xl bg-white dark:bg-[#0F172A] border border-[#BFDBFE]/70 dark:border-blue-500/25 border-l-4 border-l-[#00A86B] space-y-2 text-xs sm:text-sm text-[#0F172A] dark:text-[#F8FAFC]">
+                                    {sec.formulas.map((f, fIdx) => (
+                                      <div key={fIdx}>
+                                        <MathRichText content={f} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
                         )}
                       </>
                     )}

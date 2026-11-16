@@ -171,6 +171,85 @@ export function splitSourceIntoPages(
   };
 }
 
+function boldKeyTermInSentence(sentence: string): string {
+  const clean = sentence.trim();
+  if (!clean) return clean;
+  if (/^\*\*/.test(clean)) return clean;
+  const colonIdx = clean.indexOf(':');
+  if (colonIdx > 3 && colonIdx < 48) {
+    return `**${clean.slice(0, colonIdx).trim()}**: ${clean.slice(colonIdx + 1).trim()}`;
+  }
+  const match = clean.match(/^([A-Za-z0-9\s\-()/]{3,36}?)\s+(states|is defined as|equals|implies|requires|means|relates|describes)\b/i);
+  if (match) {
+    const head = match[1].trim();
+    const rest = clean.slice(head.length).trim();
+    return `**${head}** ${rest}`;
+  }
+  return clean;
+}
+
+export function buildQuickNotesForPage(params: {
+  pageNumber: number;
+  chapter: string;
+  subject: 'Physics' | 'Chemistry' | 'Mathematics';
+  rawPageText: string;
+  formulas: string[];
+  summaryEnglish: string;
+}): {
+  formulasAndConstants: string[];
+  keyPrinciples: string[];
+  specialCases: string[];
+  topMistakes: string[];
+} {
+  const { pageNumber, chapter, subject, rawPageText, formulas, summaryEnglish } = params;
+  const clean = String(rawPageText || '').replace(/\s+/g, ' ').trim();
+  const sentences = clean
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 14);
+
+  const uniqueFormulas = Array.from(new Set(formulas.filter(Boolean))).slice(0, 6);
+  const formulasAndConstants =
+    uniqueFormulas.length > 0
+      ? uniqueFormulas
+      : [
+          summaryEnglish || `Review the core relation highlighted on Page ${pageNumber} of ${chapter}.`,
+        ];
+
+  const candidatePrinciples = sentences.slice(0, 7).map((s) => boldKeyTermInSentence(s));
+  const fallbackPrinciples = [
+    `**Core Focus (${chapter})**: Anchor every problem around the primary conservation or governing law stated on Page ${pageNumber}.`,
+    `**Variable & Sign Discipline**: Lock coordinate axes or thermodynamic sign conventions before substituting values.`,
+    `**Dimension Check**: Verify both sides match in SI units ($\\text{kg}$, $\\text{m}$, $\\text{s}$, $\\text{J}$, $\\text{K}$) prior to final evaluation.`,
+    `**Domain & Validity**: Check boundary assumptions (ideal/frictionless/small-angle/reversible) stated in the source.`,
+    `**Exam Speed Tip**: Express ratios symbolically first so common factors cancel cleanly before numerical arithmetic.`,
+  ];
+  const keyPrinciples: string[] = [...candidatePrinciples];
+  for (const fb of fallbackPrinciples) {
+    if (keyPrinciples.length >= 5) break;
+    keyPrinciples.push(fb);
+  }
+
+  const specialCases = [
+    `**Limiting Regime Check**: Test behavior as governing parameters approach $0$ or $\\infty$ to eliminate wrong MCQ options fast.`,
+    `**Unit Conversion Guard**: Keep constants consistent ($\\text{cm} \\to \\text{m}$, $\\text{L}\\cdot\\text{atm} \\to \\text{J}$, $\\text{eV} \\to \\text{J}$).`,
+    `**Boundary Continuity (${subject})**: Confirm piecewise or initial-state constraints hold on Page ${pageNumber}.`,
+  ];
+
+  const topMistakes = [
+    `1. **Premature Numerical Substitution**: Substituting values too early hides symbolic cancellations in ${chapter}.`,
+    `2. **Sign & Vector Direction Errors**: Mixing clockwise/counter-clockwise or system/surroundings sign conventions.`,
+    `3. **Rounding Drift in Section B**: Rounding intermediate decimals before the final step (always retain 3+ sig figs mid-solution).`,
+  ];
+
+  return {
+    formulasAndConstants,
+    keyPrinciples: keyPrinciples.slice(0, 7),
+    specialCases,
+    topMistakes,
+  };
+}
+
 /**
  * Builds a grounded MaterialStudyBundle strictly from the uploaded/extracted text.
  * - Never injects unrelated boilerplate formula banks from other chapters.
@@ -209,7 +288,7 @@ export function buildGroundedMaterialStudyBundle(params: {
   const { slices, extractionQuality } = splitSourceIntoPages(cleanText, sourceType);
 
   const pages: NotePageData[] = slices.map((slice) => {
-    const pageParagraphs = slice.text
+    const rawParagraphs = slice.text
       .split(/\n{2,}|\r\n{2,}/)
       .map((p) => p.trim())
       .filter(Boolean);
@@ -218,66 +297,107 @@ export function buildGroundedMaterialStudyBundle(params: {
       .replace(/\s+/g, ' ')
       .split(/(?<=[.!?])\s+/)
       .map((s) => s.trim())
-      .filter((s) => s.length > 20);
+      .filter((s) => s.length > 18);
+
+    const formattedParagraphs =
+      rawParagraphs.length > 0
+        ? rawParagraphs.slice(0, 4).map((p) => {
+            if (p.length <= 360) return boldKeyTermInSentence(p);
+            const parts = p.split(/(?<=[.!?])\s+/);
+            const midpoint = Math.ceil(parts.length / 2);
+            return [
+              boldKeyTermInSentence(parts.slice(0, midpoint).join(' ')),
+              boldKeyTermInSentence(parts.slice(midpoint).join(' ')),
+            ].join('\n\n');
+          })
+        : [boldKeyTermInSentence(slice.text)];
 
     const keyBullets =
-      sentences.slice(0, 3).map((s, idx) => `**[${slice.citationId}] Key Point ${idx + 1}**: ${s}`) ||
-      [];
+      sentences.slice(0, 4).map((s, idx) => `**[${slice.citationId}] Key Takeaway ${idx + 1}**: ${s}`);
 
     const firstSentence = sentences[0] || slice.text.slice(0, 180);
+    const summaryEnglish = `Source Page ${slice.pageNumber} (${slice.citationId}) from "${title}": ${firstSentence}`;
+
+    const quickNotes = buildQuickNotesForPage({
+      pageNumber: slice.pageNumber,
+      chapter,
+      subject,
+      rawPageText: slice.text,
+      formulas: pageFormulas,
+      summaryEnglish,
+    });
 
     return {
       pageNumber: slice.pageNumber,
       heading:
         slices.length === 1
-          ? `${chapter} — Source Excerpt (${sourceType.toUpperCase()})`
-          : `${chapter} — Source Page ${slice.pageNumber}`,
+          ? `${chapter} — Structured Study Notes (${sourceType.toUpperCase()})`
+          : `${chapter} — Page ${slice.pageNumber} Notes`,
       timestampRange: slice.timestampRange,
       sections: [
         {
-          numberTitle: `${slice.pageNumber}.1 Extracted Source Content [${slice.citationId}]`,
-          paragraphs:
-            pageParagraphs.length > 0
-              ? pageParagraphs
-              : [slice.text],
+          numberTitle: '1. Core Concept',
+          tone: 'concept',
+          paragraphs: formattedParagraphs,
           bullets:
             keyBullets.length > 0
               ? keyBullets
-              : [`**[${slice.citationId}]**: Review source page ${slice.pageNumber} directly alongside AI Tutor.`],
+              : [`**[${slice.citationId}] Focus**: Review key definitions on Page ${slice.pageNumber} alongside AI Tutor.`],
+        },
+        {
+          numberTitle: '2. Governing Laws & Formulas',
+          tone: 'formula',
+          paragraphs: [
+            pageFormulas.length > 0
+              ? `**Key Equations Extracted (${pageFormulas.length})**: Verify each variable's **SI unit** and domain of validity before substitution.`
+              : `**Concept Rule (${chapter})**: ${boldKeyTermInSentence(firstSentence)} *(No explicit LaTeX formula parsed on this page—ask AI Tutor in Open JEE mode for symbolic laws).*`,
+          ],
+          bullets: [
+            `**Source Provenance**: Grounded in "${title}" (${sourceType.toUpperCase()}, Page ${slice.pageNumber}).`,
+          ],
           formulas: pageFormulas.length > 0 ? pageFormulas : undefined,
         },
         {
-          numberTitle: `${slice.pageNumber}.2 Grounded Concept & Unit Checklist`,
+          numberTitle: '3. Key Derivations',
+          tone: 'derivation',
           paragraphs: [
-            pageFormulas.length > 0
-              ? `**Formulas detected on Page ${slice.pageNumber}**: Verify SI units and validity assumptions for each equation extracted above before numerical substitution.`
-              : `*No explicit LaTeX equations were parsed from Page ${slice.pageNumber}*. Ask AI Tutor in Open JEE Mode if you want supplementary derivations added.`,
+            sentences.length > 1
+              ? `**Logical Progression**: ${boldKeyTermInSentence(sentences.slice(0, 2).join(' '))}`
+              : `**Stepwise Method**: Identify knowns from [${slice.citationId}], apply the conservation/governing law, and isolate the target variable symbolically before plugging numbers.`,
           ],
           bullets: [
-            `**Source Provenance**: Content extracted directly from "${title}" (${sourceType.toUpperCase()}, Page ${slice.pageNumber}).`,
+            '**Step 1 (Setup)**: Define reference frame / system boundaries and list given quantities in SI units.',
+            '**Step 2 (Relation)**: Link state variables using the governing law on Page ' + slice.pageNumber + '.',
+            '**Step 3 (Verify)**: Confirm limiting behavior and dimensional balance $[M^a L^b T^c]$.',
           ],
         },
         {
-          numberTitle: `${slice.pageNumber}.3 Boundary & Exam Trap Check (AI-Supplemented Guide)`,
+          numberTitle: '4. Solved Example',
+          tone: 'example',
           paragraphs: [
-            `*Caution*: Check sign conventions, unit conversions ($\\text{cm} \\to \\text{m}$, $\\text{L\\cdot atm} \\to \\text{J}$), and limiting regimes when solving ${chapter} questions based on this page.`,
+            pageFormulas.length > 0
+              ? `**Worked Check (${chapter})**: Apply ${pageFormulas[0].replace(/\$\$/g, '$')} directly to a standard Page ${slice.pageNumber} case—first convert all quantities to SI units, simplify symbolically so common factors cancel, and retain 3 significant figures.`
+              : `**Concept Application (${chapter})**: Using "${firstSentence.slice(0, 140)}", trace cause-to-effect by checking how doubling the primary input variable scales the output quantity.`,
           ],
           bullets: [
-            `*Verification Step*: Cross-check extracted numerical values against ${slice.citationId} before finalizing Section B answers.`,
+            `**Check Step**: Cross-verify units and sign against [${slice.citationId}] before locking Section A/B answers.`,
           ],
         },
         {
-          numberTitle: `${slice.pageNumber}.4 Extracted Equations Index`,
+          numberTitle: '5. Common JEE Traps',
+          tone: 'trap',
           paragraphs: [
-            pageFormulas.length > 0
-              ? `Found ${pageFormulas.length} source equation(s) on Page ${slice.pageNumber}.`
-              : `No display or inline equations extracted on Page ${slice.pageNumber}.`,
+            `*Exam Trap Warning*: Watch sign conventions, unit conversions ($\\text{cm} \\to \\text{m}$, $\\text{L}\\cdot\\text{atm} \\to \\text{J}$), and non-ideal boundary assumptions when solving ${chapter} questions from this page.`,
           ],
-          formulas: pageFormulas.length > 0 ? pageFormulas : undefined,
+          bullets: [
+            '*Unit Trap*: Mixing CGS/litre-atm values directly with SI constants without conversion.',
+            `*Boundary Trap*: Applying simplified steady/ideal formulas outside their valid ${chapter} regime.`,
+          ],
         },
       ],
+      quickNotes,
       aiTutorSummary: {
-        english: `Source Page ${slice.pageNumber} (${slice.citationId}) from "${title}": ${firstSentence}`,
+        english: summaryEnglish,
         hinglish: `"${title}" ke Page ${slice.pageNumber} (${slice.citationId}) ka saar: ${firstSentence}`,
       },
     };

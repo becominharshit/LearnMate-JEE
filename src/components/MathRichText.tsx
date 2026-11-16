@@ -21,7 +21,8 @@ export function normalizeLatexDelimiters(input: string): string {
   if (!input) return '';
   return input
     .replace(/\\\[([\s\S]+?)\\\]/g, (_m, inner) => `$$${inner.trim()}$$`)
-    .replace(/\\\(([\s\S]+?)\\\)/g, (_m, inner) => `$${inner.trim()}$`);
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_m, inner) => `$${inner.trim()}$`)
+    .replace(/\\text\{([A-Za-z]+)\\cdot\s*([A-Za-z]+)\}/g, '\\text{$1}\\cdot\\text{$2}');
 }
 
 export function renderLatexSegment(latex: string, displayMode = false): string {

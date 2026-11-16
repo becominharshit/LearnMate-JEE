@@ -359,11 +359,11 @@ export function createRouteRateLimiter(options: {
   keyPrefix: string;
   errorCode?: string;
 }) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     const uid = req.userUid || 'anonymous';
     const baseFp = req.clientFingerprint || computeRequestFingerprint(req, uid);
     const key = `${options.keyPrefix}:${baseFp}`;
-    const result = consumeTokenBucket(key, options.maxPerMinute);
+    const result = await consumeTokenBucketDistributed(key, options.maxPerMinute);
     if (!result.allowed) {
       res.setHeader('Retry-After', String(result.retryAfterSeconds));
       res.status(429).json({

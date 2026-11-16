@@ -741,7 +741,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
               <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">
                 Quick Presets
               </label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {PRESET_LIST.map((preset) => (
                   <button
                     key={preset}
@@ -758,7 +758,7 @@ export const CreateStudioPanel: React.FC<CreateStudioPanelProps> = ({
                           : `JEE ${preset} diagram with labeled vectors and parameters.`
                       );
                     }}
-                    className={`px-2 py-2 rounded-lg text-[11px] font-medium border transition-colors duration-150 cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-colors duration-150 cursor-pointer whitespace-nowrap ${
                       activePreset === preset && !aiSvgOverride
                         ? 'bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white border-transparent font-semibold'
                         : 'border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#F1F5F9] dark:hover:bg-[#243247]'

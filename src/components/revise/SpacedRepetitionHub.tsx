@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import {
   calculateSM2Schedule,
+  formatSM2IntervalShort,
   CBTQuestion,
   ErrorRootCauseTag,
   SM2FlashcardItem,
@@ -29,6 +30,8 @@ interface SpacedRepetitionHubProps {
   onPracticeMistake?: (question: CBTQuestion) => void;
   onPracticeQuestion?: (question: CBTQuestion) => void;
   onVerifyMistakeRecheck?: (mistakeId: string, passed: boolean) => void;
+  reviewedTodayCount?: number;
+  onIncrementReviewed?: () => void;
   showToast?: (msg: string) => void;
 }
 
@@ -45,6 +48,8 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
   onPracticeMistake,
   onPracticeQuestion,
   onVerifyMistakeRecheck,
+  reviewedTodayCount: controlledReviewedCount,
+  onIncrementReviewed,
   showToast,
 }) => {
   const dueCards = sm2Cards || cards || [];
@@ -54,7 +59,8 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
   );
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
-  const [reviewedTodayCount, setReviewedTodayCount] = useState<number>(0);
+  const [localReviewedCount, setLocalReviewedCount] = useState<number>(0);
+  const reviewedTodayCount = controlledReviewedCount ?? localReviewedCount;
   const activeCard = dueCards[activeIndex % Math.max(1, dueCards.length)] || null;
 
   const handleUpdateCard = onUpdateSM2Card || onUpdateCardSchedule;
@@ -81,11 +87,15 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
     if (handleUpdateCard) handleUpdateCard(updated);
     if (showToast) {
       showToast(
-        `SM-2 Scheduled: Next review in ${nextSchedule.intervalDays} day(s) (EF ${nextSchedule.easeFactor})`
+        `SM-2 Scheduled: Next review in ${formatSM2IntervalShort(nextSchedule.intervalDays)} (EF ${nextSchedule.easeFactor})`
       );
     }
     setIsFlipped(false);
-    setReviewedTodayCount((c) => c + 1);
+    if (onIncrementReviewed) {
+      onIncrementReviewed();
+    } else {
+      setLocalReviewedCount((c) => c + 1);
+    }
     setActiveIndex((idx) => (idx + 1) % Math.max(1, dueCards.length));
   };
 
@@ -195,38 +205,39 @@ export const SpacedRepetitionHub: React.FC<SpacedRepetitionHubProps> = ({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button
-              type="button"
-              onClick={() => handleRateCard(1)}
-              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
-            >
-              <div>Again</div>
-              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">1d · EF −0.2</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRateCard(3)}
-              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
-            >
-              <div>Hard</div>
-              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">Quality 3</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRateCard(4)}
-              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-[#0F172A] dark:text-[#F8FAFC] text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
-            >
-              <div>Good</div>
-              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">Quality 4</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRateCard(5)}
-              className="p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 text-[#00A86B] dark:text-emerald-400 text-xs font-semibold cursor-pointer text-center transition-colors duration-150"
-            >
-              <div>Easy</div>
-              <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">Quality 5 · EF +0.1</div>
-            </button>
+            {(
+              [
+                { label: 'Again', quality: 1, cls: 'text-rose-600 dark:text-rose-400', subOverride: '< 10m · EF −0.2' },
+                { label: 'Hard', quality: 3, cls: 'text-amber-600 dark:text-amber-400', subOverride: null },
+                { label: 'Good', quality: 4, cls: 'text-[#0F172A] dark:text-[#F8FAFC]', subOverride: null },
+                { label: 'Easy', quality: 5, cls: 'text-[#00A86B] dark:text-emerald-400', subOverride: null },
+              ] as const
+            ).map((btn) => {
+              const preview = calculateSM2Schedule(
+                {
+                  intervalDays: activeCard.intervalDays ?? 1,
+                  repetitionCount: activeCard.repetitionCount ?? 0,
+                  easeFactor: activeCard.easeFactor ?? 2.5,
+                },
+                btn.quality
+              );
+              const subLabel =
+                btn.subOverride ||
+                `${formatSM2IntervalShort(preview.intervalDays)} · EF ${preview.easeFactor.toFixed(2)}`;
+              return (
+                <button
+                  key={btn.label}
+                  type="button"
+                  onClick={() => handleRateCard(btn.quality)}
+                  className={`p-3 rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] bg-[#F8FAFF] dark:bg-[#1E293B] hover:bg-[#F1F5F9] dark:hover:bg-slate-700 ${btn.cls} text-xs font-semibold cursor-pointer text-center transition-colors duration-150`}
+                >
+                  <div>{btn.label}</div>
+                  <div className="text-[10px] tabular-nums text-[#475569] dark:text-[#94A3B8] mt-0.5">
+                    {subLabel}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (

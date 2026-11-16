@@ -290,22 +290,33 @@ ingestionRouter.post('/youtube', async (req: AuthenticatedRequest, res: Response
         const ai = getValidatedGenAIClient();
         const models = getModelRoutingConfig();
         const prompt = `Watch this JEE lecture video and transcribe the spoken explanation and board equations verbatim into timestamped [HH:MM:SS] sections suitable for JEE Main & Advanced study notes. Use LaTeX ($...$ / $$...$$) for mathematical expressions. Start each segment on a new line as [HH:MM:SS] <topic & verbatim notes>.`;
-        const { result } = await generateWithModelFallback(
-          buildThinkingFallbackChain(models.thinking),
-          async (model) =>
-            ai.models.generateContent({
-              model,
-              contents: [
-                {
-                  role: 'user',
-                  parts: [
-                    { fileData: { fileUri: canonicalUrl, mimeType: 'video/*' } },
-                    { text: prompt },
-                  ],
-                },
-              ],
-            })
-        );
+        let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+        const { result } = await Promise.race([
+          generateWithModelFallback(
+            buildThinkingFallbackChain(models.thinking),
+            async (model) =>
+              ai.models.generateContent({
+                model,
+                contents: [
+                  {
+                    role: 'user',
+                    parts: [
+                      { fileData: { fileUri: canonicalUrl, mimeType: 'video/*' } },
+                      { text: prompt },
+                    ],
+                  },
+                ],
+              })
+          ),
+          new Promise<never>((_resolve, reject) => {
+            timeoutHandle = setTimeout(
+              () => reject(new Error('YOUTUBE_GEMINI_TIMEOUT: Video transcription exceeded 12s limit.')),
+              12000
+            );
+          }),
+        ]).finally(() => {
+          if (timeoutHandle) clearTimeout(timeoutHandle);
+        });
         const aiTranscript = String(result?.text || '').trim();
         if (aiTranscript.length > 0) {
           extractedVia = 'gemini_multimodal_video';

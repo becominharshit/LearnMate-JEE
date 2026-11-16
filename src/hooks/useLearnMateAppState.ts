@@ -183,6 +183,8 @@ export function useLearnMateAppState() {
   const [streakDays, setStreakDays] = useState<number>(0);
   const [xp, setXp] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
+  const [clueCoins, setClueCoins] = useState<number>(6);
+  const [sm2ReviewedCount, setSm2ReviewedCount] = useState<number>(0);
   const [lastMockScore, setLastMockScore] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -254,6 +256,18 @@ export function useLearnMateAppState() {
       if (mRaw) setMistakesNotebook(JSON.parse(mRaw));
       const cRaw = localStorage.getItem(`learnmate_${uid}_sm2_cards`);
       if (cRaw) setSm2Cards(JSON.parse(cRaw));
+      const coinsRaw = localStorage.getItem(`learnmate_${uid}_clue_coins`);
+      if (coinsRaw !== null && Number.isFinite(Number(coinsRaw))) {
+        setClueCoins(Math.max(0, Number(coinsRaw)));
+      } else {
+        setClueCoins(6);
+      }
+      const reviewedRaw = localStorage.getItem(`learnmate_${uid}_sm2_reviewed`);
+      if (reviewedRaw !== null && Number.isFinite(Number(reviewedRaw))) {
+        setSm2ReviewedCount(Math.max(0, Number(reviewedRaw)));
+      } else {
+        setSm2ReviewedCount(0);
+      }
 
       const tRaw = localStorage.getItem(`learnmate_${uid}_tasks`);
       if (tRaw) {
@@ -491,6 +505,34 @@ export function useLearnMateAppState() {
     });
   };
 
+  const handleAdjustClueCoins = (delta: number) => {
+    setClueCoins((prev) => {
+      const next = Math.max(0, prev + delta);
+      if (currentUser) {
+        try {
+          localStorage.setItem(`learnmate_${currentUser.uid}_clue_coins`, String(next));
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  };
+
+  const handleIncrementSm2Reviewed = () => {
+    setSm2ReviewedCount((prev) => {
+      const next = prev + 1;
+      if (currentUser) {
+        try {
+          localStorage.setItem(`learnmate_${currentUser.uid}_sm2_reviewed`, String(next));
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  };
+
   const handleSignOutAndPurgeAll = async () => {
     const uid = currentUser?.uid;
     setProfileModalOpen(false);
@@ -504,6 +546,8 @@ export function useLearnMateAppState() {
     setStreakDays(0);
     setXp(0);
     setLevel(1);
+    setClueCoins(6);
+    setSm2ReviewedCount(0);
     setLastMockScore(null);
     setSubscriptionTier('free');
     await clearAllIndexedDbDocuments();
@@ -1225,6 +1269,8 @@ export function useLearnMateAppState() {
     xp,
     setXp,
     level,
+    clueCoins,
+    sm2ReviewedCount,
     lastMockScore,
     toastMessage,
     studentProfile,
@@ -1236,6 +1282,8 @@ export function useLearnMateAppState() {
     handleVerifyMistakeRecheck,
     handleUpdateSM2Card,
     handleAddSM2Card,
+    handleAdjustClueCoins,
+    handleIncrementSm2Reviewed,
     handleSignOutAndPurgeAll,
     handleDeleteAccountData,
     handleSaveStudentProfile,

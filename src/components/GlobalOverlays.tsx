@@ -84,6 +84,7 @@ import {
 } from '../firebase';
 import { LegalModalTabId } from './LandingAndAuth';
 import { MathRichText } from './MathRichText';
+import { speakWithLocaleVoice } from '../utils/speechVoice';
 
 // ============================================================================
 // 1. Add Material Modal (Clean Zero-State + Auto Subject/Chapter Detection + Up to 12-Hour YouTube Marathon + Handwritten OCR)
@@ -197,13 +198,18 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
       let extractedAiText = '';
       if (verifiedTranscript.length >= 20) {
-        const aiRes = await apiFetchWithAuth<{ text?: string }>('/api/ai/analyze', {
-          youtubeUrl: youtubeUrl.trim() || undefined,
-          lectureDurationHours,
-          transcriptOrOutline: verifiedTranscript.slice(0, 12000),
-          sourceType: 'youtube',
-          prompt: `Structure these verified lecture transcript segments for "${initialDetection.chapter}" into chapter notes, derivations, and equations without inventing external facts.`,
-        });
+        const aiRes = await apiFetchWithAuth<{ text?: string }>(
+          '/api/ai/analyze',
+          {
+            youtubeUrl: youtubeUrl.trim() || undefined,
+            lectureDurationHours,
+            transcriptOrOutline: verifiedTranscript.slice(0, 12000),
+            sourceType: 'youtube',
+            prompt: `Structure these verified lecture transcript segments for "${initialDetection.chapter}" into chapter notes, derivations, and equations without inventing external facts.`,
+          },
+          'POST',
+          { signal: AbortSignal.timeout(12_000) }
+        );
         if (aiRes.ok && aiRes.data.text) {
           extractedAiText = aiRes.data.text;
         }
@@ -2267,9 +2273,10 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
         return;
       }
 
-      const ws = new WebSocket(wsUrl('/api/live'), [
-        `learnmate-auth.${token}`,
-      ]);
+      const ws = new WebSocket(
+        wsUrl(`/api/live?persona=${encodeURIComponent(teacherPersona)}`),
+        [`learnmate-auth.${token}`]
+      );
       activeWs = ws;
       wsRef.current = ws;
       registerActiveVoiceSocket(ws);
@@ -2337,7 +2344,7 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
       setConnected(false);
       setMicActive(false);
     };
-  }, [isOpen, retryNonce]);
+  }, [isOpen, retryNonce, teacherPersona]);
 
   const stopAllTimersAndSpeech = () => {
     if (streamTimerRef.current) {
@@ -2471,23 +2478,13 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
       return;
     }
 
-    // Speak aloud using browser speechSynthesis with matching Indian English / Hindi teacher accent
-    if (!voiceMuted && 'speechSynthesis' in window) {
+    // Speak aloud using browser speechSynthesis with strict persona/locale matching
+    if (!voiceMuted) {
       try {
-        window.speechSynthesis.cancel();
-        const cleanSpoken = replyText
-          .replace(/\$\$[^$]+\$\$/g, ' equation ')
-          .replace(/\$[^$]+\$/g, ' formula ')
-          .replace(/[*#_`]/g, '');
-        const utter = new SpeechSynthesisUtterance(cleanSpoken);
-        utter.lang = activePersonaObj.langCode;
-        utter.rate = 1.0;
-        const voices = window.speechSynthesis.getVoices();
-        const matchedVoice = voices.find((v) =>
-          v.lang.toLowerCase().includes(activePersonaObj.langCode.toLowerCase())
-        );
-        if (matchedVoice) utter.voice = matchedVoice;
-        window.speechSynthesis.speak(utter);
+        speakWithLocaleVoice({
+          text: replyText,
+          target: teacherPersona,
+        });
       } catch {
         // ignore speech synthesis error
       }
@@ -2705,13 +2702,21 @@ export const LiveVoiceTutorModal: React.FC<LiveVoiceTutorModalProps> = ({
       </div>
 
       {/* Compact 4-Persona Pills */}
-      <div className="px-3 py-1.5 shrink-0 grid grid-cols-2 gap-1 bg-[#F8FAFF] dark:bg-[#070B14] border-b border-[#E2E8F0] dark:border-white/[0.08] text-[10px]">
+      <div className="px-3 py-1.5 shrink-0 grid grid-cols-2 gap-1.5 bg-[#F8FAFF] dark:bg-[#070B14] border-b border-[#E2E8F0] dark:border-white/[0.08] text-[10px]">
         {PERSONA_OPTIONS.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setTeacherPersona(p.id)}
-            className={`px-2 py-1 rounded-md font-semibold border truncate transition-colors cursor-pointer ${
+            style={
+              p.id === 'pure_hindi'
+                ? {
+                    fontFamily:
+                      "'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', 'Mangal', 'Inter', sans-serif",
+                  }
+                : undefined
+            }
+            className={`px-2 py-1.5 min-h-[30px] rounded-md font-semibold border leading-snug text-center transition-colors cursor-pointer ${
               teacherPersona === p.id
                 ? 'btn-brand border-transparent'
                 : 'bg-white dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8] border-[#E2E8F0] dark:border-white/[0.08] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'

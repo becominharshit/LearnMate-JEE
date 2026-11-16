@@ -5,9 +5,12 @@ import {
   evaluateSingleQuestionMarks,
   calculateCBTSummary,
   calculateSM2Schedule,
+  calculateNextSRSReview,
+  formatSM2IntervalShort,
   generateChapterShardZ,
   CBTQuestion,
 } from './jeeEngine.ts';
+import { selectSpeechSynthesisVoice } from './speechVoice.ts';
 import {
   generateMaterialStudyBundle,
   JEE_SYLLABUS_DATA,
@@ -299,7 +302,18 @@ test('generateMaterialStudyBundle builds source-grounded pages without boilerpla
   });
 
   assert.equal(bundle.pages.length, 3);
-  assert.equal(bundle.pages[0].sections.length, 4);
+  assert.equal(bundle.pages[0].sections.length, 5);
+  assert.equal(bundle.pages[0].sections[0].numberTitle, '1. Core Concept');
+  assert.equal(bundle.pages[0].sections[1].numberTitle, '2. Governing Laws & Formulas');
+  assert.equal(bundle.pages[0].sections[4].numberTitle, '5. Common JEE Traps');
+  assert.ok(bundle.pages[0].quickNotes);
+  assert.ok(bundle.pages[0].quickNotes!.formulasAndConstants.length >= 1);
+  assert.ok(
+    bundle.pages[0].quickNotes!.keyPrinciples.length >= 5 &&
+      bundle.pages[0].quickNotes!.keyPrinciples.length <= 7
+  );
+  assert.ok(bundle.pages[0].quickNotes!.specialCases.length >= 2);
+  assert.equal(bundle.pages[0].quickNotes!.topMistakes.length, 3);
   assert.ok(bundle.formulas.some((f) => f.formula.includes('I_{cm}')));
   assert.equal(bundle.formulas.some((f) => f.formula.includes('varepsilon_0')), false);
   assert.equal(/katex/i.test(JSON.stringify(bundle)), false);
@@ -579,4 +593,39 @@ test('filterCustomTestQuestions enforces strict intersection with zero silent fa
     false
   );
 });
+
+test('SM-2 Hard/Good/Easy intervals remain strictly distinct across rep 0, rep 1, and rep 2+', () => {
+  for (const rep of [0, 1, 2]) {
+    const hard = calculateNextSRSReview('Hard', 10, 2.5, rep);
+    const good = calculateNextSRSReview('Good', 10, 2.5, rep);
+    const easy = calculateNextSRSReview('Easy', 10, 2.5, rep);
+    assert.ok(
+      hard.nextIntervalDays < good.nextIntervalDays && good.nextIntervalDays < easy.nextIntervalDays,
+      `Expected Hard < Good < Easy at rep=${rep}, got ${hard.nextIntervalDays}, ${good.nextIntervalDays}, ${easy.nextIntervalDays}`
+    );
+  }
+  assert.equal(formatSM2IntervalShort(0.5), '12h');
+  assert.equal(formatSM2IntervalShort(3), '3d');
+});
+
+test('selectSpeechSynthesisVoice enforces persona BCP-47 locale separation', () => {
+  const mockVoices = [
+    { lang: 'en-US', name: 'Google US English', default: true },
+    { lang: 'en-IN', name: 'Microsoft Ravi - English (India)', default: false },
+    { lang: 'hi-IN', name: 'Google हिन्दी', default: false },
+  ];
+
+  const hindi = selectSpeechSynthesisVoice(mockVoices, 'pure_hindi', 'सर, गॉस का नियम समझाइए।');
+  assert.equal(hindi.lang, 'hi-IN');
+  assert.equal(hindi.voice?.lang, 'hi-IN');
+
+  const hinglish = selectSpeechSynthesisVoice(mockVoices, 'hinglish_faculty', 'Beta Gauss law samjho.');
+  assert.equal(hinglish.lang, 'en-IN');
+  assert.equal(hinglish.voice?.lang, 'en-IN');
+
+  const pureEn = selectSpeechSynthesisVoice(mockVoices, 'pure_english', 'Apply Gauss Law.');
+  assert.equal(pureEn.lang, 'en-US');
+  assert.equal(pureEn.voice?.lang, 'en-US');
+});
+
 
