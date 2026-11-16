@@ -49,8 +49,6 @@ export function App() {
       <>
         {s.unauthScreen === 'landing' ? (
           <LandingPage
-            darkMode={s.darkMode}
-            onToggleTheme={() => s.setDarkMode((prev) => !prev)}
             onOpenAuth={(mode) => {
               s.setAuthInitialMode(mode);
               s.setUnauthScreen('auth');
